@@ -1,0 +1,4 @@
+Symlinking /home/chen/offboard_control/devel/lib/pkgconfig/follow_cable.pc
+Symlinking /home/chen/offboard_control/devel/lib/follow_cable/follow_cable_node
+Symlinking /home/chen/offboard_control/devel/share/follow_cable/cmake/follow_cableConfig-version.cmake
+Symlinking /home/chen/offboard_control/devel/share/follow_cable/cmake/follow_cableConfig.cmake
