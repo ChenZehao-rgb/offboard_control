@@ -1,8 +1,0 @@
-prefix=/home/chen/offboard_control/install
-
-Name: follow_cable
-Description: Description of follow_cable
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

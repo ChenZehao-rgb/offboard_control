@@ -1,4 +1,0 @@
-[35m[1mScanning dependencies of target follow_cable_node[0m
-[ 50%] [32mBuilding CXX object CMakeFiles/follow_cable_node.dir/src/FollowCable.cpp.o[0m
-[100%] [32m[1mLinking CXX executable /home/chen/offboard_control/devel/.private/follow_cable/lib/follow_cable/follow_cable_node[0m
-[100%] Built target follow_cable_node

@@ -1,24 +1,26 @@
 {
-  "configurations": [
-    {
-      "browse": {
-        "databaseFilename": "${default}",
-        "limitSymbolsToIncludedHeaders": false
-      },
-      "includePath": [
-        "/home/chen/mav_px4/devel/include/**",
-        "/opt/ros/noetic/include/**",
-        "/home/chen/mav_px4/src/mav_offboard/include/**",
-        "/home/chen/mav_px4/src/px4_offboard/include/**",
-        "/home/chen/offboard_control/src/follow_cable/include/**",
-        "/usr/include/**"
-      ],
-      "name": "ROS",
-      "intelliSenseMode": "gcc-x64",
-      "compilerPath": "/usr/bin/gcc",
-      "cStandard": "gnu11",
-      "cppStandard": "c++14"
-    }
-  ],
-  "version": 4
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/home/chen/mav_px4/devel/include/**",
+                "/opt/ros/noetic/include/**",
+                "/home/chen/mav_px4/src/mav_offboard/include/**",
+                "/home/chen/mav_px4/src/px4_offboard/include/**",
+                "/home/chen/offboard_control/src/offboard_control/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14",
+            "compileCommands": "/home/chen/offboard_control/build/offboard_control/compile_commands.json",
+            "configurationProvider": "b2.catkin_tools"
+        }
+    ],
+    "version": 4
 }
