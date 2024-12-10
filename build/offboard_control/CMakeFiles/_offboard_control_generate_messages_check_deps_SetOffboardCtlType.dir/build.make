@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/chen/offboard_control/build/offboard_control
 include CMakeFiles/_offboard_control_generate_messages_check_deps_SetOffboardCtlType.dir/progress.make
 
 CMakeFiles/_offboard_control_generate_messages_check_deps_SetOffboardCtlType:
-	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py offboard_control /home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv offboard_control/OffboardCtlType
+	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py offboard_control /home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv 
 
 _offboard_control_generate_messages_check_deps_SetOffboardCtlType: CMakeFiles/_offboard_control_generate_messages_check_deps_SetOffboardCtlType
 _offboard_control_generate_messages_check_deps_SetOffboardCtlType: CMakeFiles/_offboard_control_generate_messages_check_deps_SetOffboardCtlType.dir/build.make

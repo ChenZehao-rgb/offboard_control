@@ -140,6 +140,7 @@ add_library(${PROJECT_NAME}
 # add_executable(${PROJECT_NAME}_node src/ros_pkg_node.cpp)
 add_executable(offboard_control_node src/OffboardCtl.cpp)
 add_executable(follow_cable_node src/FollowCable.cpp)
+add_executable(keyboard_control_node src/KeyboardControl.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -159,6 +160,9 @@ target_link_libraries(offboard_control_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(follow_cable_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(keyboard_control_node
   ${catkin_LIBRARIES}
 )
 

@@ -45,8 +45,6 @@ ros/builtin_message_traits.h
 -
 ros/message_operations.h
 -
-offboard_control/OffboardCtlType.h
--
 
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlTypeResponse.h
 string

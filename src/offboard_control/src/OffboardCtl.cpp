@@ -36,12 +36,13 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh)
     stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
     // 初始化控制模式
-    offbCtlType_= GOTO_SETPOINT_STEP;
+    // offbCtlType_= GOTO_SETPOINT_STEP;
+    offbCtlType_= GOTO_SETPOINT_CLOSED_LOOP;
 
     // 初始化pid控制器
     pidX_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
     pidY_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
-    pidZ_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
+    pidZ_.initPid(5.0, 0.0, 0.1, 0.0, 0.0, 0);
 }
 OffboardCtl::~OffboardCtl()
 {
@@ -171,7 +172,8 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             targetPoint_.header.stamp = ros::Time::now(); //设置时间戳
             setpointLocalPub_.publish(targetPoint_); //发布目标位置
             //打印信息
-            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << targetPoint_);
+            // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << targetPoint_);
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << uavPoseLocal_);
             break;
         }
         // 在原定点控制外环加位置闭环
@@ -179,7 +181,8 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         {
             positionCtl(targetPoint_, uavPoseLocal_); //位置环pid控制
             //打印信息
-            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << targetPoint_);
+            // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << targetPoint_);
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << uavPoseLocal_);
             break;
         }
     

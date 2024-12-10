@@ -37,9 +37,12 @@ int main(int argc, char** argv)
     targetPoint.pose.position.y = 0;
     targetPoint.pose.position.z = 5;
     followCable.setTargetPoint(targetPoint); // 设置目标点
+
+    // 开启回调
+    ros::spin();
     return 0;
 }
-
+// 键盘输入回调函数，键盘输入的数据应该是mode 0/1或者pid 0/1/2 kp ki kd
 void FollowCable::keyboardCallback(const std_msgs::String::ConstPtr& msg)
 {
     std::istringstream iss(msg->data);
@@ -64,15 +67,15 @@ void FollowCable::keyboardCallback(const std_msgs::String::ConstPtr& msg)
     else if (command == "pid")
     {
         int axis;
-        double kp, ki, kd, i_max, i_min;
-        iss >> axis >> kp >> ki >> kd >> i_max >> i_min;
+        double kp, ki, kd;
+        iss >> axis >> kp >> ki >> kd;
         offboard_control::SetPidGains setPidGains;
         setPidGains.request.pid_axis = axis;
         setPidGains.request.kp = kp;
         setPidGains.request.ki = ki;
         setPidGains.request.kd = kd;
-        setPidGains.request.i_max = i_max;
-        setPidGains.request.i_min = i_min;
+        setPidGains.request.i_max = 0;
+        setPidGains.request.i_min = 0;
         if (setPidGainsClient_.call(setPidGains) && setPidGains.response.success)
         {
             ROS_INFO_STREAM("Set PID gains for axis " << axis << " success");

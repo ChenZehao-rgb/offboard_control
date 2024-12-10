@@ -25,6 +25,7 @@
 /home/chen/offboard_control/build/offboard_control/CMakeFiles/control_toolbox_generate_messages_py.dir
 /home/chen/offboard_control/build/offboard_control/CMakeFiles/control_msgs_generate_messages_eus.dir
 /home/chen/offboard_control/build/offboard_control/CMakeFiles/geometry_msgs_generate_messages_eus.dir
+/home/chen/offboard_control/build/offboard_control/CMakeFiles/keyboard_control_node.dir
 /home/chen/offboard_control/build/offboard_control/CMakeFiles/std_msgs_generate_messages_nodejs.dir
 /home/chen/offboard_control/build/offboard_control/CMakeFiles/std_msgs_generate_messages_py.dir
 /home/chen/offboard_control/build/offboard_control/CMakeFiles/mavros_msgs_generate_messages_nodejs.dir

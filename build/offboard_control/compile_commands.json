@@ -1,6 +1,11 @@
 [
 {
   "directory": "/home/chen/offboard_control/build/offboard_control",
+  "command": "/usr/bin/c++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"offboard_control\\\" -I/home/chen/offboard_control/devel/.private/offboard_control/include -I/home/chen/offboard_control/src/offboard_control/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp    -o CMakeFiles/keyboard_control_node.dir/src/KeyboardControl.cpp.o -c /home/chen/offboard_control/src/offboard_control/src/KeyboardControl.cpp",
+  "file": "/home/chen/offboard_control/src/offboard_control/src/KeyboardControl.cpp"
+},
+{
+  "directory": "/home/chen/offboard_control/build/offboard_control",
   "command": "/usr/bin/c++  -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\\\"offboard_control\\\" -I/home/chen/offboard_control/devel/.private/offboard_control/include -I/home/chen/offboard_control/src/offboard_control/include -I/opt/ros/noetic/include -I/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp    -o CMakeFiles/follow_cable_node.dir/src/FollowCable.cpp.o -c /home/chen/offboard_control/src/offboard_control/src/FollowCable.cpp",
   "file": "/home/chen/offboard_control/src/offboard_control/src/FollowCable.cpp"
 },

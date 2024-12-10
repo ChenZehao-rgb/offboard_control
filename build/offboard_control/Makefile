@@ -467,6 +467,19 @@ geometry_msgs_generate_messages_eus/fast:
 .PHONY : geometry_msgs_generate_messages_eus/fast
 
 #=============================================================================
+# Target rules for targets named keyboard_control_node
+
+# Build rule for target.
+keyboard_control_node: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 keyboard_control_node
+.PHONY : keyboard_control_node
+
+# fast build rule for target.
+keyboard_control_node/fast:
+	$(MAKE) -f CMakeFiles/keyboard_control_node.dir/build.make CMakeFiles/keyboard_control_node.dir/build
+.PHONY : keyboard_control_node/fast
+
+#=============================================================================
 # Target rules for targets named std_msgs_generate_messages_nodejs
 
 # Build rule for target.
@@ -1416,6 +1429,33 @@ src/FollowCable.cpp.s:
 	$(MAKE) -f CMakeFiles/follow_cable_node.dir/build.make CMakeFiles/follow_cable_node.dir/src/FollowCable.cpp.s
 .PHONY : src/FollowCable.cpp.s
 
+src/KeyboardControl.o: src/KeyboardControl.cpp.o
+
+.PHONY : src/KeyboardControl.o
+
+# target to build an object file
+src/KeyboardControl.cpp.o:
+	$(MAKE) -f CMakeFiles/keyboard_control_node.dir/build.make CMakeFiles/keyboard_control_node.dir/src/KeyboardControl.cpp.o
+.PHONY : src/KeyboardControl.cpp.o
+
+src/KeyboardControl.i: src/KeyboardControl.cpp.i
+
+.PHONY : src/KeyboardControl.i
+
+# target to preprocess a source file
+src/KeyboardControl.cpp.i:
+	$(MAKE) -f CMakeFiles/keyboard_control_node.dir/build.make CMakeFiles/keyboard_control_node.dir/src/KeyboardControl.cpp.i
+.PHONY : src/KeyboardControl.cpp.i
+
+src/KeyboardControl.s: src/KeyboardControl.cpp.s
+
+.PHONY : src/KeyboardControl.s
+
+# target to generate assembly for a file
+src/KeyboardControl.cpp.s:
+	$(MAKE) -f CMakeFiles/keyboard_control_node.dir/build.make CMakeFiles/keyboard_control_node.dir/src/KeyboardControl.cpp.s
+.PHONY : src/KeyboardControl.cpp.s
+
 src/OffboardCtl.o: src/OffboardCtl.cpp.o
 
 .PHONY : src/OffboardCtl.o
@@ -1479,6 +1519,7 @@ help:
 	@echo "... control_toolbox_generate_messages_py"
 	@echo "... control_msgs_generate_messages_eus"
 	@echo "... geometry_msgs_generate_messages_eus"
+	@echo "... keyboard_control_node"
 	@echo "... std_msgs_generate_messages_nodejs"
 	@echo "... std_msgs_generate_messages_py"
 	@echo "... mavros_msgs_generate_messages_nodejs"
@@ -1556,6 +1597,9 @@ help:
 	@echo "... src/FollowCable.o"
 	@echo "... src/FollowCable.i"
 	@echo "... src/FollowCable.s"
+	@echo "... src/KeyboardControl.o"
+	@echo "... src/KeyboardControl.i"
+	@echo "... src/KeyboardControl.s"
 	@echo "... src/OffboardCtl.o"
 	@echo "... src/OffboardCtl.i"
 	@echo "... src/OffboardCtl.s"
