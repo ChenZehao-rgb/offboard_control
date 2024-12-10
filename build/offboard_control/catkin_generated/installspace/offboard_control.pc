@@ -1,0 +1,8 @@
+prefix=/home/chen/offboard_control/install
+
+Name: offboard_control
+Description: Description of offboard_control
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox

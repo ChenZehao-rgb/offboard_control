@@ -1,0 +1,11 @@
+<launch>
+    <!-- Include px4.launch with custom fcu_url parameter -->
+    <include file="$(find mavros)/launch/px4.launch">
+        <arg name="fcu_url" value="udp://:14540@127.0.0.1:14557" />
+    </include>
+
+    <!-- Launch OffboardCtl node -->
+    <node pkg="offboard_control" type="offboard_control_node" name="OffboardCtl" output="screen" launch-prefix="gnome-terminal -- bash -c">
+        <!-- Add necessary parameters or remappings here -->
+    </node>
+</launch>

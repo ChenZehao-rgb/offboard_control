@@ -7,12 +7,15 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
+#include <mavros_msgs/PositionTarget.h>
+#include <mavros_msgs/AttitudeTarget.h>
+#include <control_toolbox/pid.h>
 
 //自定义的服务类型
 #include <offboard_control/SetTargetPoint.h>
-
-
-
+#include <offboard_control/OffboardCtlType.h>
+#include <offboard_control/SetOffboardCtlType.h>
+#include <offboard_control/SetPidGains.h>
 #include <ros/ros.h>
 class OffboardCtl {
 public:
@@ -29,10 +32,9 @@ private:
     ros::Publisher setpointRawLocalPub_; //发布无人机本地原始位置
     ros::Publisher setpointRawAttPub_; //发布无人机原始姿态
 
-    ros::ServiceClient armingClient_; //解锁服务
-    ros::ServiceClient setModeClient_; //设置模式服务
-
     ros::ServiceServer setTargetPointSrv_; //设置目标位置服务
+    ros::ServiceServer setOffboardCtlTypeSrv_; //设置控制模式服务
+    ros::ServiceServer setPidGainsSrv_; //动态调整pid参数服务
 
     //状态切换定时器
     ros::Timer stateSwitchTimer_;
@@ -48,10 +50,23 @@ private:
     geometry_msgs::TwistStamped uavTwistLocal_; //订阅得到的无人机本地速度
     geometry_msgs::AccelWithCovarianceStamped uavAccLocal_; //订阅得到的无人机本地加速度
 
+    //定义是否获得无人机目标位置
+    bool isGetTargetPoint_;
+    
     geometry_msgs::PoseStamped targetPoint_; //位置服务函数中设置的目标位置
-
+    int offbCtlType_; //控制模式服务函数中设置的控制模式
+    
     //位置设置服务函数
     bool setTargetPoint(offboard_control::SetTargetPoint::Request& req, offboard_control::SetTargetPoint::Response& res);
+    //控制模式设置服务函数
+    bool setOffboardCtlType(offboard_control::SetOffboardCtlType::Request& req, offboard_control::SetOffboardCtlType::Response& res);
+    // pid参数设置服务函数
+    bool setPidGains(offboard_control::SetPidGains::Request& req, offboard_control::SetPidGains::Response& res);
+
+    // pid控制参数
+    control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
+    // 位置环pid控制
+    void positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal);
 };
 
 #endif // OFFBOARD_CTL_H

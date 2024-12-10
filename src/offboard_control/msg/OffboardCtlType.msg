@@ -1,0 +1,6 @@
+uint8 offb_ctrl_type
+
+uint8 GOTO_SETPOINT_STEP = 0
+uint8 GOTO_SETPOINT_CLOSED_LOOP = 1
+
+uint8 GOTO_SETPOINTS_SERIES = 2

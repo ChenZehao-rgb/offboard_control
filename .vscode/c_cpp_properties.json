@@ -11,6 +11,7 @@
                 "/home/chen/mav_px4/src/mav_offboard/include/**",
                 "/home/chen/mav_px4/src/px4_offboard/include/**",
                 "/home/chen/offboard_control/src/offboard_control/include/**",
+                "/home/chen/offboard_control/src/follow_cable/include/**",
                 "/usr/include/**"
             ],
             "name": "ROS",

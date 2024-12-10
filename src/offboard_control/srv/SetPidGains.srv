@@ -1,0 +1,8 @@
+int32 pid_axis
+float64 kp
+float64 ki
+float64 kd
+float64 i_max
+float64 i_min
+---
+bool success

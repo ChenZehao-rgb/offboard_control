@@ -1,0 +1,48 @@
+[35m[1mScanning dependencies of target offboard_control[0m
+[35m[1mScanning dependencies of target offboard_control_node[0m
+[  0%] Built target geometry_msgs_generate_messages_eus
+[  0%] Built target geometry_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target follow_cable_node[0m
+[  0%] Built target std_msgs_generate_messages_eus
+[  0%] Built target geometry_msgs_generate_messages_cpp
+[  0%] Built target geometry_msgs_generate_messages_py
+[  0%] Built target std_msgs_generate_messages_py
+[  0%] Built target std_msgs_generate_messages_cpp
+[  0%] Built target std_msgs_generate_messages_nodejs
+[  0%] Built target std_msgs_generate_messages_lisp
+[  0%] Built target geometry_msgs_generate_messages_lisp
+[ 10%] [32mBuilding CXX object CMakeFiles/follow_cable_node.dir/src/FollowCable.cpp.o[0m
+[ 10%] [32mBuilding CXX object CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o[0m
+[ 10%] [32mBuilding CXX object CMakeFiles/offboard_control.dir/src/OffboardCtl.cpp.o[0m
+[ 10%] Built target _offboard_control_generate_messages_check_deps_SetTargetPoint
+[ 10%] Built target _offboard_control_generate_messages_check_deps_OffboardCtlType
+[ 10%] Built target _offboard_control_generate_messages_check_deps_SetPidGains
+[ 10%] Built target _offboard_control_generate_messages_check_deps_SetOffboardCtlType
+[ 34%] Built target offboard_control_generate_messages_lisp
+[ 41%] Built target offboard_control_generate_messages_eus
+[ 62%] Built target offboard_control_generate_messages_py
+[ 75%] Built target offboard_control_generate_messages_nodejs
+[ 89%] Built target offboard_control_generate_messages_cpp
+[ 89%] Built target offboard_control_generate_messages
+[01m[K/home/chen/offboard_control/src/offboard_control/src/FollowCable.cpp:[m[K In member function ‘[01m[Kvoid FollowCable::keyboardCallback(const ConstPtr&)[m[K’:
+[01m[K/home/chen/offboard_control/src/offboard_control/src/FollowCable.cpp:54:50:[m[K [01;31m[Kerror: [m[Kno match for ‘[01m[Koperator=[m[K’ (operand types are ‘[01m[Koffboard_control::SetOffboardCtlTypeRequest_<std::allocator<void> >::_offbCtlType_type[m[K’ {aka ‘[01m[Koffboard_control::OffboardCtlType_<std::allocator<void> >[m[K’} and ‘[01m[Kint[m[K’)
+   54 |         setOffboardCtlType.request.offbCtlType = [01;31m[Kmode[m[K;
+      |                                                  [01;31m[K^~~~[m[K
+In file included from [01m[K/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlTypeRequest.h:18[m[K,
+                 from [01m[K/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlType.h:11[m[K,
+                 from [01m[K/home/chen/offboard_control/src/offboard_control/include/FollowCable.h:10[m[K,
+                 from [01m[K/home/chen/offboard_control/src/offboard_control/src/FollowCable.cpp:4[m[K:
+[01m[K/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h:22:8:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Kconstexpr offboard_control::OffboardCtlType_<std::allocator<void> >& offboard_control::OffboardCtlType_<std::allocator<void> >::operator=(const offboard_control::OffboardCtlType_<std::allocator<void> >&)[m[K’
+   22 | struct [01;36m[KOffboardCtlType_[m[K
+      |        [01;36m[K^~~~~~~~~~~~~~~~[m[K
+[01m[K/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h:22:8:[m[K [01;36m[Knote: [m[K  no known conversion for argument 1 from ‘[01m[Kint[m[K’ to ‘[01m[Kconst offboard_control::OffboardCtlType_<std::allocator<void> >&[m[K’
+[01m[K/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h:22:8:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Kconstexpr offboard_control::OffboardCtlType_<std::allocator<void> >& offboard_control::OffboardCtlType_<std::allocator<void> >::operator=(offboard_control::OffboardCtlType_<std::allocator<void> >&&)[m[K’
+[01m[K/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h:22:8:[m[K [01;36m[Knote: [m[K  no known conversion for argument 1 from ‘[01m[Kint[m[K’ to ‘[01m[Koffboard_control::OffboardCtlType_<std::allocator<void> >&&[m[K’
+make[2]: *** [CMakeFiles/follow_cable_node.dir/build.make:63: CMakeFiles/follow_cable_node.dir/src/FollowCable.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:970: CMakeFiles/follow_cable_node.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+[ 93%] [32m[1mLinking CXX executable /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/offboard_control_node[0m
+[ 96%] [32m[1mLinking CXX shared library /home/chen/offboard_control/devel/.private/offboard_control/lib/liboffboard_control.so[0m
+[ 96%] Built target offboard_control
+[ 96%] Built target offboard_control_node
+make: *** [Makefile:141: all] Error 2

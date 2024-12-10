@@ -13,7 +13,7 @@ geometry_msgs
 mavros_msgs
 std_msgs
 message_generation
-
+control_toolbox
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,16 +50,17 @@ message_generation
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  OffboardCtlType.msg
+)
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
   SetTargetPoint.srv
+  SetOffboardCtlType.srv
+  SetPidGains.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -108,7 +109,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_pkg
-  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime
+  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox
 #  DEPENDS system_lib
 )
 
@@ -124,9 +125,9 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/ros_pkg.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/OffboardCtl.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -138,6 +139,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/ros_pkg_node.cpp)
 add_executable(offboard_control_node src/OffboardCtl.cpp)
+add_executable(follow_cable_node src/FollowCable.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -154,6 +156,9 @@ add_executable(offboard_control_node src/OffboardCtl.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(offboard_control_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(follow_cable_node
   ${catkin_LIBRARIES}
 )
 
