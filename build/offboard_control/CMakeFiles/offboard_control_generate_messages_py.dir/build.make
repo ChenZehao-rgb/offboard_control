@@ -54,6 +54,7 @@ CMAKE_BINARY_DIR = /home/chen/offboard_control/build/offboard_control
 include CMakeFiles/offboard_control_generate_messages_py.dir/progress.make
 
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py
+CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
@@ -66,44 +67,52 @@ CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/de
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating Python from MSG offboard_control/OffboardCtlType"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py /home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg
 
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py: /home/chen/offboard_control/src/offboard_control/msg/StateControl.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python from MSG offboard_control/StateControl"
+	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py /home/chen/offboard_control/src/offboard_control/msg/StateControl.msg -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg
+
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/std_msgs/msg/Header.msg
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating Python code from SRV offboard_control/SetTargetPoint"
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating Python code from SRV offboard_control/SetTargetPoint"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py: /home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating Python code from SRV offboard_control/SetOffboardCtlType"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Generating Python code from SRV offboard_control/SetOffboardCtlType"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py: /home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Generating Python code from SRV offboard_control/SetPidGains"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating Python code from SRV offboard_control/SetPidGains"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating Python msg __init__.py for offboard_control"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating Python msg __init__.py for offboard_control"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg --initpy
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating Python srv __init__.py for offboard_control"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating Python srv __init__.py for offboard_control"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv --initpy
 
 offboard_control_generate_messages_py: CMakeFiles/offboard_control_generate_messages_py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py
+offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py

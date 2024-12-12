@@ -1,6 +1,6 @@
 # generated from genmsg/cmake/pkg-genmsg.cmake.em
 
-message(STATUS "offboard_control: 1 messages, 3 services")
+message(STATUS "offboard_control: 2 messages, 3 services")
 
 set(MSG_I_FLAGS "-Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg;-Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg")
 
@@ -22,9 +22,14 @@ add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
   COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg" ""
 )
 
+get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" NAME_WE)
+add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" ""
+)
+
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" "geometry_msgs/PoseStamped:geometry_msgs/Quaternion:geometry_msgs/Pose:geometry_msgs/Point:std_msgs/Header"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" "geometry_msgs/Pose:std_msgs/Header:geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseStamped"
 )
 
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv" NAME_WE)
@@ -49,12 +54,18 @@ _generate_msg_cpp(offboard_control
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/offboard_control
 )
+_generate_msg_cpp(offboard_control
+  "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
+  "${MSG_I_FLAGS}"
+  ""
+  ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/offboard_control
+)
 
 ### Generating Services
 _generate_srv_cpp(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/offboard_control
 )
 _generate_srv_cpp(offboard_control
@@ -84,6 +95,8 @@ add_dependencies(offboard_control_generate_messages offboard_control_generate_me
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg" NAME_WE)
 add_dependencies(offboard_control_generate_messages_cpp _offboard_control_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" NAME_WE)
+add_dependencies(offboard_control_generate_messages_cpp _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_dependencies(offboard_control_generate_messages_cpp _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv" NAME_WE)
@@ -106,12 +119,18 @@ _generate_msg_eus(offboard_control
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/offboard_control
 )
+_generate_msg_eus(offboard_control
+  "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
+  "${MSG_I_FLAGS}"
+  ""
+  ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/offboard_control
+)
 
 ### Generating Services
 _generate_srv_eus(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/offboard_control
 )
 _generate_srv_eus(offboard_control
@@ -141,6 +160,8 @@ add_dependencies(offboard_control_generate_messages offboard_control_generate_me
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg" NAME_WE)
 add_dependencies(offboard_control_generate_messages_eus _offboard_control_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" NAME_WE)
+add_dependencies(offboard_control_generate_messages_eus _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_dependencies(offboard_control_generate_messages_eus _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv" NAME_WE)
@@ -163,12 +184,18 @@ _generate_msg_lisp(offboard_control
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/offboard_control
 )
+_generate_msg_lisp(offboard_control
+  "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
+  "${MSG_I_FLAGS}"
+  ""
+  ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/offboard_control
+)
 
 ### Generating Services
 _generate_srv_lisp(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/offboard_control
 )
 _generate_srv_lisp(offboard_control
@@ -198,6 +225,8 @@ add_dependencies(offboard_control_generate_messages offboard_control_generate_me
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg" NAME_WE)
 add_dependencies(offboard_control_generate_messages_lisp _offboard_control_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" NAME_WE)
+add_dependencies(offboard_control_generate_messages_lisp _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_dependencies(offboard_control_generate_messages_lisp _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv" NAME_WE)
@@ -220,12 +249,18 @@ _generate_msg_nodejs(offboard_control
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/offboard_control
 )
+_generate_msg_nodejs(offboard_control
+  "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
+  "${MSG_I_FLAGS}"
+  ""
+  ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/offboard_control
+)
 
 ### Generating Services
 _generate_srv_nodejs(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/offboard_control
 )
 _generate_srv_nodejs(offboard_control
@@ -255,6 +290,8 @@ add_dependencies(offboard_control_generate_messages offboard_control_generate_me
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg" NAME_WE)
 add_dependencies(offboard_control_generate_messages_nodejs _offboard_control_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" NAME_WE)
+add_dependencies(offboard_control_generate_messages_nodejs _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_dependencies(offboard_control_generate_messages_nodejs _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv" NAME_WE)
@@ -277,12 +314,18 @@ _generate_msg_py(offboard_control
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/offboard_control
 )
+_generate_msg_py(offboard_control
+  "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
+  "${MSG_I_FLAGS}"
+  ""
+  ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/offboard_control
+)
 
 ### Generating Services
 _generate_srv_py(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/offboard_control
 )
 _generate_srv_py(offboard_control
@@ -311,6 +354,8 @@ add_dependencies(offboard_control_generate_messages offboard_control_generate_me
 
 # add dependencies to all check dependencies targets
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg" NAME_WE)
+add_dependencies(offboard_control_generate_messages_py _offboard_control_generate_messages_check_deps_${_filename})
+get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg" NAME_WE)
 add_dependencies(offboard_control_generate_messages_py _offboard_control_generate_messages_check_deps_${_filename})
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_dependencies(offboard_control_generate_messages_py _offboard_control_generate_messages_check_deps_${_filename})

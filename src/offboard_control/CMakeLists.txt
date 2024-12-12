@@ -53,6 +53,7 @@ control_toolbox
 add_message_files(
   FILES
   OffboardCtlType.msg
+  StateControl.msg
 )
 
 ## Generate services in the 'srv' folder

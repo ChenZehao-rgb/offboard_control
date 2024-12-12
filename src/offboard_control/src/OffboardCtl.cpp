@@ -85,6 +85,8 @@ void OffboardCtl::positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_m
     setpointRawLocalPub_.publish(positionTarget);
 
 }
+// 目标点平滑过渡控制
+
 // 设置目标位置服务函数
 bool OffboardCtl::setTargetPoint(offboard_control::SetTargetPoint::Request& req, offboard_control::SetTargetPoint::Response& res)
 {

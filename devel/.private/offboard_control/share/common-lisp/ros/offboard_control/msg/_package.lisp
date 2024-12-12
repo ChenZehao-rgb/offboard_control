@@ -3,5 +3,7 @@
   (:export
    "<OFFBOARDCTLTYPE>"
    "OFFBOARDCTLTYPE"
+   "<STATECONTROL>"
+   "STATECONTROL"
   ))
 

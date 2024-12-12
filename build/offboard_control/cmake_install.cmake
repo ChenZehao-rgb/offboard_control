@@ -129,7 +129,10 @@ file(INSTALL DESTINATION "/home/chen/offboard_control/install" TYPE FILE FILES "
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/offboard_control/msg" TYPE FILE FILES "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/offboard_control/msg" TYPE FILE FILES
+    "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg"
+    "/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
+    )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)

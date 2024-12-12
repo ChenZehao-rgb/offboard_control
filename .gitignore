@@ -1,0 +1,33 @@
+# 忽略所有对象文件
+*.o
+
+# 忽略所有可执行文件
+*.exe
+*.out
+*.app
+
+# 忽略构建目录
+/build/
+/bin/
+/lib/
+/obj/
+
+# 忽略CMake生成的文件
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# 忽略catkin生成的文件
+.devel/
+.build/
+install/
+logs/
+
+# 忽略CLion生成的文件
+.idea/
+cmake-build-debug/
+cmake-build-release/
+
+# 忽略VSCode生成的文件
+.vscode/

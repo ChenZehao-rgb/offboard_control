@@ -21,7 +21,7 @@ class OffboardCtl {
 public:
     OffboardCtl(const ros::NodeHandle& nh);
     ~OffboardCtl();
-
+    void positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal);
 private:
     ros::NodeHandle nh_; //在主函数中使用nh_(nh)，
     ros::Subscriber uavPoseLocalSub_; //订阅无人机本地位置
@@ -66,7 +66,7 @@ private:
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
     // 位置环pid控制
-    void positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal);
+    
 };
 
 #endif // OFFBOARD_CTL_H

@@ -181,19 +181,6 @@ offboard_control_genpy/fast:
 .PHONY : offboard_control_genpy/fast
 
 #=============================================================================
-# Target rules for targets named offboard_control_gennodejs
-
-# Build rule for target.
-offboard_control_gennodejs: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 offboard_control_gennodejs
-.PHONY : offboard_control_gennodejs
-
-# fast build rule for target.
-offboard_control_gennodejs/fast:
-	$(MAKE) -f CMakeFiles/offboard_control_gennodejs.dir/build.make CMakeFiles/offboard_control_gennodejs.dir/build
-.PHONY : offboard_control_gennodejs/fast
-
-#=============================================================================
 # Target rules for targets named offboard_control_generate_messages_nodejs
 
 # Build rule for target.
@@ -257,6 +244,32 @@ _offboard_control_generate_messages_check_deps_SetTargetPoint: cmake_check_build
 _offboard_control_generate_messages_check_deps_SetTargetPoint/fast:
 	$(MAKE) -f CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint.dir/build.make CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint.dir/build
 .PHONY : _offboard_control_generate_messages_check_deps_SetTargetPoint/fast
+
+#=============================================================================
+# Target rules for targets named offboard_control_gennodejs
+
+# Build rule for target.
+offboard_control_gennodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 offboard_control_gennodejs
+.PHONY : offboard_control_gennodejs
+
+# fast build rule for target.
+offboard_control_gennodejs/fast:
+	$(MAKE) -f CMakeFiles/offboard_control_gennodejs.dir/build.make CMakeFiles/offboard_control_gennodejs.dir/build
+.PHONY : offboard_control_gennodejs/fast
+
+#=============================================================================
+# Target rules for targets named _offboard_control_generate_messages_check_deps_StateControl
+
+# Build rule for target.
+_offboard_control_generate_messages_check_deps_StateControl: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _offboard_control_generate_messages_check_deps_StateControl
+.PHONY : _offboard_control_generate_messages_check_deps_StateControl
+
+# fast build rule for target.
+_offboard_control_generate_messages_check_deps_StateControl/fast:
+	$(MAKE) -f CMakeFiles/_offboard_control_generate_messages_check_deps_StateControl.dir/build.make CMakeFiles/_offboard_control_generate_messages_check_deps_StateControl.dir/build
+.PHONY : _offboard_control_generate_messages_check_deps_StateControl/fast
 
 #=============================================================================
 # Target rules for targets named _offboard_control_generate_messages_check_deps_OffboardCtlType
@@ -1496,13 +1509,14 @@ help:
 	@echo "... list_install_components"
 	@echo "... test"
 	@echo "... offboard_control_genpy"
-	@echo "... offboard_control_gennodejs"
 	@echo "... offboard_control_generate_messages_nodejs"
 	@echo "... install/local"
 	@echo "... offboard_control_gencpp"
 	@echo "... offboard_control_generate_messages_cpp"
 	@echo "... _offboard_control_generate_messages_check_deps_SetPidGains"
 	@echo "... _offboard_control_generate_messages_check_deps_SetTargetPoint"
+	@echo "... offboard_control_gennodejs"
+	@echo "... _offboard_control_generate_messages_check_deps_StateControl"
 	@echo "... _offboard_control_generate_messages_check_deps_OffboardCtlType"
 	@echo "... offboard_control_generate_messages"
 	@echo "... dynamic_reconfigure_gencfg"
