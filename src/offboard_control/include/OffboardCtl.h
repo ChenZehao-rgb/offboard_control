@@ -19,11 +19,12 @@
 #include <ros/ros.h>
 class OffboardCtl {
 public:
-    OffboardCtl(const ros::NodeHandle& nh);
+    OffboardCtl(const ros::NodeHandle& nh1, const ros::NodeHandle& nh2);
     ~OffboardCtl();
     void positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal);
 private:
-    ros::NodeHandle nh_; //在主函数中使用nh_(nh)，
+    ros::NodeHandle nh1_; //在主函数中使用nh_(nh)，
+    ros::NodeHandle nh2_; //节点2
     ros::Subscriber uavPoseLocalSub_; //订阅无人机本地位置
     ros::Subscriber uavTwistLocalSub_; //订阅无人机本地速度
     ros::Subscriber uavAccLocalSub_; //订阅无人机本地加速度

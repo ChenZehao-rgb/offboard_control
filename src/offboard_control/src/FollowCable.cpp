@@ -2,8 +2,7 @@
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/String.h>
 #include "FollowCable.h"
-#include <tf/tf.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 // 状态机控制频率
 #define controlRate 20.0
 #define controlPeriod (1.0 / controlRate)
@@ -15,7 +14,7 @@ geometry_msgs::PoseStamped cablePose_;
 // 大小飞机运动的相对位姿点
 geometry_msgs::PoseStamped uavRalPose1_, uavRalPose2_;
 
-FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlineTarg_(false), isSendOnlineTarg_(false)
+FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlineTarg_(false), isSendOnlineTarg_(false), tfListener_(ros::Duration(10))
 {
     // 解锁服务
     armingClient_ = nh_.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
@@ -41,12 +40,12 @@ FollowCable::~FollowCable()
 {
     // 在这里添加任何需要的清理代码
 }
-// 线传感器数据处理
+// 线传感器数据处理,现假设是通过另一个节点发布的
 void FollowCable::getCablePose(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     cablePose_ = *msg;
 }
-// 上线操作中索道坐标->大小飞机坐标
+// 上线操作中索道坐标->大小飞机坐标，onlineTarg只得是通过雷达离线采点得到的全局坐标，包含x,y,z以及orientation
 void FollowCable::onLineTarg2UavTarg(const geometry_msgs::PoseStamped& onLineTarg, geometry_msgs::PoseStamped& uavTarg1, geometry_msgs::PoseStamped& uavTarg2)
 {
     // 小飞机坐标为索道坐标的上方，距离由携带爪子大小而定
@@ -57,25 +56,42 @@ void FollowCable::onLineTarg2UavTarg(const geometry_msgs::PoseStamped& onLineTar
     uavTarg2.pose.position.z += 1.0;
     
 }
-// 根据线结构传感器的测量结果，得到大小飞机需要运动的相对位置/角度
+// 根据线结构传感器的测量结果，得到大小飞机需要运动的相对位置/角度，cablePose为相机坐标系下的坐标，需要先转换到小无人机坐标系下，然后再转换到大无人机坐标系下，最后再计算大小无人机运动的相对位置/角度
 void FollowCable::cablePose2UavRalPose(const geometry_msgs::PoseStamped& cablePose, geometry_msgs::PoseStamped& uavRalPose1, geometry_msgs::PoseStamped& uavRalPose2)
 {
-    // 通过cablePose的位置和角度，获取小飞机的目标位姿
-    uavRalPose1 = cablePose;
-    // 小飞机的头朝向和索道朝向一致
-    uavRalPose1.pose.orientation = cablePose.pose.orientation;
-    // 小飞机相对于索道的位置调整
-    uavRalPose1.pose.position.x += cos(tf::getYaw(cablePose.pose.orientation));
-    uavRalPose1.pose.position.y += sin(tf::getYaw(cablePose.pose.orientation));
+    // 将cablePose转换到小飞机坐标系下
+    geometry_msgs::PoseStamped cablePoseInUav1Frame;
+    try
+    {
+        tfListener_.transformPose("uav1_frame", cablePose, cablePoseInUav1Frame);
+    }
+    catch (tf::TransformException& ex)
+    {
+        ROS_ERROR("Transform error: %s", ex.what());
+        return;
+    }
+
+    // 计算小无人机的目标位置和姿态
+    uavRalPose1 = cablePoseInUav1Frame;
     uavRalPose1.pose.position.z += 1.0; // 假设小飞机在索道上方1米处
 
-    // 大飞机相对于小飞机的位置调整
-    uavRalPose2 = uavRalPose1;
-    uavRalPose2.pose.position.x += cos(tf::getYaw(uavRalPose1.pose.orientation)) * 1.0; // 假设大飞机在小飞机x方向1米处
-    uavRalPose2.pose.position.y += sin(tf::getYaw(uavRalPose1.pose.orientation)) * 1.0; // 假设大飞机在小飞机y方向1米处
+    // 3. 将小无人机的目标位置转换到大无人机坐标系下
+    geometry_msgs::PoseStamped uavRalPose1InUav2Frame;
+    try
+    {
+        tfListener_.transformPose("uav2_frame", uavRalPose1, uavRalPose1InUav2Frame);
+    }
+    catch (tf::TransformException& ex)
+    {
+        ROS_ERROR("Transform error: %s", ex.what());
+        return;
+    }
+
+    // 计算大无人机的目标位置和姿态
+    uavRalPose2 = uavRalPose1InUav2Frame;
     uavRalPose2.pose.position.z += 1.0; // 假设大飞机在小飞机上方1米处
 
-    // 考虑大小飞机的yaw角度偏差
+    // 考虑大小飞机的 yaw 角度偏差
     double yaw_offset = tf::getYaw(uavRalPose1.pose.orientation) - tf::getYaw(uavPoseLocal_.pose.orientation);
     tf::Quaternion q;
     q.setRPY(0, 0, yaw_offset);
@@ -95,7 +111,7 @@ bool FollowCable::isArrived(const geometry_msgs::PoseStamped& targetPoint)
     return false;
 }
 // 根据线结构传感器的测量结果，判断姿态调整是否到位
-bool FollowCable::isAjustPose(const geometry_msgs::PoseStamped& cablePose)
+bool FollowCable::isAjusted(const geometry_msgs::PoseStamped& cablePose)
 {
     // 计算角度差
     double yaw_diff = tf::getYaw(cablePose.pose.orientation) - tf::getYaw(uavPoseLocal_.pose.orientation);
@@ -168,7 +184,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 isGetAjustPose_ = true;
             }
             // 通过获取线结构传感器的测量结果，判断大小飞机是否到达相对位置/角度
-            if(isAjustPose(cablePose_))
+            if(isAjusted(cablePose_))
             {
                 // 已经调整好位置，准备降落上线
                 stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;

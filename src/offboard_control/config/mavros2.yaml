@@ -1,0 +1,6 @@
+# connection_url: /dev/ttyACM1:57600
+connection_url: udp://localhost:14541
+fcu_protocol: v2.0
+gcs_url: udp://@127.0.0.1
+target_system_id: 2
+target_component_id: 1

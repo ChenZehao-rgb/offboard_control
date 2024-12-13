@@ -5,6 +5,9 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <tf/tf.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf/transform_listener.h>
 
 #include "offboard_control/SetTargetPoint.h"
 #include "offboard_control/SetOffboardCtlType.h"
@@ -49,7 +52,7 @@ private:
     // 判断是否到达目标点
     bool isArrived(const geometry_msgs::PoseStamped& targetPoint);
     // 根据线结构传感器的测量结果，判断姿态调整是否到位
-    bool isAjustPose(const geometry_msgs::PoseStamped& cablePose);
+    bool isAjusted(const geometry_msgs::PoseStamped& cablePose);
 
     // 获取线传感器数据
     void getCablePose(const geometry_msgs::PoseStamped::ConstPtr& msg);
@@ -65,6 +68,8 @@ private:
     bool isArrivedOnlineTarg_;
     // 获取大小飞机调整姿态点标志位
     bool isGetAjustPose_;
+    // 坐标变换成员变量
+    tf::TransformListener tfListener_;
 };
 
 #endif // FOLLOWCABLE_H
