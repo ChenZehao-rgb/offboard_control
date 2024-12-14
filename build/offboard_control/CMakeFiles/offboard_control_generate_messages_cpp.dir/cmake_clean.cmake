@@ -4,6 +4,7 @@ file(REMOVE_RECURSE
   "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGains.h"
   "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h"
   "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/StateControl.h"
+  "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h"
   "CMakeFiles/offboard_control_generate_messages_cpp"
 )
 

@@ -26,6 +26,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlineTarg_(
     setOffboardCtlTypeClient_ = nh_.serviceClient<offboard_control::SetOffboardCtlType>("/offboard_control/set_offboard_ctl_type");
     // 设置pid参数客户端
     setPidGainsClient_ = nh_.serviceClient<offboard_control::SetPidGains>("/offboard_control/set_pid_gains");
+    // 判断是否到达目标点客户端
+    isUavArrivedClient_ = nh_.serviceClient<offboard_control::isUavArrived>("/offboard_control/is_arrived");
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
@@ -97,19 +99,7 @@ void FollowCable::cablePose2UavRalPose(const geometry_msgs::PoseStamped& cablePo
     q.setRPY(0, 0, yaw_offset);
     tf::quaternionTFToMsg(q, uavRalPose2.pose.orientation);
 }
-// 判断是否到达目标点
-bool FollowCable::isArrived(const geometry_msgs::PoseStamped& targetPoint)
-{
-    // 计算距离
-    double distance = sqrt(pow(targetPoint.pose.position.x - uavPoseLocal_.pose.position.x, 2) + 
-                           pow(targetPoint.pose.position.y - uavPoseLocal_.pose.position.y, 2) + 
-                           pow(targetPoint.pose.position.z - uavPoseLocal_.pose.position.z, 2));
-    if (distance < 0.5)
-    {
-        return true;
-    }
-    return false;
-}
+
 // 根据线结构传感器的测量结果，判断姿态调整是否到位
 bool FollowCable::isAjusted(const geometry_msgs::PoseStamped& cablePose)
 {
@@ -127,12 +117,12 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
     while(ros::ok() && stateControl_.state_ctrl_type == offboard_control::StateControl::TAKEOFF)
     {
         // 通过当前位置信息以及offboard模式，判断无人机是否起飞
-        if(isArrived(takeOffTarg_))
+        if(isUavArrived(takeOffTarg_,2))
         {
             stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;
         }
         ROS_INFO_STREAM("Waiting for takeoff...");
-        ros::Rate(5).sleep();
+        ros::Rate(20).sleep();
     }
     // 运动控制状态机逻辑
     ROS_INFO("Running control loop...");
@@ -152,17 +142,17 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 发送大飞机上线点
             if(!isSendOnlineTarg_)
             {
-                setTargetPoint(onLineTarg2_);
+                setTargetPoint(onLineTarg2_,2);
                 isSendOnlineTarg_ = true;
             }
             // 判断大飞机是否到达上线点,当大飞机到达上线点时且是否到达上线点标志位为false时，控制小飞机到达onLineTarg1_
-            if(isArrived(onLineTarg2_)&&!isArrivedOnlineTarg_)
+            if(isUavArrived(onLineTarg2_,2)&&!isArrivedOnlineTarg_)
             {
-                setTargetPoint(onLineTarg1_);
+                setTargetPoint(onLineTarg1_,1);
                 isArrivedOnlineTarg_ = true;
             }
             // 判断小飞机是否到达onLineTarg1_
-            if(isArrived(onLineTarg1_))
+            if(isUavArrived(onLineTarg1_,1))
             {
                 stateControl_.state_ctrl_type = offboard_control::StateControl::AJUST_ATTITUDE;
                 ROS_INFO_STREAM("Arrived on line point, and adjust attitude...");
@@ -179,8 +169,8 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 // 根据cablePose_的位置和角度，得到大小飞机需要运动的相对位置/角度，uavRalPose1_和uavRalPose2_，均是相对位置，包含x,y,z,orientation
                 cablePose2UavRalPose(cablePose_, uavRalPose1_, uavRalPose2_);
                 // 发送大小飞机的相对pose
-                setTargetPoint(uavRalPose1_);
-                setTargetPoint(uavRalPose2_);
+                setTargetPoint(uavRalPose1_,1);
+                setTargetPoint(uavRalPose2_,2);
                 isGetAjustPose_ = true;
             }
             // 通过获取线结构传感器的测量结果，判断大小飞机是否到达相对位置/角度
@@ -202,9 +192,9 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         {
             
             // 控制大飞机到达onLineTarg2_
-            setTargetPoint(onLineTarg2_); // 需要在offboardCtl中新建一个模式，即到点前需要减速，尽量让大飞机到点后，小飞机也能很快稳定在onLineTarg1_上,或者可以同时发送大小飞机的目标点
+            setTargetPoint(onLineTarg2_,2); // 需要在offboardCtl中新建一个模式，即到点前需要减速，尽量让大飞机到点后，小飞机也能很快稳定在onLineTarg1_上,或者可以同时发送大小飞机的目标点
             // 判断大飞机是否到达onLineTarg2_，判断范围根据线结构传感器的测量范围来定
-            if(isArrived(onLineTarg2_))
+            if(isUavArrived(onLineTarg2_,2))
             {
                 
 
@@ -259,8 +249,7 @@ int main(int argc, char** argv)
     targetPoint.pose.position.x = 0;
     targetPoint.pose.position.y = 0;
     targetPoint.pose.position.z = 5;
-    followCable.setTargetPoint(targetPoint); // 设置目标点
-    
+    followCable.setTargetPoint(targetPoint,2); // 设置目标点
     
     // 开启回调
     ros::spin();
@@ -317,17 +306,34 @@ void FollowCable::uavPoseLocalCallback(const geometry_msgs::PoseStamped::ConstPt
     uavPoseLocal_ = *msg;
 }
 // 设置目标点
-void FollowCable::setTargetPoint(const geometry_msgs::PoseStamped& targetPoint)
+void FollowCable::setTargetPoint(const geometry_msgs::PoseStamped& targetPoint,uint8_t uavID)
 {
     offboard_control::SetTargetPoint setTargetPoint;
     setTargetPoint.request.targetPoint = targetPoint;
+    setTargetPoint.request.uavID = uavID;
     if(setPointClient_.call(setTargetPoint) && setTargetPoint.response.success)
     {
-        ROS_INFO_STREAM("Set target point success");
+        ROS_INFO_STREAM("Set uav "<<uavID<<" target point success");
     }
     else
     {
-        ROS_ERROR_STREAM("Set target point failed");
+        ROS_ERROR_STREAM("Set uav "<<uavID<<" target point failed");
+    }
+}
+// 判断是否到达目标点
+bool FollowCable::isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID)
+{
+    offboard_control::isUavArrived isUavArrived;
+    isUavArrived.request.targetPoint = targetPoint;
+    isUavArrived.request.uavID = uavID;
+    if(isUavArrivedClient_.call(isUavArrived))
+    {
+        return isUavArrived.response.isArrived;
+    }
+    else
+    {
+        ROS_ERROR_STREAM("Failed to call isUavArrived service.");
+        return false;
     }
 }
 

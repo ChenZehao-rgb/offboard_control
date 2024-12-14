@@ -22,15 +22,17 @@
 
 (defclass offboard_control::SetTargetPointRequest
   :super ros::object
-  :slots (_targetPoint ))
+  :slots (_targetPoint _uavID ))
 
 (defmethod offboard_control::SetTargetPointRequest
   (:init
    (&key
     ((:targetPoint __targetPoint) (instance geometry_msgs::PoseStamped :init))
+    ((:uavID __uavID) 0)
     )
    (send-super :init)
    (setq _targetPoint __targetPoint)
+   (setq _uavID (round __uavID))
    self)
   (:targetPoint
    (&rest __targetPoint)
@@ -39,11 +41,16 @@
      (progn
        (if __targetPoint (setq _targetPoint (car __targetPoint)))
        _targetPoint)))
+  (:uavID
+   (&optional __uavID)
+   (if __uavID (setq _uavID __uavID)) _uavID)
   (:serialization-length
    ()
    (+
     ;; geometry_msgs/PoseStamped _targetPoint
     (send _targetPoint :serialization-length)
+    ;; uint8 _uavID
+    1
     ))
   (:serialize
    (&optional strm)
@@ -51,12 +58,16 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; geometry_msgs/PoseStamped _targetPoint
        (send _targetPoint :serialize s)
+     ;; uint8 _uavID
+       (write-byte _uavID s)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
    ;; geometry_msgs/PoseStamped _targetPoint
      (send _targetPoint :deserialize buf ptr-) (incf ptr- (send _targetPoint :serialization-length))
+   ;; uint8 _uavID
+     (setq _uavID (sys::peek buf ptr- :char)) (incf ptr- 1)
    ;;
    self)
   )
@@ -102,7 +113,7 @@
   :super ros::object
   :slots ())
 
-(setf (get offboard_control::SetTargetPoint :md5sum-) "51439c92d41e3c6de0a9c8267b7eef43")
+(setf (get offboard_control::SetTargetPoint :md5sum-) "9a658aee9c9634e4e1d337a3edbe9137")
 (setf (get offboard_control::SetTargetPoint :datatype-) "offboard_control/SetTargetPoint")
 (setf (get offboard_control::SetTargetPoint :request) offboard_control::SetTargetPointRequest)
 (setf (get offboard_control::SetTargetPoint :response) offboard_control::SetTargetPointResponse)
@@ -110,10 +121,11 @@
 (defmethod offboard_control::SetTargetPointRequest
   (:response () (instance offboard_control::SetTargetPointResponse :init)))
 
-(setf (get offboard_control::SetTargetPointRequest :md5sum-) "51439c92d41e3c6de0a9c8267b7eef43")
+(setf (get offboard_control::SetTargetPointRequest :md5sum-) "9a658aee9c9634e4e1d337a3edbe9137")
 (setf (get offboard_control::SetTargetPointRequest :datatype-) "offboard_control/SetTargetPointRequest")
 (setf (get offboard_control::SetTargetPointRequest :definition-)
       "geometry_msgs/PoseStamped targetPoint
+uint8 uavID
 
 ================================================================================
 MSG: geometry_msgs/PoseStamped
@@ -162,10 +174,11 @@ float64 w
 bool success
 ")
 
-(setf (get offboard_control::SetTargetPointResponse :md5sum-) "51439c92d41e3c6de0a9c8267b7eef43")
+(setf (get offboard_control::SetTargetPointResponse :md5sum-) "9a658aee9c9634e4e1d337a3edbe9137")
 (setf (get offboard_control::SetTargetPointResponse :datatype-) "offboard_control/SetTargetPointResponse")
 (setf (get offboard_control::SetTargetPointResponse :definition-)
       "geometry_msgs/PoseStamped targetPoint
+uint8 uavID
 
 ================================================================================
 MSG: geometry_msgs/PoseStamped
@@ -216,6 +229,6 @@ bool success
 
 
 
-(provide :offboard_control/SetTargetPoint "51439c92d41e3c6de0a9c8267b7eef43")
+(provide :offboard_control/SetTargetPoint "9a658aee9c9634e4e1d337a3edbe9137")
 
 

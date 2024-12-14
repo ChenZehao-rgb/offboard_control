@@ -10,10 +10,11 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class SetTargetPointRequest(genpy.Message):
-  _md5sum = "afac860adb3c3efce8f84ecbb1eeb9b5"
+  _md5sum = "fe78b9b615816ee275f9bae3c27a36c6"
   _type = "offboard_control/SetTargetPointRequest"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """geometry_msgs/PoseStamped targetPoint
+uint8 uavID
 
 ================================================================================
 MSG: geometry_msgs/PoseStamped
@@ -59,8 +60,8 @@ float64 y
 float64 z
 float64 w
 """
-  __slots__ = ['targetPoint']
-  _slot_types = ['geometry_msgs/PoseStamped']
+  __slots__ = ['targetPoint','uavID']
+  _slot_types = ['geometry_msgs/PoseStamped','uint8']
 
   def __init__(self, *args, **kwds):
     """
@@ -70,7 +71,7 @@ float64 w
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       targetPoint
+       targetPoint,uavID
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -81,8 +82,11 @@ float64 w
       # message fields cannot be None, assign default values for those that are
       if self.targetPoint is None:
         self.targetPoint = geometry_msgs.msg.PoseStamped()
+      if self.uavID is None:
+        self.uavID = 0
     else:
       self.targetPoint = geometry_msgs.msg.PoseStamped()
+      self.uavID = 0
 
   def _get_types(self):
     """
@@ -105,7 +109,7 @@ float64 w
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7d().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w))
+      buff.write(_get_struct_7dB().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -135,8 +139,8 @@ float64 w
         self.targetPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 56
-      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w,) = _get_struct_7d().unpack(str[start:end])
+      end += 57
+      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID,) = _get_struct_7dB().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -158,7 +162,7 @@ float64 w
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7d().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w))
+      buff.write(_get_struct_7dB().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -189,8 +193,8 @@ float64 w
         self.targetPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 56
-      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w,) = _get_struct_7d().unpack(str[start:end])
+      end += 57
+      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID,) = _get_struct_7dB().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -205,12 +209,12 @@ def _get_struct_3I():
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
-_struct_7d = None
-def _get_struct_7d():
-    global _struct_7d
-    if _struct_7d is None:
-        _struct_7d = struct.Struct("<7d")
-    return _struct_7d
+_struct_7dB = None
+def _get_struct_7dB():
+    global _struct_7dB
+    if _struct_7dB is None:
+        _struct_7dB = struct.Struct("<7dB")
+    return _struct_7dB
 # This Python file uses the following encoding: utf-8
 """autogenerated by genpy from offboard_control/SetTargetPointResponse.msg. Do not edit."""
 import codecs
@@ -328,6 +332,6 @@ def _get_struct_B():
     return _struct_B
 class SetTargetPoint(object):
   _type          = 'offboard_control/SetTargetPoint'
-  _md5sum = '51439c92d41e3c6de0a9c8267b7eef43'
+  _md5sum = '9a658aee9c9634e4e1d337a3edbe9137'
   _request_class  = SetTargetPointRequest
   _response_class = SetTargetPointResponse

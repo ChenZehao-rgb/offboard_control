@@ -11,6 +11,9 @@ CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_
 CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h
 CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPointRequest.h
 CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPointResponse.h
+CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h
+CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrivedRequest.h
+CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrivedResponse.h
 CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/src/offboard_control/include/OffboardCtl.h
 CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /home/chen/offboard_control/src/offboard_control/src/OffboardCtl.cpp
 CMakeFiles/offboard_control_node.dir/src/OffboardCtl.cpp.o: /opt/ros/noetic/include/control_msgs/PidState.h

@@ -23,6 +23,7 @@ class SetTargetPointRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.targetPoint = null;
+      this.uavID = null;
     }
     else {
       if (initObj.hasOwnProperty('targetPoint')) {
@@ -31,6 +32,12 @@ class SetTargetPointRequest {
       else {
         this.targetPoint = new geometry_msgs.msg.PoseStamped();
       }
+      if (initObj.hasOwnProperty('uavID')) {
+        this.uavID = initObj.uavID
+      }
+      else {
+        this.uavID = 0;
+      }
     }
   }
 
@@ -38,6 +45,8 @@ class SetTargetPointRequest {
     // Serializes a message object of type SetTargetPointRequest
     // Serialize message field [targetPoint]
     bufferOffset = geometry_msgs.msg.PoseStamped.serialize(obj.targetPoint, buffer, bufferOffset);
+    // Serialize message field [uavID]
+    bufferOffset = _serializer.uint8(obj.uavID, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -47,13 +56,15 @@ class SetTargetPointRequest {
     let data = new SetTargetPointRequest(null);
     // Deserialize message field [targetPoint]
     data.targetPoint = geometry_msgs.msg.PoseStamped.deserialize(buffer, bufferOffset);
+    // Deserialize message field [uavID]
+    data.uavID = _deserializer.uint8(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += geometry_msgs.msg.PoseStamped.getMessageSize(object.targetPoint);
-    return length;
+    return length + 1;
   }
 
   static datatype() {
@@ -63,13 +74,14 @@ class SetTargetPointRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'afac860adb3c3efce8f84ecbb1eeb9b5';
+    return 'fe78b9b615816ee275f9bae3c27a36c6';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     geometry_msgs/PoseStamped targetPoint
+    uint8 uavID
     
     ================================================================================
     MSG: geometry_msgs/PoseStamped
@@ -129,6 +141,13 @@ class SetTargetPointRequest {
     }
     else {
       resolved.targetPoint = new geometry_msgs.msg.PoseStamped()
+    }
+
+    if (msg.uavID !== undefined) {
+      resolved.uavID = msg.uavID;
+    }
+    else {
+      resolved.uavID = 0
     }
 
     return resolved;
@@ -209,6 +228,6 @@ class SetTargetPointResponse {
 module.exports = {
   Request: SetTargetPointRequest,
   Response: SetTargetPointResponse,
-  md5sum() { return '51439c92d41e3c6de0a9c8267b7eef43'; },
+  md5sum() { return '9a658aee9c9634e4e1d337a3edbe9137'; },
   datatype() { return 'offboard_control/SetTargetPoint'; }
 };

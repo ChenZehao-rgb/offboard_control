@@ -12,6 +12,7 @@
 #include "offboard_control/SetTargetPoint.h"
 #include "offboard_control/SetOffboardCtlType.h"
 #include "offboard_control/SetPidGains.h"
+#include "offboard_control/isUavArrived.h"
 #include "offboard_control/StateControl.h"
 
 class FollowCable{
@@ -19,7 +20,7 @@ public:
     FollowCable(const ros::NodeHandle& nh);
     ~FollowCable();
     void controlLoop(const ros::TimerEvent&);
-    void setTargetPoint(const geometry_msgs::PoseStamped& targetPoint);
+    void setTargetPoint(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID);
     void setOffboardMode();
     void setArm();
     void setOffboardCtlType(int type);
@@ -34,6 +35,7 @@ private:
     ros::ServiceClient setPointClient_; //设置目标点客户端
     ros::ServiceClient setOffboardCtlTypeClient_; //设置控制模式客户端
     ros::ServiceClient setPidGainsClient_; //设置pid参数客户端
+    ros::ServiceClient isUavArrivedClient_; //判断是否到达目标点客户端
 
     // 键盘输入
     ros::Subscriber keyboardSub_;
@@ -49,8 +51,8 @@ private:
     geometry_msgs::PoseStamped uavPoseLocal_;
     // 本地位置回调函数
     void uavPoseLocalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
-    // 判断是否到达目标点
-    bool isArrived(const geometry_msgs::PoseStamped& targetPoint);
+    // 判断是否到达目标点服务函数
+    bool isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID);
     // 根据线结构传感器的测量结果，判断姿态调整是否到位
     bool isAjusted(const geometry_msgs::PoseStamped& cablePose);
 

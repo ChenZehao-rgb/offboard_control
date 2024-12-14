@@ -25,10 +25,12 @@ struct SetTargetPointRequest_
   typedef SetTargetPointRequest_<ContainerAllocator> Type;
 
   SetTargetPointRequest_()
-    : targetPoint()  {
+    : targetPoint()
+    , uavID(0)  {
     }
   SetTargetPointRequest_(const ContainerAllocator& _alloc)
-    : targetPoint(_alloc)  {
+    : targetPoint(_alloc)
+    , uavID(0)  {
   (void)_alloc;
     }
 
@@ -36,6 +38,9 @@ struct SetTargetPointRequest_
 
    typedef  ::geometry_msgs::PoseStamped_<ContainerAllocator>  _targetPoint_type;
   _targetPoint_type targetPoint;
+
+   typedef uint8_t _uavID_type;
+  _uavID_type uavID;
 
 
 
@@ -66,7 +71,8 @@ return s;
 template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::offboard_control::SetTargetPointRequest_<ContainerAllocator1> & lhs, const ::offboard_control::SetTargetPointRequest_<ContainerAllocator2> & rhs)
 {
-  return lhs.targetPoint == rhs.targetPoint;
+  return lhs.targetPoint == rhs.targetPoint &&
+    lhs.uavID == rhs.uavID;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -123,12 +129,12 @@ struct MD5Sum< ::offboard_control::SetTargetPointRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "afac860adb3c3efce8f84ecbb1eeb9b5";
+    return "fe78b9b615816ee275f9bae3c27a36c6";
   }
 
   static const char* value(const ::offboard_control::SetTargetPointRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xafac860adb3c3efcULL;
-  static const uint64_t static_value2 = 0xe8f84ecbb1eeb9b5ULL;
+  static const uint64_t static_value1 = 0xfe78b9b615816ee2ULL;
+  static const uint64_t static_value2 = 0x75f9bae3c27a36c6ULL;
 };
 
 template<class ContainerAllocator>
@@ -148,6 +154,7 @@ struct Definition< ::offboard_control::SetTargetPointRequest_<ContainerAllocator
   static const char* value()
   {
     return "geometry_msgs/PoseStamped targetPoint\n"
+"uint8 uavID\n"
 "\n"
 "================================================================================\n"
 "MSG: geometry_msgs/PoseStamped\n"
@@ -211,6 +218,7 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.targetPoint);
+      stream.next(m.uavID);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -232,6 +240,8 @@ struct Printer< ::offboard_control::SetTargetPointRequest_<ContainerAllocator> >
     s << indent << "targetPoint: ";
     s << std::endl;
     Printer< ::geometry_msgs::PoseStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.targetPoint);
+    s << indent << "uavID: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.uavID);
   }
 };
 

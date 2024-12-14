@@ -4,6 +4,7 @@ Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py, /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/msg/__init__.py)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_StateControl.py, /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/msg/_StateControl.py)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py, /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py)
+Symlinking /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py, /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/srv/__init__.py)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py, /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py, /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py)
@@ -11,21 +12,25 @@ Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/pkgconf
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/keyboard_control_node, /home/chen/offboard_control/devel/lib/offboard_control/keyboard_control_node)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/follow_cable_node, /home/chen/offboard_control/devel/lib/offboard_control/follow_cable_node)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/offboard_control_node, /home/chen/offboard_control/devel/lib/offboard_control/offboard_control_node)
+Symlinking /home/chen/offboard_control/devel/include/offboard_control/isUavArrivedResponse.h
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGains.h, /home/chen/offboard_control/devel/include/offboard_control/SetPidGains.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/StateControl.h, /home/chen/offboard_control/devel/include/offboard_control/StateControl.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h, /home/chen/offboard_control/devel/include/offboard_control/OffboardCtlType.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlType.h, /home/chen/offboard_control/devel/include/offboard_control/SetOffboardCtlType.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGainsRequest.h, /home/chen/offboard_control/devel/include/offboard_control/SetPidGainsRequest.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGainsResponse.h, /home/chen/offboard_control/devel/include/offboard_control/SetPidGainsResponse.h)
+Symlinking /home/chen/offboard_control/devel/include/offboard_control/isUavArrivedRequest.h
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlTypeRequest.h, /home/chen/offboard_control/devel/include/offboard_control/SetOffboardCtlTypeRequest.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPointRequest.h, /home/chen/offboard_control/devel/include/offboard_control/SetTargetPointRequest.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPointResponse.h, /home/chen/offboard_control/devel/include/offboard_control/SetTargetPointResponse.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h, /home/chen/offboard_control/devel/include/offboard_control/SetTargetPoint.h)
+Symlinking /home/chen/offboard_control/devel/include/offboard_control/isUavArrived.h
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlTypeResponse.h, /home/chen/offboard_control/devel/include/offboard_control/SetOffboardCtlTypeResponse.h)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/manifest.l, /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/manifest.l)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/OffboardCtlType.l, /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/msg/OffboardCtlType.l)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/StateControl.l, /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/msg/StateControl.l)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetOffboardCtlType.l, /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/srv/SetOffboardCtlType.l)
+Symlinking /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/srv/isUavArrived.l
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l, /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/srv/SetTargetPoint.l)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetPidGains.l, /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/srv/SetPidGains.l)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/_index.js, /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/_index.js)
@@ -35,6 +40,7 @@ Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/genno
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetPidGains.js, /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/SetPidGains.js)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/_index.js, /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/_index.js)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetOffboardCtlType.js, /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/SetOffboardCtlType.js)
+Symlinking /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/isUavArrived.js
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetTargetPoint.js, /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/SetTargetPoint.js)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/offboard_control/cmake/offboard_control-msg-paths.cmake, /home/chen/offboard_control/devel/share/offboard_control/cmake/offboard_control-msg-paths.cmake)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/offboard_control/cmake/offboard_control-msg-extras.cmake, /home/chen/offboard_control/devel/share/offboard_control/cmake/offboard_control-msg-extras.cmake)
@@ -46,7 +52,9 @@ Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/commo
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/offboard_control-msg.asd, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/offboard_control-msg.asd)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/_package.lisp, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/_package.lisp)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/StateControl.lisp, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/StateControl.lisp)
+Symlinking /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/srv/_package_isUavArrived.lisp
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/SetPidGains.lisp, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/srv/SetPidGains.lisp)
+Symlinking /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/srv/isUavArrived.lisp
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/_package_SetOffboardCtlType.lisp, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/srv/_package_SetOffboardCtlType.lisp)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/offboard_control-srv.asd, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/srv/offboard_control-srv.asd)
 Linked: (/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/_package_SetPidGains.lisp, /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/srv/_package_SetPidGains.lisp)

@@ -58,6 +58,7 @@ CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/d
 CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l
 CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetOffboardCtlType.l
 CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetPidGains.l
+CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l
 CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/manifest.l
 
 
@@ -73,11 +74,11 @@ CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/d
 
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/lib/geneus/gen_eus.py
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv
-/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
-/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/std_msgs/msg/Header.msg
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/std_msgs/msg/Header.msg
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating EusLisp code from offboard_control/SetTargetPoint.srv"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv
 
@@ -91,8 +92,18 @@ CMakeFiles/offboard_control_generate_messages_eus: /home/chen/offboard_control/d
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating EusLisp code from offboard_control/SetPidGains.srv"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv
 
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /opt/ros/noetic/lib/geneus/gen_eus.py
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating EusLisp code from offboard_control/isUavArrived.srv"
+	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py /home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv
+
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/manifest.l: /opt/ros/noetic/lib/geneus/gen_eus.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating EusLisp manifest code for offboard_control"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating EusLisp manifest code for offboard_control"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/geneus/cmake/../../../lib/geneus/gen_eus.py -m -o /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control offboard_control std_msgs geometry_msgs
 
 offboard_control_generate_messages_eus: CMakeFiles/offboard_control_generate_messages_eus
@@ -101,6 +112,7 @@ offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.priva
 offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l
 offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetOffboardCtlType.l
 offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetPidGains.l
+offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/isUavArrived.l
 offboard_control_generate_messages_eus: /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/manifest.l
 offboard_control_generate_messages_eus: CMakeFiles/offboard_control_generate_messages_eus.dir/build.make
 

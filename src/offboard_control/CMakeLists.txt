@@ -8,12 +8,13 @@ project(offboard_control)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-roscpp
-geometry_msgs
-mavros_msgs
-std_msgs
-message_generation
-control_toolbox
+  roscpp
+  geometry_msgs
+  mavros_msgs
+  std_msgs
+  message_generation
+  control_toolbox
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -62,6 +63,7 @@ add_service_files(
   SetTargetPoint.srv
   SetOffboardCtlType.srv
   SetPidGains.srv
+  isUavArrived.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -110,7 +112,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_pkg
-  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox
+  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf
 #  DEPENDS system_lib
 )
 

@@ -9,31 +9,40 @@
 #define GOTO_SETPOINT_CLOSED_LOOP 1
 
 // 构造函数
-OffboardCtl::OffboardCtl(const ros::NodeHandle& nh)
-    :nh_(nh),isGetTargetPoint_(false)
+OffboardCtl::OffboardCtl(const std::string& nh1, const std::string& nh2) : nh1_(nh1), nh2_(nh2),isGetTargetPoint_(false)
 {
     // 订阅无人机本地位置
-    uavPoseLocalSub_ = nh_.subscribe("/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback, this);
+    uavPoseLocalSub1_ = nh1_.subscribe("/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback1, this);
+    uavPoseLocalSub2_ = nh2_.subscribe("/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback2, this);
     // 订阅无人机本地速度
-    uavTwistLocalSub_ = nh_.subscribe("/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback, this);
+    uavTwistLocalSub1_ = nh1_.subscribe("/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback1, this);
+    uavTwistLocalSub2_ = nh2_.subscribe("/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback2, this);
     // 订阅无人机本地加速度
-    uavAccLocalSub_ = nh_.subscribe("/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback, this);
+    uavAccLocalSub1_ = nh1_.subscribe("/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback1, this);
+    uavAccLocalSub2_ = nh2_.subscribe("/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback2, this);
 
     // 发布无人机本地位置
-    setpointLocalPub_ = nh_.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
+    setpointLocalPub1_ = nh1_.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
+    setpointLocalPub2_ = nh2_.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
     // 发布无人机本地原始位置
-    setpointRawLocalPub_ = nh_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
+    setpointRawLocalPub1_ = nh1_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
+    setpointRawLocalPub2_ = nh2_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
     // 发布无人机原始姿态
-    setpointRawAttPub_ = nh_.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 10);
+    setpointRawAttPub1_ = nh1_.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 10);
+    setpointRawAttPub2_ = nh2_.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 10);
 
+    /* 服务函数两无人机共用，使用大无人机uav2的句柄 */
     // 设置目标位置服务
-    setTargetPointSrv_ = nh_.advertiseService("offboard_control/set_target_point", &OffboardCtl::setTargetPoint, this);
+    setTargetPointSrv_ = nh2_.advertiseService("offboard_control/set_target_point", &OffboardCtl::setTargetPoint, this);
     // 设置控制模式服务
-    setOffboardCtlTypeSrv_ = nh_.advertiseService("offboard_control/set_offboard_ctl_type", &OffboardCtl::setOffboardCtlType, this);
+    setOffboardCtlTypeSrv_ = nh2_.advertiseService("offboard_control/set_offboard_ctl_type", &OffboardCtl::setOffboardCtlType, this);
     // 动态调整pid参数服务
-    setPidGainsSrv_ = nh_.advertiseService("offboard_control/set_pid_gains", &OffboardCtl::setPidGains, this);
+    setPidGainsSrv_ = nh2_.advertiseService("offboard_control/set_pid_gains", &OffboardCtl::setPidGains, this);
+    // 判断无人机是否到点服务
+    isUavArrivedSrv_ = nh2_.advertiseService("offboard_control/is_arrived", &OffboardCtl::isUavArrived, this);
+
     // 状态切换定时器
-    stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
+    stateSwitchTimer_ = nh2_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
     // 初始化控制模式
     // offbCtlType_= GOTO_SETPOINT_STEP;
@@ -49,8 +58,8 @@ OffboardCtl::~OffboardCtl()
     // 在这里添加任何需要的清理代码
 }
 
-// 位置环pid控制
-void OffboardCtl::positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal)
+// 位置环pid控制 ,返回位置环控制量
+mavros_msgs::PositionTarget OffboardCtl::positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal)
 {
     // 获取目标位置和当前位置
     double target_x = targetPoint.pose.position.x;
@@ -82,20 +91,32 @@ void OffboardCtl::positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_m
     positionTarget.velocity.x = control_vx;
     positionTarget.velocity.y = control_vy;
     positionTarget.velocity.z = control_vz;
-    setpointRawLocalPub_.publish(positionTarget);
-
+    return positionTarget;
 }
 // 目标点平滑过渡控制
 
 // 设置目标位置服务函数
 bool OffboardCtl::setTargetPoint(offboard_control::SetTargetPoint::Request& req, offboard_control::SetTargetPoint::Response& res)
 {
-    targetPoint_ = req.targetPoint;
+    // 判断uavID,赋值给两个无人机对应的目标位置
+    switch (req.uavID)
+    {
+        case 1:
+            uavTargetPoint1_ = req.targetPoint;
+            ROS_INFO_STREAM("targetPointUav1_: " << uavTargetPoint1_);
+            break;
+        case 2:
+            uavTargetPoint2_ = req.targetPoint;
+            ROS_INFO_STREAM("targetPointUav2_: " << uavTargetPoint2_);
+            break;
+        default:
+            ROS_ERROR_STREAM("uavID is not correct.");
+            res.success = false;
+            return false;
+    }
     res.success = true;
     // 设置目标位置成功
     isGetTargetPoint_ = true;
-    // 打印目标位置
-    ROS_INFO_STREAM("setTargetPoint: " << targetPoint_);
     return true;
 }
 
@@ -132,22 +153,74 @@ bool OffboardCtl::setPidGains(offboard_control::SetPidGains::Request& req, offbo
     ROS_INFO_STREAM("setPidGains: " << req);
     return true;
 }
-// 回调函数
-void OffboardCtl::uavPoseLocalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+// 判断无人机是否到点服务函数
+bool OffboardCtl::isUavArrived(offboard_control::isUavArrived::Request& req, offboard_control::isUavArrived::Response& res)
 {
-    uavPoseLocal_ = *msg;
+    // 判断uavID,赋值给两个无人机对应的本地
+    switch (req.uavID)
+    {
+        case 1:
+            // req.targetPoint由客户端传入，判断是否到达目标点，是则将isArrived赋值为true，否则为false
+            res.isArrived = isArrived(req.targetPoint, uavPoseLocal1_);
+            break;
+        case 2:
+            res.isArrived = isArrived(req.targetPoint, uavPoseLocal2_);
+            break;
+        default:
+            ROS_ERROR_STREAM("uavID is not correct.");
+            res.isArrived = false;
+            return false;
+    }
+    return true;
+}
+// 判断是否到达目标点
+bool OffboardCtl::isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal)
+{
+    // 计算距离
+    double distance = sqrt(pow(targetPoint.pose.position.x - uavPoseLocal.pose.position.x, 2) + 
+                           pow(targetPoint.pose.position.y - uavPoseLocal.pose.position.y, 2) + 
+                           pow(targetPoint.pose.position.z - uavPoseLocal.pose.position.z, 2));
+    // 判断精度需要根据实际设置
+    if (distance < 0.5)
+    {
+        return true;
+    }
+    return false;
+}
+// 回调函数
+void OffboardCtl::uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+    uavPoseLocal1_ = *msg;
     // 打印无人机本地位置
     // ROS_INFO_STREAM("uavPoseLocalCallback: " << uavPoseLocal_);
 }
-void OffboardCtl::uavTwistLocalCallback(const geometry_msgs::TwistStamped::ConstPtr& msg)
+void OffboardCtl::uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
-    uavTwistLocal_ = *msg;
+    uavPoseLocal2_ = *msg;
+    // 打印无人机本地位置
+    // ROS_INFO_STREAM("uavPoseLocalCallback: " << uavPoseLocal_);
+}
+void OffboardCtl::uavTwistLocalCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg)
+{
+    uavTwistLocal1_ = *msg;
     // 打印无人机本地速度
     // ROS_INFO_STREAM("uavTwistLocalCallback: " << uavTwistLocal_);
 }
-void OffboardCtl::uavAccLocalCallback(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg)
+void OffboardCtl::uavTwistLocalCallback2(const geometry_msgs::TwistStamped::ConstPtr& msg)
 {
-    uavAccLocal_ = *msg;
+    uavTwistLocal2_ = *msg;
+    // 打印无人机本地速度
+    // ROS_INFO_STREAM("uavTwistLocalCallback: " << uavTwistLocal_);
+}
+void OffboardCtl::uavAccLocalCallback1(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg)
+{
+    uavAccLocal1_ = *msg;
+    // 打印无人机本地加速度
+    // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
+}
+void OffboardCtl::uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg)
+{
+    uavAccLocal2_ = *msg;
     // 打印无人机本地加速度
     // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
 }
@@ -160,10 +233,10 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
     {   
         //打印信息
         ROS_INFO_STREAM("Waiting for target point...");
-        //运行频率5hz
-        ros::Rate(5).sleep();
+        //运行频率20hz
+        ros::Rate(20).sleep();
         // 原理是因为offborad模式，需要无人机持续接收位置信息，如果没有接收到位置信息，无人机会自动降落
-        setpointLocalPub_.publish(uavPoseLocal_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
+        setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
         
     }
     // 状态机开始运行
@@ -171,20 +244,20 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
     {
         case GOTO_SETPOINT_STEP:
         {
-            targetPoint_.header.stamp = ros::Time::now(); //设置时间戳
-            setpointLocalPub_.publish(targetPoint_); //发布目标位置
+            uavTargetPoint1_.header.stamp = ros::Time::now(); //设置时间戳
+            setpointLocalPub1_.publish(uavTargetPoint1_); //发布目标位置
             //打印信息
             // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << targetPoint_);
-            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << uavPoseLocal_);
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << uavPoseLocal1_);
             break;
         }
         // 在原定点控制外环加位置闭环
         case GOTO_SETPOINT_CLOSED_LOOP:
         {
-            positionCtl(targetPoint_, uavPoseLocal_); //位置环pid控制
+            positionCtl(uavTargetPoint1_, uavPoseLocal1_); //位置环pid控制
             //打印信息
             // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << targetPoint_);
-            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << uavPoseLocal_);
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << uavPoseLocal1_);
             break;
         }
     
@@ -197,8 +270,6 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offboard_control_node");
-    ros::NodeHandle nh;
-
     // 等待mavros
     ROS_INFO_STREAM("Waiting for mavros...");
     // 等待offboard模式  ？offboard模式应该如何设置，周期发送？不使用程序设置？
@@ -222,7 +293,7 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM("Arm success!");
     }
     // 创建 OffboardCtl 对象,创建了使用nh句柄的各种订阅、发布、服务等
-    OffboardCtl offboardctl(nh);
+    OffboardCtl offboardctl("uav1", "uav2");
 
     // 开启异步线程处理回调函数
     ros::MultiThreadedSpinner spinner(6);

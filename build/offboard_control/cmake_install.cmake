@@ -140,6 +140,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
     "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
     "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv"
     "/home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv"
+    "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
     )
 endif()
 
