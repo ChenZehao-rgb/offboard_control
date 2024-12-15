@@ -93,7 +93,8 @@ mavros_msgs::PositionTarget OffboardCtl::positionCtl(geometry_msgs::PoseStamped 
     positionTarget.velocity.z = control_vz;
     return positionTarget;
 }
-// 目标点平滑过渡控制
+// 给定一系列目标点，使得无人机能够以指定的速度经过这一系列目标点，并在每个目标点上停留一段时间
+
 
 // 设置目标位置服务函数
 bool OffboardCtl::setTargetPoint(offboard_control::SetTargetPoint::Request& req, offboard_control::SetTargetPoint::Response& res)
@@ -161,10 +162,10 @@ bool OffboardCtl::isUavArrived(offboard_control::isUavArrived::Request& req, off
     {
         case 1:
             // req.targetPoint由客户端传入，判断是否到达目标点，是则将isArrived赋值为true，否则为false
-            res.isArrived = isArrived(req.targetPoint, uavPoseLocal1_);
+            res.isArrived = isArrived(req.targetPoint, uavPoseLocal1_,req.precision);
             break;
         case 2:
-            res.isArrived = isArrived(req.targetPoint, uavPoseLocal2_);
+            res.isArrived = isArrived(req.targetPoint, uavPoseLocal2_,req.precision);
             break;
         default:
             ROS_ERROR_STREAM("uavID is not correct.");
@@ -174,19 +175,16 @@ bool OffboardCtl::isUavArrived(offboard_control::isUavArrived::Request& req, off
     return true;
 }
 // 判断是否到达目标点
-bool OffboardCtl::isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal)
+bool OffboardCtl::isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal, double precision)
 {
     // 计算距离
-    double distance = sqrt(pow(targetPoint.pose.position.x - uavPoseLocal.pose.position.x, 2) + 
-                           pow(targetPoint.pose.position.y - uavPoseLocal.pose.position.y, 2) + 
-                           pow(targetPoint.pose.position.z - uavPoseLocal.pose.position.z, 2));
+    double distance_2 = pow(targetPoint.pose.position.x - uavPoseLocal.pose.position.x, 2) + 
+                        pow(targetPoint.pose.position.y - uavPoseLocal.pose.position.y, 2) + 
+                        pow(targetPoint.pose.position.z - uavPoseLocal.pose.position.z, 2);
     // 判断精度需要根据实际设置
-    if (distance < 0.5)
-    {
-        return true;
-    }
-    return false;
+    return (distance_2 < pow(precision, 2));
 }
+// 
 // 回调函数
 void OffboardCtl::uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
@@ -225,7 +223,7 @@ void OffboardCtl::uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceS
     // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
 }
 
-//状态机
+// 运动模式切换
 void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
 {
     //判断是否ok,通过isGetTargetPoint_，其为真，退出循环，可以进行下一步

@@ -6,6 +6,8 @@
 // 状态机控制频率
 #define controlRate 20.0
 #define controlPeriod (1.0 / controlRate)
+double onLineTargZ = 1.0; // 上线点高度
+int onLineFailCnt = 0; // 上线失败计数
 // 定义一些重要的点
 geometry_msgs::PoseStamped takeOffTarg_; // 起飞点
 geometry_msgs::PoseStamped onLineTarg_, onLineTarg1_, onLineTarg2_; // 索道上的上线点，小飞机的目标点，大飞机的目标点
@@ -52,7 +54,7 @@ void FollowCable::onLineTarg2UavTarg(const geometry_msgs::PoseStamped& onLineTar
 {
     // 小飞机坐标为索道坐标的上方，距离由携带爪子大小而定
     uavTarg1 = onLineTarg;
-    uavTarg1.pose.position.z += 1.0;
+    uavTarg1.pose.position.z += onLineTargZ;
     // 大飞机坐标为小飞机坐标的上方，距离由两者间连接绳的长度而定
     uavTarg2 = uavTarg1;
     uavTarg2.pose.position.z += 1.0;
@@ -111,6 +113,26 @@ bool FollowCable::isAjusted(const geometry_msgs::PoseStamped& cablePose)
     }
     return false;
 }
+// 控制爪子抓住索道
+bool FollowCable::graspCable()
+{
+    // 控制指令
+
+    //等待20s
+    ros::Duration(20).sleep();
+    // 判断是否抓住索道
+    return (1>0); // 某个值大于阈值
+}
+// 松开爪子
+bool FollowCable::releaseCable()
+{
+    // 控制指令
+
+    //等待20s
+    ros::Duration(20).sleep();
+    // 判断是否松开索道
+    return (1<0); // 某个值小于阈值
+}
 void FollowCable::controlLoop(const ros::TimerEvent&)
 {
     // 等待无人机起飞
@@ -156,6 +178,10 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             {
                 stateControl_.state_ctrl_type = offboard_control::StateControl::AJUST_ATTITUDE;
                 ROS_INFO_STREAM("Arrived on line point, and adjust attitude...");
+                // 重置标志位
+                isGetOnlineTarg_ = false;
+                isSendOnlineTarg_ = false;
+                isArrivedOnlineTarg_ = false;
             }
             break;
         }
@@ -191,25 +217,44 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         case offboard_control::StateControl::ON_LINE:
         {
             
-            // 控制大飞机到达onLineTarg2_
+            // 控制大飞机下降
             setTargetPoint(onLineTarg2_,2); // 需要在offboardCtl中新建一个模式，即到点前需要减速，尽量让大飞机到点后，小飞机也能很快稳定在onLineTarg1_上,或者可以同时发送大小飞机的目标点
             // 判断大飞机是否到达onLineTarg2_，判断范围根据线结构传感器的测量范围来定
-            if(isUavArrived(onLineTarg2_,2))
+            if(isUavArrived(onLineTarg2_,2,0.1))
             {
-                
-
-                // 大飞机降落，到达小飞机能抓住的位置
-
-                // 小飞机抓
-
-                stateControl_.state_ctrl_type = offboard_control::StateControl::FOLLOW_CABLE;
+                // 大无人机到达指定精度的上线点，理想状态下小无人机姿态位置不变，爪子正好在索道上
+                // 控制爪子抓住索道
+                if(graspCable())
+                {
+                    stateControl_.state_ctrl_type = offboard_control::StateControl::FOLLOW_CABLE;
+                    ROS_INFO_STREAM("Grasp cable success, and follow cable...");
+                }
+                else
+                {
+                    ROS_ERROR_STREAM("Grasp cable failed.");
+                    releaseCable(); // 释放索道
+                    // 返回上线点上方，重新调整姿态后再次尝试上线
+                    if(onLineFailCnt++ < 2) //上线失败次数小于2，即至多2次上线失败
+                    {
+                        stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
+                        // 修改上线点距索道的距离，比第一次低一些
+                        onLineTargZ -= 0.5;
+                        ROS_INFO_STREAM("Release cable success, and back to on line point...");
+                    }
+                    else
+                    {
+                        // 任务失败，返航
+                        stateControl_.state_ctrl_type = offboard_control::StateControl::LAND;
+                        ROS_ERROR_STREAM("Task failed, and return to home...");
+                    }
+                }
             }
-            ROS_INFO("Following line...");
             break;
         }
         case offboard_control::StateControl::FOLLOW_CABLE:
         {
-            // 跟随电缆
+            // 跟随索道，沿离线采集的点运动
+
             ROS_INFO("Following cable...");
             break;
         }
@@ -320,12 +365,50 @@ void FollowCable::setTargetPoint(const geometry_msgs::PoseStamped& targetPoint,u
         ROS_ERROR_STREAM("Set uav "<<uavID<<" target point failed");
     }
 }
+// 指定无人机到达一系列目标点
+void FollowCable::setTargetPoints(const std::vector<geometry_msgs::PoseStamped>& waypoints, uint8_t uavID)
+{
+    for (const auto& waypoint : waypoints)
+    {
+        // 发布目标位置
+        mavros_msgs::PositionTarget positionTarget;
+        positionTarget.header.stamp = ros::Time::now();
+        positionTarget.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
+        positionTarget.type_mask = mavros_msgs::PositionTarget::IGNORE_VX |
+                                   mavros_msgs::PositionTarget::IGNORE_VY |
+                                   mavros_msgs::PositionTarget::IGNORE_VZ |
+                                   mavros_msgs::PositionTarget::IGNORE_AFX |
+                                   mavros_msgs::PositionTarget::IGNORE_AFY |
+                                   mavros_msgs::PositionTarget::IGNORE_AFZ |
+                                   mavros_msgs::PositionTarget::IGNORE_YAW |
+                                   mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+        positionTarget.position = waypoint.pose.position;
+
+        // 发布目标位置直到到达目标点
+        ros::Rate rate(20); // 20 Hz
+        while (ros::ok())
+        {
+            setpointRawLocalPub_.publish(positionTarget);
+            ros::spinOnce();
+            rate.sleep();
+
+            // 检查是否到达目标点
+            if (isAtPosition(waypoint.pose.position))
+            {
+                // 存储采集到的索道信息
+                storeCableInfo();
+                break; // 跳出 while 循环，继续 for 循环的下一次迭代
+            }
+        }
+    }
+}
 // 判断是否到达目标点
-bool FollowCable::isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID)
+bool FollowCable::isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID, double precision)
 {
     offboard_control::isUavArrived isUavArrived;
     isUavArrived.request.targetPoint = targetPoint;
     isUavArrived.request.uavID = uavID;
+    isUavArrived.request.precision = precision;
     if(isUavArrivedClient_.call(isUavArrived))
     {
         return isUavArrived.response.isArrived;

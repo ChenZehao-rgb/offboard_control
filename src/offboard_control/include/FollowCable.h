@@ -8,6 +8,7 @@
 #include <tf/tf.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf/transform_listener.h>
+#include <vector>
 
 #include "offboard_control/SetTargetPoint.h"
 #include "offboard_control/SetOffboardCtlType.h"
@@ -52,7 +53,7 @@ private:
     // 本地位置回调函数
     void uavPoseLocalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     // 判断是否到达目标点服务函数
-    bool isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID);
+    bool isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID, double precision);
     // 根据线结构传感器的测量结果，判断姿态调整是否到位
     bool isAjusted(const geometry_msgs::PoseStamped& cablePose);
 
@@ -70,8 +71,13 @@ private:
     bool isArrivedOnlineTarg_;
     // 获取大小飞机调整姿态点标志位
     bool isGetAjustPose_;
+    // 爪子控制
+    bool graspCable();
+    bool releaseCable();
     // 坐标变换成员变量
     tf::TransformListener tfListener_;
+    // 示例采集点列表
+    std::vector<geometry_msgs::PoseStamped> wayPoints_;
 };
 
 #endif // FOLLOWCABLE_H

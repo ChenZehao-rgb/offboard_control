@@ -77,7 +77,7 @@ private:
     // 判断无人机是否到点服务函数
     bool isUavArrived(offboard_control::isUavArrived::Request& req, offboard_control::isUavArrived::Response& res);
     // 判断是否到达目标点
-    bool isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal);
+    bool isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal, double precision);
 
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
