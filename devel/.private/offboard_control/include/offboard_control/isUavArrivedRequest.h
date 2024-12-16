@@ -26,11 +26,13 @@ struct isUavArrivedRequest_
 
   isUavArrivedRequest_()
     : targetPoint()
-    , uavID(0)  {
+    , uavID(0)
+    , precision(0.0)  {
     }
   isUavArrivedRequest_(const ContainerAllocator& _alloc)
     : targetPoint(_alloc)
-    , uavID(0)  {
+    , uavID(0)
+    , precision(0.0)  {
   (void)_alloc;
     }
 
@@ -41,6 +43,9 @@ struct isUavArrivedRequest_
 
    typedef uint8_t _uavID_type;
   _uavID_type uavID;
+
+   typedef double _precision_type;
+  _precision_type precision;
 
 
 
@@ -72,7 +77,8 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::offboard_control::isUavArrivedRequest_<ContainerAllocator1> & lhs, const ::offboard_control::isUavArrivedRequest_<ContainerAllocator2> & rhs)
 {
   return lhs.targetPoint == rhs.targetPoint &&
-    lhs.uavID == rhs.uavID;
+    lhs.uavID == rhs.uavID &&
+    lhs.precision == rhs.precision;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -129,12 +135,12 @@ struct MD5Sum< ::offboard_control::isUavArrivedRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "fe78b9b615816ee275f9bae3c27a36c6";
+    return "2a852d8a1c008da07f4deb04685ae72f";
   }
 
   static const char* value(const ::offboard_control::isUavArrivedRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xfe78b9b615816ee2ULL;
-  static const uint64_t static_value2 = 0x75f9bae3c27a36c6ULL;
+  static const uint64_t static_value1 = 0x2a852d8a1c008da0ULL;
+  static const uint64_t static_value2 = 0x7f4deb04685ae72fULL;
 };
 
 template<class ContainerAllocator>
@@ -155,6 +161,7 @@ struct Definition< ::offboard_control::isUavArrivedRequest_<ContainerAllocator> 
   {
     return "geometry_msgs/PoseStamped targetPoint\n"
 "uint8 uavID\n"
+"float64 precision\n"
 "\n"
 "================================================================================\n"
 "MSG: geometry_msgs/PoseStamped\n"
@@ -219,6 +226,7 @@ namespace serialization
     {
       stream.next(m.targetPoint);
       stream.next(m.uavID);
+      stream.next(m.precision);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -242,6 +250,8 @@ struct Printer< ::offboard_control::isUavArrivedRequest_<ContainerAllocator> >
     Printer< ::geometry_msgs::PoseStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.targetPoint);
     s << indent << "uavID: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.uavID);
+    s << indent << "precision: ";
+    Printer<double>::stream(s, indent + "  ", v.precision);
   }
 };
 

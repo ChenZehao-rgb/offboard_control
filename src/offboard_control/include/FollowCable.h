@@ -4,11 +4,13 @@
 #include <ros/ros.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
+#include <mavros_msgs/PositionTarget.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/tf.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf/transform_listener.h>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 
 #include "offboard_control/SetTargetPoint.h"
 #include "offboard_control/SetOffboardCtlType.h"
@@ -22,6 +24,7 @@ public:
     ~FollowCable();
     void controlLoop(const ros::TimerEvent&);
     void setTargetPoint(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID);
+    void setTargetPointRaw(const mavros_msgs::PositionTarget& targetPointRaw, uint8_t uavID);
     void setOffboardMode();
     void setArm();
     void setOffboardCtlType(int type);
@@ -34,6 +37,7 @@ private:
     ros::ServiceClient setModeClient_; //设置模式客户端
 
     ros::ServiceClient setPointClient_; //设置目标点客户端
+    ros::ServiceClient setRawPointClient_; //设置目标点原始值客户端
     ros::ServiceClient setOffboardCtlTypeClient_; //设置控制模式客户端
     ros::ServiceClient setPidGainsClient_; //设置pid参数客户端
     ros::ServiceClient isUavArrivedClient_; //判断是否到达目标点客户端
@@ -74,10 +78,17 @@ private:
     // 爪子控制
     bool graspCable();
     bool releaseCable();
+    // 采集信息
+    bool storeCableInfo();
     // 坐标变换成员变量
     tf::TransformListener tfListener_;
+    // 从yaml文件中读取参数
+    std::vector<geometry_msgs::PoseStamped> loadWaypoints(const YAML::Node& node);
     // 示例采集点列表
     std::vector<geometry_msgs::PoseStamped> wayPoints_;
+    // 跟踪索道点
+    void followCablePoints(const std::vector<geometry_msgs::PoseStamped>& waypoints, uint8_t uavID);
+
 };
 
 #endif // FOLLOWCABLE_H

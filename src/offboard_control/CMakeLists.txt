@@ -78,6 +78,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   geometry_msgs
+  mavros_msgs
 )
 
 ################################################
@@ -125,6 +126,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -163,7 +165,7 @@ target_link_libraries(offboard_control_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(follow_cable_node
-  ${catkin_LIBRARIES}
+  ${catkin_LIBRARIES} yaml-cpp
 )
 target_link_libraries(keyboard_control_node
   ${catkin_LIBRARIES}

@@ -16,7 +16,12 @@
     :reader uavID
     :initarg :uavID
     :type cl:fixnum
-    :initform 0))
+    :initform 0)
+   (precision
+    :reader precision
+    :initarg :precision
+    :type cl:float
+    :initform 0.0))
 )
 
 (cl:defclass isUavArrived-request (<isUavArrived-request>)
@@ -36,15 +41,39 @@
 (cl:defmethod uavID-val ((m <isUavArrived-request>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader offboard_control-srv:uavID-val is deprecated.  Use offboard_control-srv:uavID instead.")
   (uavID m))
+
+(cl:ensure-generic-function 'precision-val :lambda-list '(m))
+(cl:defmethod precision-val ((m <isUavArrived-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader offboard_control-srv:precision-val is deprecated.  Use offboard_control-srv:precision instead.")
+  (precision m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <isUavArrived-request>) ostream)
   "Serializes a message object of type '<isUavArrived-request>"
   (roslisp-msg-protocol:serialize (cl:slot-value msg 'targetPoint) ostream)
   (cl:write-byte (cl:ldb (cl:byte 8 0) (cl:slot-value msg 'uavID)) ostream)
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'precision))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 32) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 40) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <isUavArrived-request>) istream)
   "Deserializes a message object of type '<isUavArrived-request>"
   (roslisp-msg-protocol:deserialize (cl:slot-value msg 'targetPoint) istream)
     (cl:setf (cl:ldb (cl:byte 8 0) (cl:slot-value msg 'uavID)) (cl:read-byte istream))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 32) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'precision) (roslisp-utils:decode-double-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<isUavArrived-request>)))
@@ -55,26 +84,28 @@
   "offboard_control/isUavArrivedRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<isUavArrived-request>)))
   "Returns md5sum for a message object of type '<isUavArrived-request>"
-  "260e64ccdbc79f78d3e3be5abe67c990")
+  "753b28f691163b5366ad20e7061a9439")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'isUavArrived-request)))
   "Returns md5sum for a message object of type 'isUavArrived-request"
-  "260e64ccdbc79f78d3e3be5abe67c990")
+  "753b28f691163b5366ad20e7061a9439")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<isUavArrived-request>)))
   "Returns full string definition for message of type '<isUavArrived-request>"
-  (cl:format cl:nil "geometry_msgs/PoseStamped targetPoint~%uint8 uavID~%~%================================================================================~%MSG: geometry_msgs/PoseStamped~%# A Pose with reference coordinate frame and timestamp~%Header header~%Pose pose~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of position and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
+  (cl:format cl:nil "geometry_msgs/PoseStamped targetPoint~%uint8 uavID~%float64 precision~%~%================================================================================~%MSG: geometry_msgs/PoseStamped~%# A Pose with reference coordinate frame and timestamp~%Header header~%Pose pose~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of position and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'isUavArrived-request)))
   "Returns full string definition for message of type 'isUavArrived-request"
-  (cl:format cl:nil "geometry_msgs/PoseStamped targetPoint~%uint8 uavID~%~%================================================================================~%MSG: geometry_msgs/PoseStamped~%# A Pose with reference coordinate frame and timestamp~%Header header~%Pose pose~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of position and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
+  (cl:format cl:nil "geometry_msgs/PoseStamped targetPoint~%uint8 uavID~%float64 precision~%~%================================================================================~%MSG: geometry_msgs/PoseStamped~%# A Pose with reference coordinate frame and timestamp~%Header header~%Pose pose~%~%================================================================================~%MSG: std_msgs/Header~%# Standard metadata for higher-level stamped data types.~%# This is generally used to communicate timestamped data ~%# in a particular coordinate frame.~%# ~%# sequence ID: consecutively increasing ID ~%uint32 seq~%#Two-integer timestamp that is expressed as:~%# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')~%# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')~%# time-handling sugar is provided by the client library~%time stamp~%#Frame this data is associated with~%string frame_id~%~%================================================================================~%MSG: geometry_msgs/Pose~%# A representation of pose in free space, composed of position and orientation. ~%Point position~%Quaternion orientation~%~%================================================================================~%MSG: geometry_msgs/Point~%# This contains the position of a point in free space~%float64 x~%float64 y~%float64 z~%~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <isUavArrived-request>))
   (cl:+ 0
      (roslisp-msg-protocol:serialization-length (cl:slot-value msg 'targetPoint))
      1
+     8
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <isUavArrived-request>))
   "Converts a ROS message object to a list"
   (cl:list 'isUavArrived-request
     (cl:cons ':targetPoint (targetPoint msg))
     (cl:cons ':uavID (uavID msg))
+    (cl:cons ':precision (precision msg))
 ))
 ;//! \htmlinclude isUavArrived-response.msg.html
 
@@ -115,10 +146,10 @@
   "offboard_control/isUavArrivedResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<isUavArrived-response>)))
   "Returns md5sum for a message object of type '<isUavArrived-response>"
-  "260e64ccdbc79f78d3e3be5abe67c990")
+  "753b28f691163b5366ad20e7061a9439")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'isUavArrived-response)))
   "Returns md5sum for a message object of type 'isUavArrived-response"
-  "260e64ccdbc79f78d3e3be5abe67c990")
+  "753b28f691163b5366ad20e7061a9439")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<isUavArrived-response>)))
   "Returns full string definition for message of type '<isUavArrived-response>"
   (cl:format cl:nil "bool isArrived~%~%~%"))

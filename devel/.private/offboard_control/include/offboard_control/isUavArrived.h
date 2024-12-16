@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::offboard_control::isUavArrived > {
   static const char* value()
   {
-    return "260e64ccdbc79f78d3e3be5abe67c990";
+    return "753b28f691163b5366ad20e7061a9439";
   }
 
   static const char* value(const ::offboard_control::isUavArrived&) { return value(); }

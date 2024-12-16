@@ -24,6 +24,7 @@ class isUavArrivedRequest {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.targetPoint = null;
       this.uavID = null;
+      this.precision = null;
     }
     else {
       if (initObj.hasOwnProperty('targetPoint')) {
@@ -38,6 +39,12 @@ class isUavArrivedRequest {
       else {
         this.uavID = 0;
       }
+      if (initObj.hasOwnProperty('precision')) {
+        this.precision = initObj.precision
+      }
+      else {
+        this.precision = 0.0;
+      }
     }
   }
 
@@ -47,6 +54,8 @@ class isUavArrivedRequest {
     bufferOffset = geometry_msgs.msg.PoseStamped.serialize(obj.targetPoint, buffer, bufferOffset);
     // Serialize message field [uavID]
     bufferOffset = _serializer.uint8(obj.uavID, buffer, bufferOffset);
+    // Serialize message field [precision]
+    bufferOffset = _serializer.float64(obj.precision, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -58,13 +67,15 @@ class isUavArrivedRequest {
     data.targetPoint = geometry_msgs.msg.PoseStamped.deserialize(buffer, bufferOffset);
     // Deserialize message field [uavID]
     data.uavID = _deserializer.uint8(buffer, bufferOffset);
+    // Deserialize message field [precision]
+    data.precision = _deserializer.float64(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
     let length = 0;
     length += geometry_msgs.msg.PoseStamped.getMessageSize(object.targetPoint);
-    return length + 1;
+    return length + 9;
   }
 
   static datatype() {
@@ -74,7 +85,7 @@ class isUavArrivedRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'fe78b9b615816ee275f9bae3c27a36c6';
+    return '2a852d8a1c008da07f4deb04685ae72f';
   }
 
   static messageDefinition() {
@@ -82,6 +93,7 @@ class isUavArrivedRequest {
     return `
     geometry_msgs/PoseStamped targetPoint
     uint8 uavID
+    float64 precision
     
     ================================================================================
     MSG: geometry_msgs/PoseStamped
@@ -148,6 +160,13 @@ class isUavArrivedRequest {
     }
     else {
       resolved.uavID = 0
+    }
+
+    if (msg.precision !== undefined) {
+      resolved.precision = msg.precision;
+    }
+    else {
+      resolved.precision = 0.0
     }
 
     return resolved;
@@ -228,6 +247,6 @@ class isUavArrivedResponse {
 module.exports = {
   Request: isUavArrivedRequest,
   Response: isUavArrivedResponse,
-  md5sum() { return '260e64ccdbc79f78d3e3be5abe67c990'; },
+  md5sum() { return '753b28f691163b5366ad20e7061a9439'; },
   datatype() { return 'offboard_control/isUavArrived'; }
 };

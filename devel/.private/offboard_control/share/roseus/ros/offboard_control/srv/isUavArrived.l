@@ -22,17 +22,19 @@
 
 (defclass offboard_control::isUavArrivedRequest
   :super ros::object
-  :slots (_targetPoint _uavID ))
+  :slots (_targetPoint _uavID _precision ))
 
 (defmethod offboard_control::isUavArrivedRequest
   (:init
    (&key
     ((:targetPoint __targetPoint) (instance geometry_msgs::PoseStamped :init))
     ((:uavID __uavID) 0)
+    ((:precision __precision) 0.0)
     )
    (send-super :init)
    (setq _targetPoint __targetPoint)
    (setq _uavID (round __uavID))
+   (setq _precision (float __precision))
    self)
   (:targetPoint
    (&rest __targetPoint)
@@ -44,6 +46,9 @@
   (:uavID
    (&optional __uavID)
    (if __uavID (setq _uavID __uavID)) _uavID)
+  (:precision
+   (&optional __precision)
+   (if __precision (setq _precision __precision)) _precision)
   (:serialization-length
    ()
    (+
@@ -51,6 +56,8 @@
     (send _targetPoint :serialization-length)
     ;; uint8 _uavID
     1
+    ;; float64 _precision
+    8
     ))
   (:serialize
    (&optional strm)
@@ -60,6 +67,8 @@
        (send _targetPoint :serialize s)
      ;; uint8 _uavID
        (write-byte _uavID s)
+     ;; float64 _precision
+       (sys::poke _precision (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -68,6 +77,8 @@
      (send _targetPoint :deserialize buf ptr-) (incf ptr- (send _targetPoint :serialization-length))
    ;; uint8 _uavID
      (setq _uavID (sys::peek buf ptr- :char)) (incf ptr- 1)
+   ;; float64 _precision
+     (setq _precision (sys::peek buf ptr- :double)) (incf ptr- 8)
    ;;
    self)
   )
@@ -113,7 +124,7 @@
   :super ros::object
   :slots ())
 
-(setf (get offboard_control::isUavArrived :md5sum-) "260e64ccdbc79f78d3e3be5abe67c990")
+(setf (get offboard_control::isUavArrived :md5sum-) "753b28f691163b5366ad20e7061a9439")
 (setf (get offboard_control::isUavArrived :datatype-) "offboard_control/isUavArrived")
 (setf (get offboard_control::isUavArrived :request) offboard_control::isUavArrivedRequest)
 (setf (get offboard_control::isUavArrived :response) offboard_control::isUavArrivedResponse)
@@ -121,11 +132,12 @@
 (defmethod offboard_control::isUavArrivedRequest
   (:response () (instance offboard_control::isUavArrivedResponse :init)))
 
-(setf (get offboard_control::isUavArrivedRequest :md5sum-) "260e64ccdbc79f78d3e3be5abe67c990")
+(setf (get offboard_control::isUavArrivedRequest :md5sum-) "753b28f691163b5366ad20e7061a9439")
 (setf (get offboard_control::isUavArrivedRequest :datatype-) "offboard_control/isUavArrivedRequest")
 (setf (get offboard_control::isUavArrivedRequest :definition-)
       "geometry_msgs/PoseStamped targetPoint
 uint8 uavID
+float64 precision
 
 ================================================================================
 MSG: geometry_msgs/PoseStamped
@@ -174,11 +186,12 @@ float64 w
 bool isArrived
 ")
 
-(setf (get offboard_control::isUavArrivedResponse :md5sum-) "260e64ccdbc79f78d3e3be5abe67c990")
+(setf (get offboard_control::isUavArrivedResponse :md5sum-) "753b28f691163b5366ad20e7061a9439")
 (setf (get offboard_control::isUavArrivedResponse :datatype-) "offboard_control/isUavArrivedResponse")
 (setf (get offboard_control::isUavArrivedResponse :definition-)
       "geometry_msgs/PoseStamped targetPoint
 uint8 uavID
+float64 precision
 
 ================================================================================
 MSG: geometry_msgs/PoseStamped
@@ -229,6 +242,6 @@ bool isArrived
 
 
 
-(provide :offboard_control/isUavArrived "260e64ccdbc79f78d3e3be5abe67c990")
+(provide :offboard_control/isUavArrived "753b28f691163b5366ad20e7061a9439")
 
 

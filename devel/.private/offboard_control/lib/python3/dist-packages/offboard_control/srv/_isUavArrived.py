@@ -10,11 +10,12 @@ import geometry_msgs.msg
 import std_msgs.msg
 
 class isUavArrivedRequest(genpy.Message):
-  _md5sum = "fe78b9b615816ee275f9bae3c27a36c6"
+  _md5sum = "2a852d8a1c008da07f4deb04685ae72f"
   _type = "offboard_control/isUavArrivedRequest"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """geometry_msgs/PoseStamped targetPoint
 uint8 uavID
+float64 precision
 
 ================================================================================
 MSG: geometry_msgs/PoseStamped
@@ -60,8 +61,8 @@ float64 y
 float64 z
 float64 w
 """
-  __slots__ = ['targetPoint','uavID']
-  _slot_types = ['geometry_msgs/PoseStamped','uint8']
+  __slots__ = ['targetPoint','uavID','precision']
+  _slot_types = ['geometry_msgs/PoseStamped','uint8','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -71,7 +72,7 @@ float64 w
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       targetPoint,uavID
+       targetPoint,uavID,precision
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -84,9 +85,12 @@ float64 w
         self.targetPoint = geometry_msgs.msg.PoseStamped()
       if self.uavID is None:
         self.uavID = 0
+      if self.precision is None:
+        self.precision = 0.
     else:
       self.targetPoint = geometry_msgs.msg.PoseStamped()
       self.uavID = 0
+      self.precision = 0.
 
   def _get_types(self):
     """
@@ -109,7 +113,7 @@ float64 w
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7dB().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID))
+      buff.write(_get_struct_7dBd().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID, _x.precision))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -139,8 +143,8 @@ float64 w
         self.targetPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 57
-      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID,) = _get_struct_7dB().unpack(str[start:end])
+      end += 65
+      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID, _x.precision,) = _get_struct_7dBd().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -162,7 +166,7 @@ float64 w
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7dB().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID))
+      buff.write(_get_struct_7dBd().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID, _x.precision))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -193,8 +197,8 @@ float64 w
         self.targetPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 57
-      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID,) = _get_struct_7dB().unpack(str[start:end])
+      end += 65
+      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID, _x.precision,) = _get_struct_7dBd().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -209,12 +213,12 @@ def _get_struct_3I():
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
-_struct_7dB = None
-def _get_struct_7dB():
-    global _struct_7dB
-    if _struct_7dB is None:
-        _struct_7dB = struct.Struct("<7dB")
-    return _struct_7dB
+_struct_7dBd = None
+def _get_struct_7dBd():
+    global _struct_7dBd
+    if _struct_7dBd is None:
+        _struct_7dBd = struct.Struct("<7dBd")
+    return _struct_7dBd
 # This Python file uses the following encoding: utf-8
 """autogenerated by genpy from offboard_control/isUavArrivedResponse.msg. Do not edit."""
 import codecs
@@ -332,6 +336,6 @@ def _get_struct_B():
     return _struct_B
 class isUavArrived(object):
   _type          = 'offboard_control/isUavArrived'
-  _md5sum = '260e64ccdbc79f78d3e3be5abe67c990'
+  _md5sum = '753b28f691163b5366ad20e7061a9439'
   _request_class  = isUavArrivedRequest
   _response_class = isUavArrivedResponse

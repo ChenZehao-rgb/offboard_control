@@ -2,7 +2,7 @@
 
 message(STATUS "offboard_control: 2 messages, 4 services")
 
-set(MSG_I_FLAGS "-Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg;-Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg")
+set(MSG_I_FLAGS "-Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg;-Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg;-Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg;-Imavros_msgs:/opt/ros/noetic/share/mavros_msgs/cmake/../msg;-Igeographic_msgs:/opt/ros/noetic/share/geographic_msgs/cmake/../msg;-Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg;-Iuuid_msgs:/opt/ros/noetic/share/uuid_msgs/cmake/../msg")
 
 # Find all generators
 find_package(gencpp REQUIRED)
@@ -29,7 +29,7 @@ add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
 
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" NAME_WE)
 add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" "geometry_msgs/Quaternion:std_msgs/Header:geometry_msgs/Point:geometry_msgs/PoseStamped:geometry_msgs/Pose"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv" "geometry_msgs/Vector3:geometry_msgs/PoseStamped:geometry_msgs/Quaternion:geometry_msgs/Pose:geometry_msgs/Point:std_msgs/Header:mavros_msgs/PositionTarget"
 )
 
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv" NAME_WE)
@@ -44,7 +44,7 @@ add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
 
 get_filename_component(_filename "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv" NAME_WE)
 add_custom_target(_offboard_control_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv" "geometry_msgs/Quaternion:std_msgs/Header:geometry_msgs/Point:geometry_msgs/PoseStamped:geometry_msgs/Pose"
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "offboard_control" "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv" "geometry_msgs/PoseStamped:geometry_msgs/Quaternion:geometry_msgs/Pose:geometry_msgs/Point:std_msgs/Header"
 )
 
 #
@@ -70,7 +70,7 @@ _generate_msg_cpp(offboard_control
 _generate_srv_cpp(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/mavros_msgs/cmake/../msg/PositionTarget.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/offboard_control
 )
 _generate_srv_cpp(offboard_control
@@ -88,7 +88,7 @@ _generate_srv_cpp(offboard_control
 _generate_srv_cpp(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/offboard_control
 )
 
@@ -143,7 +143,7 @@ _generate_msg_eus(offboard_control
 _generate_srv_eus(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/mavros_msgs/cmake/../msg/PositionTarget.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/offboard_control
 )
 _generate_srv_eus(offboard_control
@@ -161,7 +161,7 @@ _generate_srv_eus(offboard_control
 _generate_srv_eus(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/offboard_control
 )
 
@@ -216,7 +216,7 @@ _generate_msg_lisp(offboard_control
 _generate_srv_lisp(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/mavros_msgs/cmake/../msg/PositionTarget.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/offboard_control
 )
 _generate_srv_lisp(offboard_control
@@ -234,7 +234,7 @@ _generate_srv_lisp(offboard_control
 _generate_srv_lisp(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/offboard_control
 )
 
@@ -289,7 +289,7 @@ _generate_msg_nodejs(offboard_control
 _generate_srv_nodejs(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/mavros_msgs/cmake/../msg/PositionTarget.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/offboard_control
 )
 _generate_srv_nodejs(offboard_control
@@ -307,7 +307,7 @@ _generate_srv_nodejs(offboard_control
 _generate_srv_nodejs(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/offboard_control
 )
 
@@ -362,7 +362,7 @@ _generate_msg_py(offboard_control
 _generate_srv_py(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Vector3.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/mavros_msgs/cmake/../msg/PositionTarget.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/offboard_control
 )
 _generate_srv_py(offboard_control
@@ -380,7 +380,7 @@ _generate_srv_py(offboard_control
 _generate_srv_py(offboard_control
   "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
   "${MSG_I_FLAGS}"
-  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg"
+  "/opt/ros/noetic/share/geometry_msgs/cmake/../msg/PoseStamped.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Quaternion.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Pose.msg;/opt/ros/noetic/share/geometry_msgs/cmake/../msg/Point.msg;/opt/ros/noetic/share/std_msgs/cmake/../msg/Header.msg"
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/offboard_control
 )
 
@@ -431,6 +431,9 @@ endif()
 if(TARGET geometry_msgs_generate_messages_cpp)
   add_dependencies(offboard_control_generate_messages_cpp geometry_msgs_generate_messages_cpp)
 endif()
+if(TARGET mavros_msgs_generate_messages_cpp)
+  add_dependencies(offboard_control_generate_messages_cpp mavros_msgs_generate_messages_cpp)
+endif()
 
 if(geneus_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/offboard_control)
   # install generated code
@@ -444,6 +447,9 @@ if(TARGET std_msgs_generate_messages_eus)
 endif()
 if(TARGET geometry_msgs_generate_messages_eus)
   add_dependencies(offboard_control_generate_messages_eus geometry_msgs_generate_messages_eus)
+endif()
+if(TARGET mavros_msgs_generate_messages_eus)
+  add_dependencies(offboard_control_generate_messages_eus mavros_msgs_generate_messages_eus)
 endif()
 
 if(genlisp_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/offboard_control)
@@ -459,6 +465,9 @@ endif()
 if(TARGET geometry_msgs_generate_messages_lisp)
   add_dependencies(offboard_control_generate_messages_lisp geometry_msgs_generate_messages_lisp)
 endif()
+if(TARGET mavros_msgs_generate_messages_lisp)
+  add_dependencies(offboard_control_generate_messages_lisp mavros_msgs_generate_messages_lisp)
+endif()
 
 if(gennodejs_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/offboard_control)
   # install generated code
@@ -472,6 +481,9 @@ if(TARGET std_msgs_generate_messages_nodejs)
 endif()
 if(TARGET geometry_msgs_generate_messages_nodejs)
   add_dependencies(offboard_control_generate_messages_nodejs geometry_msgs_generate_messages_nodejs)
+endif()
+if(TARGET mavros_msgs_generate_messages_nodejs)
+  add_dependencies(offboard_control_generate_messages_nodejs mavros_msgs_generate_messages_nodejs)
 endif()
 
 if(genpy_INSTALL_DIR AND EXISTS ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/offboard_control)
@@ -487,4 +499,7 @@ if(TARGET std_msgs_generate_messages_py)
 endif()
 if(TARGET geometry_msgs_generate_messages_py)
   add_dependencies(offboard_control_generate_messages_py geometry_msgs_generate_messages_py)
+endif()
+if(TARGET mavros_msgs_generate_messages_py)
+  add_dependencies(offboard_control_generate_messages_py mavros_msgs_generate_messages_py)
 endif()

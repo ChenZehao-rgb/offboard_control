@@ -3,6 +3,7 @@
 
 (defsystem "offboard_control-srv"
   :depends-on (:roslisp-msg-protocol :roslisp-utils :geometry_msgs-msg
+               :mavros_msgs-msg
 )
   :components ((:file "_package")
     (:file "SetOffboardCtlType" :depends-on ("_package_SetOffboardCtlType"))

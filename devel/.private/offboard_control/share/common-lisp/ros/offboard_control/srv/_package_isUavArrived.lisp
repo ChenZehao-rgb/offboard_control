@@ -3,6 +3,8 @@
           TARGETPOINT
           UAVID-VAL
           UAVID
+          PRECISION-VAL
+          PRECISION
           ISARRIVED-VAL
           ISARRIVED
 ))

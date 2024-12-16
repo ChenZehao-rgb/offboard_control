@@ -5,6 +5,7 @@
 ;;  FROM /home/chen/offboard_control/src/offboard_control/./package.xml (0.0.0)
 ;; USING /opt/ros/noetic/lib/python3/dist-packages/geneus/geneus_main.py /opt/ros/noetic/share/geneus/package.xml (3.0.0)
 ;;
+(ros::load-ros-package "actionlib")
 (ros::load-ros-package "actionlib_msgs")
 (ros::load-ros-package "control_msgs")
 (ros::load-ros-package "control_toolbox")
@@ -17,6 +18,8 @@
 (ros::load-ros-package "sensor_msgs")
 (ros::load-ros-package "std_msgs")
 (ros::load-ros-package "std_srvs")
+(ros::load-ros-package "tf")
+(ros::load-ros-package "tf2_msgs")
 (ros::load-ros-package "topic_tools")
 (ros::load-ros-package "trajectory_msgs")
 (ros::load-ros-package "uuid_msgs")
