@@ -17,13 +17,14 @@
 #include <offboard_control/SetOffboardCtlType.h>
 #include <offboard_control/isUavArrived.h>
 #include <offboard_control/SetPidGains.h>
+#include <offboard_control/SetUavTakeoffReady.h>
 #include <ros/ros.h>
 class OffboardCtl {
 public:
-    OffboardCtl(const std::string& nh1, const std::string& nh2);
+    OffboardCtl(const ros::NodeHandle& nh);
     ~OffboardCtl();
 private:
-    ros::NodeHandle nh1_; //在主函数中使用nh_(nh)，
+    ros::NodeHandle nh_; //在主函数中使用nh_(nh)，
     ros::Subscriber uavPoseLocalSub1_; //订阅无人机本地位置
     ros::Subscriber uavTwistLocalSub1_; //订阅无人机本地速度
     ros::Subscriber uavAccLocalSub1_; //订阅无人机本地加速度
@@ -32,7 +33,9 @@ private:
     ros::Publisher setpointRawLocalPub1_; //发布无人机本地原始位置
     ros::Publisher setpointRawAttPub1_; //发布无人机原始姿态
 
-    ros::NodeHandle nh2_; //节点2
+    ros::ServiceClient armingClient1_; //解锁客户端
+    ros::ServiceClient setModeClient1_; //设置模式客户端
+
     ros::Subscriber uavPoseLocalSub2_; //订阅无人机本地位置
     ros::Subscriber uavTwistLocalSub2_; //订阅无人机本地速度
     ros::Subscriber uavAccLocalSub2_; //订阅无人机本地加速度
@@ -40,10 +43,14 @@ private:
     ros::Publisher setpointRawLocalPub2_; //发布无人机本地原始位置
     ros::Publisher setpointRawAttPub2_; //发布无人机原始姿态
 
+    ros::ServiceClient armingClient2_; //解锁客户端
+    ros::ServiceClient setModeClient2_; //设置模式客户端
+
     ros::ServiceServer setTargetPointSrv_; //设置目标位置服务
     ros::ServiceServer setOffboardCtlTypeSrv_; //设置控制模式服务
     ros::ServiceServer setPidGainsSrv_; //动态调整pid参数服务
     ros::ServiceServer isUavArrivedSrv_; //判断无人机是否到点服务
+    ros::ServiceServer setUavTakeoffReadySrv_; //设置offboard和解锁服务
 
     //状态切换定时器
     ros::Timer stateSwitchTimer_;
@@ -78,6 +85,8 @@ private:
     bool isUavArrived(offboard_control::isUavArrived::Request& req, offboard_control::isUavArrived::Response& res);
     // 判断是否到达目标点
     bool isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal, double precision);
+    // 设置offboard和解锁服务函数
+    bool setUavTakeoffReady(offboard_control::SetUavTakeoffReady::Request& req, offboard_control::SetUavTakeoffReady::Response& res);
 
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;

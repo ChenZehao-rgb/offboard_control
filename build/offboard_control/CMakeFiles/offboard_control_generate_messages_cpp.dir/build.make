@@ -59,6 +59,7 @@ CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/d
 CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlType.h
 CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGains.h
 CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h
+CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReady.h
 
 
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
@@ -75,13 +76,13 @@ CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/d
 
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv
-/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
-/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
-/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/mavros_msgs/msg/PositionTarget.msg
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/gencpp/msg.h.template
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetTargetPoint.h: /opt/ros/noetic/share/gencpp/srv.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating C++ code from offboard_control/SetTargetPoint.srv"
@@ -103,15 +104,22 @@ CMakeFiles/offboard_control_generate_messages_cpp: /home/chen/offboard_control/d
 
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv
-/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
-/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/gencpp/msg.h.template
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h: /opt/ros/noetic/share/gencpp/srv.h.template
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating C++ code from offboard_control/isUavArrived.srv"
 	cd /home/chen/offboard_control/src/offboard_control && /home/chen/offboard_control/build/offboard_control/catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Imavros_msgs:/opt/ros/noetic/share/mavros_msgs/cmake/../msg -Igeographic_msgs:/opt/ros/noetic/share/geographic_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Iuuid_msgs:/opt/ros/noetic/share/uuid_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control -e /opt/ros/noetic/share/gencpp/cmake/..
+
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReady.h: /opt/ros/noetic/lib/gencpp/gen_cpp.py
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReady.h: /home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReady.h: /opt/ros/noetic/share/gencpp/msg.h.template
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReady.h: /opt/ros/noetic/share/gencpp/srv.h.template
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating C++ code from offboard_control/SetUavTakeoffReady.srv"
+	cd /home/chen/offboard_control/src/offboard_control && /home/chen/offboard_control/build/offboard_control/catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/gencpp/cmake/../../../lib/gencpp/gen_cpp.py /home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Imavros_msgs:/opt/ros/noetic/share/mavros_msgs/cmake/../msg -Igeographic_msgs:/opt/ros/noetic/share/geographic_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Iuuid_msgs:/opt/ros/noetic/share/uuid_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control -e /opt/ros/noetic/share/gencpp/cmake/..
 
 offboard_control_generate_messages_cpp: CMakeFiles/offboard_control_generate_messages_cpp
 offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h
@@ -120,6 +128,7 @@ offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.priva
 offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlType.h
 offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGains.h
 offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h
+offboard_control_generate_messages_cpp: /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReady.h
 offboard_control_generate_messages_cpp: CMakeFiles/offboard_control_generate_messages_cpp.dir/build.make
 
 .PHONY : offboard_control_generate_messages_cpp

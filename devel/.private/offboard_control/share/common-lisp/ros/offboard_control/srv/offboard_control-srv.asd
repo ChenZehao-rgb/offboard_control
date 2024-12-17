@@ -12,6 +12,8 @@
     (:file "_package_SetPidGains" :depends-on ("_package"))
     (:file "SetTargetPoint" :depends-on ("_package_SetTargetPoint"))
     (:file "_package_SetTargetPoint" :depends-on ("_package"))
+    (:file "SetUavTakeoffReady" :depends-on ("_package_SetUavTakeoffReady"))
+    (:file "_package_SetUavTakeoffReady" :depends-on ("_package"))
     (:file "isUavArrived" :depends-on ("_package_isUavArrived"))
     (:file "_package_isUavArrived" :depends-on ("_package"))
   ))

@@ -9,44 +9,53 @@
 #define GOTO_SETPOINT_CLOSED_LOOP 1
 
 // 构造函数
-OffboardCtl::OffboardCtl(const std::string& nh1, const std::string& nh2) : nh1_(nh1), nh2_(nh2),isGetTargetPoint_(false)
+OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_(false)
 {
     // 订阅无人机本地位置
-    uavPoseLocalSub1_ = nh1_.subscribe("/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback1, this);
-    uavPoseLocalSub2_ = nh2_.subscribe("/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback2, this);
+    uavPoseLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback1, this);
+    uavPoseLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback2, this);
     // 订阅无人机本地速度
-    uavTwistLocalSub1_ = nh1_.subscribe("/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback1, this);
-    uavTwistLocalSub2_ = nh2_.subscribe("/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback2, this);
+    uavTwistLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback1, this);
+    uavTwistLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback2, this);
     // 订阅无人机本地加速度
-    uavAccLocalSub1_ = nh1_.subscribe("/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback1, this);
-    uavAccLocalSub2_ = nh2_.subscribe("/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback2, this);
+    uavAccLocalSub1_ = nh_.subscribe("uav1/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback1, this);
+    uavAccLocalSub2_ = nh_.subscribe("uav2/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback2, this);
 
     // 发布无人机本地位置
-    setpointLocalPub1_ = nh1_.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
-    setpointLocalPub2_ = nh2_.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
+    setpointLocalPub1_ = nh_.advertise<geometry_msgs::PoseStamped>("uav1/mavros/setpoint_position/local", 10);
+    setpointLocalPub2_ = nh_.advertise<geometry_msgs::PoseStamped>("uav2/mavros/setpoint_position/local", 10);
     // 发布无人机本地原始位置
-    setpointRawLocalPub1_ = nh1_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
-    setpointRawLocalPub2_ = nh2_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local", 10);
+    setpointRawLocalPub1_ = nh_.advertise<mavros_msgs::PositionTarget>("uav1/mavros/setpoint_raw/local", 10);
+    setpointRawLocalPub2_ = nh_.advertise<mavros_msgs::PositionTarget>("uav2/mavros/setpoint_raw/local", 10);
     // 发布无人机原始姿态
-    setpointRawAttPub1_ = nh1_.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 10);
-    setpointRawAttPub2_ = nh2_.advertise<mavros_msgs::AttitudeTarget>("/mavros/setpoint_raw/attitude", 10);
+    setpointRawAttPub1_ = nh_.advertise<mavros_msgs::AttitudeTarget>("uav1/mavros/setpoint_raw/attitude", 10);
+    setpointRawAttPub2_ = nh_.advertise<mavros_msgs::AttitudeTarget>("uav2/mavros/setpoint_raw/attitude", 10);
 
     /* 服务函数两无人机共用，使用大无人机uav2的句柄 */
     // 设置目标位置服务
-    setTargetPointSrv_ = nh2_.advertiseService("offboard_control/set_target_point", &OffboardCtl::setTargetPoint, this);
+    setTargetPointSrv_ = nh_.advertiseService("offboard_control/set_target_point", &OffboardCtl::setTargetPoint, this);
     // 设置控制模式服务
-    setOffboardCtlTypeSrv_ = nh2_.advertiseService("offboard_control/set_offboard_ctl_type", &OffboardCtl::setOffboardCtlType, this);
+    setOffboardCtlTypeSrv_ = nh_.advertiseService("offboard_control/set_offboard_ctl_type", &OffboardCtl::setOffboardCtlType, this);
     // 动态调整pid参数服务
-    setPidGainsSrv_ = nh2_.advertiseService("offboard_control/set_pid_gains", &OffboardCtl::setPidGains, this);
+    setPidGainsSrv_ = nh_.advertiseService("offboard_control/set_pid_gains", &OffboardCtl::setPidGains, this);
     // 判断无人机是否到点服务
-    isUavArrivedSrv_ = nh2_.advertiseService("offboard_control/is_arrived", &OffboardCtl::isUavArrived, this);
+    isUavArrivedSrv_ = nh_.advertiseService("offboard_control/is_arrived", &OffboardCtl::isUavArrived, this);
+    // 设置offboard和解锁服务
+    setUavTakeoffReadySrv_ = nh_.advertiseService("offboard_control/set_uav_takeoff_ready", &OffboardCtl::setUavTakeoffReady, this);
 
+    // 解锁服务
+    armingClient1_ = nh_.serviceClient<mavros_msgs::CommandBool>("uav1/mavros/cmd/arming");
+    armingClient2_ = nh_.serviceClient<mavros_msgs::CommandBool>("uav2/mavros/cmd/arming");
+    // 设置模式客户端
+    setModeClient1_ = nh_.serviceClient<mavros_msgs::SetMode>("uav1/mavros/set_mode");
+    setModeClient2_ = nh_.serviceClient<mavros_msgs::SetMode>("uav2/mavros/set_mode");
+ 
     // 状态切换定时器
-    stateSwitchTimer_ = nh2_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
+    stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
     // 初始化控制模式
-    // offbCtlType_= GOTO_SETPOINT_STEP;
-    offbCtlType_= GOTO_SETPOINT_CLOSED_LOOP;
+    offbCtlType_= GOTO_SETPOINT_STEP;
+    // offbCtlType_= GOTO_SETPOINT_CLOSED_LOOP;
 
     // 初始化pid控制器
     pidX_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
@@ -235,6 +244,7 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         ros::Rate(20).sleep();
         // 原理是因为offborad模式，需要无人机持续接收位置信息，如果没有接收到位置信息，无人机会自动降落
         setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
+        setpointLocalPub2_.publish(uavPoseLocal2_);
         
     }
     // 状态机开始运行
@@ -244,9 +254,12 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         {
             uavTargetPoint1_.header.stamp = ros::Time::now(); //设置时间戳
             setpointLocalPub1_.publish(uavTargetPoint1_); //发布目标位置
+            uavTargetPoint2_.header.stamp = ros::Time::now(); //设置时间戳
+            setpointLocalPub2_.publish(uavTargetPoint2_); //发布目标位置
             //打印信息
             // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << targetPoint_);
-            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: " << uavPoseLocal1_);
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_STEP: uav1: " << uavPoseLocal1_<< "uav2: " << uavPoseLocal2_);
+
             break;
         }
         // 在原定点控制外环加位置闭环
@@ -268,10 +281,12 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offboard_control_node");
+    ros::NodeHandle nh;
     // 等待mavros
     ROS_INFO_STREAM("Waiting for mavros...");
     // 等待offboard模式  ？offboard模式应该如何设置，周期发送？不使用程序设置？
-    if(!ros::service::waitForService("/mavros/set_mode", ros::Duration(10)))
+    if(!ros::service::waitForService("uav1/mavros/set_mode", ros::Duration(5))&&
+       !ros::service::waitForService("uav2/mavros/set_mode", ros::Duration(5)))
     {
         ROS_ERROR_STREAM("Failed to start offboard mode.");
         return -1;
@@ -281,7 +296,8 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM("Start offboard mode.");
     }
     // 等待解锁
-    if(!ros::service::waitForService("/mavros/cmd/arming", ros::Duration(10)))
+    if(!ros::service::waitForService("uav1/mavros/cmd/arming", ros::Duration(5))&&
+       !ros::service::waitForService("uav2/mavros/cmd/arming", ros::Duration(5)))
     {
         ROS_ERROR_STREAM("Failed to arm.");
         return -1;
@@ -291,7 +307,7 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM("Arm success!");
     }
     // 创建 OffboardCtl 对象,创建了使用nh句柄的各种订阅、发布、服务等
-    OffboardCtl offboardctl("uav1", "uav2");
+    OffboardCtl offboardctl(nh);
 
     // 开启异步线程处理回调函数
     ros::MultiThreadedSpinner spinner(6);
@@ -305,4 +321,61 @@ int main(int argc, char **argv)
     ros::spin();
 
     return 0;
+}
+// 设置offboard和解锁服务函数,解锁及设置offboard模式成功返回true
+bool OffboardCtl::setUavTakeoffReady(offboard_control::SetUavTakeoffReady::Request& req, offboard_control::SetUavTakeoffReady::Response& res)
+{
+    mavros_msgs::CommandBool arm_cmd; //解锁
+    arm_cmd.request.value = true;
+    mavros_msgs::SetMode offb_set_mode; //设置模式
+    offb_set_mode.request.custom_mode = "OFFBOARD";
+    // 判断uavID,解锁对应的无人机
+    switch(req.uavID)
+    {
+        case 1:
+            if(armingClient1_.call(arm_cmd) && arm_cmd.response.success)
+            {
+                ROS_INFO_STREAM("Uav1 armed");
+                res.armed = true;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("Uav1 arming failed");
+                res.armed = false;
+            }
+            if(setModeClient1_.call(offb_set_mode) && offb_set_mode.response.mode_sent)
+            {
+                ROS_INFO_STREAM("Uav1 offboard enabled");
+                res.offboard_enabled = true;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("Uav1 offboard enable failed");
+                res.offboard_enabled = false;
+            }
+            break;
+        case 2:
+            if(armingClient2_.call(arm_cmd) && arm_cmd.response.success)
+            {
+                ROS_INFO_STREAM("Uav2 armed");
+                res.armed = true;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("Uav2 arming failed");
+                res.armed = false;
+            }
+            if(setModeClient2_.call(offb_set_mode) && offb_set_mode.response.mode_sent)
+            {
+                ROS_INFO_STREAM("Uav2 offboard enabled");
+                res.offboard_enabled = true;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("Uav2 offboard enable failed");
+                res.offboard_enabled = false;
+            }
+            break;
+    }
+    return (res.armed && res.offboard_enabled);
 }

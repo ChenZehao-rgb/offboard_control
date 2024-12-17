@@ -220,6 +220,19 @@ offboard_control_generate_messages_cpp/fast:
 .PHONY : offboard_control_generate_messages_cpp/fast
 
 #=============================================================================
+# Target rules for targets named _offboard_control_generate_messages_check_deps_SetUavTakeoffReady
+
+# Build rule for target.
+_offboard_control_generate_messages_check_deps_SetUavTakeoffReady: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _offboard_control_generate_messages_check_deps_SetUavTakeoffReady
+.PHONY : _offboard_control_generate_messages_check_deps_SetUavTakeoffReady
+
+# fast build rule for target.
+_offboard_control_generate_messages_check_deps_SetUavTakeoffReady/fast:
+	$(MAKE) -f CMakeFiles/_offboard_control_generate_messages_check_deps_SetUavTakeoffReady.dir/build.make CMakeFiles/_offboard_control_generate_messages_check_deps_SetUavTakeoffReady.dir/build
+.PHONY : _offboard_control_generate_messages_check_deps_SetUavTakeoffReady/fast
+
+#=============================================================================
 # Target rules for targets named _offboard_control_generate_messages_check_deps_isUavArrived
 
 # Build rule for target.
@@ -1721,6 +1734,7 @@ help:
 	@echo "... install/local"
 	@echo "... offboard_control_gencpp"
 	@echo "... offboard_control_generate_messages_cpp"
+	@echo "... _offboard_control_generate_messages_check_deps_SetUavTakeoffReady"
 	@echo "... _offboard_control_generate_messages_check_deps_isUavArrived"
 	@echo "... _offboard_control_generate_messages_check_deps_SetPidGains"
 	@echo "... _offboard_control_generate_messages_check_deps_SetTargetPoint"

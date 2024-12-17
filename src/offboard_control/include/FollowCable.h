@@ -17,6 +17,7 @@
 #include "offboard_control/SetPidGains.h"
 #include "offboard_control/isUavArrived.h"
 #include "offboard_control/StateControl.h"
+#include "offboard_control/SetUavTakeoffReady.h"
 
 class FollowCable{
 public:
@@ -25,22 +26,22 @@ public:
     void controlLoop(const ros::TimerEvent&);
     void setTargetPoint(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID);
     void setTargetPointRaw(const mavros_msgs::PositionTarget& targetPointRaw, uint8_t uavID);
-    void setOffboardMode();
-    void setArm();
     void setOffboardCtlType(int type);
     void setPidGains(int axis, double kp, double ki, double kd);
     void keyboardCallback(const std_msgs::String::ConstPtr& msg);
+    // 设置offboard和解锁函数
+    bool setUavTakeoffReady(uint8_t uavID);
+    void loadTakeoffTarg();
 
 private:
     ros::NodeHandle nh_;
-    ros::ServiceClient armingClient_; //解锁客户端
-    ros::ServiceClient setModeClient_; //设置模式客户端
 
     ros::ServiceClient setPointClient_; //设置目标点客户端
     ros::ServiceClient setRawPointClient_; //设置目标点原始值客户端
     ros::ServiceClient setOffboardCtlTypeClient_; //设置控制模式客户端
     ros::ServiceClient setPidGainsClient_; //设置pid参数客户端
     ros::ServiceClient isUavArrivedClient_; //判断是否到达目标点客户端
+    ros::ServiceClient setUavTakeoffReadyClient_; //设置offboard和解锁客户端
 
     // 键盘输入
     ros::Subscriber keyboardSub_;

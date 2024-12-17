@@ -4,13 +4,13 @@
 #include "FollowCable.h"
 
 // 状态机控制频率
-#define controlRate 20.0
+#define controlRate 5.0
 #define controlPeriod (1.0 / controlRate)
 double onLineTargZ = 1.0; // 上线点高度
 double targetPointError1 = 0.1,targetPointError2=0.3; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
 int onLineFailCnt = 0; // 上线失败计数
 // 定义一些重要的点
-geometry_msgs::PoseStamped takeOffTarg_; // 起飞点
+geometry_msgs::PoseStamped takeOffTarg1_,takeOffTarg2_; // 起飞点
 geometry_msgs::PoseStamped onLineTarg_, onLineTarg1_, onLineTarg2_; // 索道上的上线点，小飞机的目标点，大飞机的目标点
 // 线结构传感器的测量结果
 geometry_msgs::PoseStamped cablePose_;
@@ -19,10 +19,6 @@ geometry_msgs::PoseStamped uavRalPose1_, uavRalPose2_;
 
 FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlineTarg_(false), isSendOnlineTarg_(false), tfListener_(ros::Duration(10))
 {
-    // 解锁服务
-    armingClient_ = nh_.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
-    // 设置模式客户端
-    setModeClient_ = nh_.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
     // 设置目标点客户端
     setPointClient_ = nh_.serviceClient<offboard_control::SetTargetPoint>("/offboard_control/set_target_point");
     // 设置目标点原始值客户端
@@ -33,6 +29,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlineTarg_(
     setPidGainsClient_ = nh_.serviceClient<offboard_control::SetPidGains>("/offboard_control/set_pid_gains");
     // 判断是否到达目标点客户端
     isUavArrivedClient_ = nh_.serviceClient<offboard_control::isUavArrived>("/offboard_control/is_arrived");
+    // 设置offboard和解锁客户端
+    setUavTakeoffReadyClient_ = nh_.serviceClient<offboard_control::SetUavTakeoffReady>("/offboard_control/set_uav_takeoff_ready");
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
@@ -41,6 +39,23 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlineTarg_(
     controlLoop_ = nh_.createTimer(ros::Duration(controlPeriod), &FollowCable::controlLoop, this);
     // 初始化状态
     stateControl_.state_ctrl_type = offboard_control::StateControl::TAKEOFF;
+    // 读取起飞点参数
+    // loadTakeoffTarg();
+    // 初始化起飞点
+    takeOffTarg1_.pose.position.x = 0.0;
+    takeOffTarg1_.pose.position.y = 0.0;
+    takeOffTarg1_.pose.position.z = 1.0;
+    takeOffTarg1_.pose.orientation.x = 0.0;
+    takeOffTarg1_.pose.orientation.y = 0.0;
+    takeOffTarg1_.pose.orientation.z = 0.0;
+    takeOffTarg1_.pose.orientation.w = 1.0;
+    takeOffTarg2_ = takeOffTarg1_;
+    takeOffTarg2_.pose.position.z += 1.0;
+
+    setUavTakeoffReady(2);
+    setTargetPoint(takeOffTarg2_,2);
+    setUavTakeoffReady(1);
+    setTargetPoint(takeOffTarg1_,1);
 }
 
 FollowCable::~FollowCable()
@@ -171,7 +186,7 @@ void FollowCable::setTargetPoint(const geometry_msgs::PoseStamped& targetPoint,u
     setTargetPoint.request.uavID = uavID;
     if(setPointClient_.call(setTargetPoint) && setTargetPoint.response.success)
     {
-        ROS_INFO_STREAM("Set uav "<<uavID<<" target point success");
+        ROS_INFO_STREAM("Set uav "<<uavID<<" target point success, x: "<<targetPoint.pose.position.x<<", y: "<<targetPoint.pose.position.y<<", z: "<<targetPoint.pose.position.z);
     }
     else
     {
@@ -193,6 +208,21 @@ void FollowCable::setTargetPointRaw(const mavros_msgs::PositionTarget& targetPoi
         ROS_ERROR_STREAM("Set uav "<<uavID<<" target point failed");
     }
 }
+// 设置无人机offboard和解锁
+bool FollowCable::setUavTakeoffReady(uint8_t uavID)
+{
+    offboard_control::SetUavTakeoffReady setUavTakeoffReady;
+    setUavTakeoffReady.request.uavID = uavID;
+    if(setUavTakeoffReadyClient_.call(setUavTakeoffReady) && setUavTakeoffReady.response.armed && setUavTakeoffReady.response.offboard_enabled)
+    {
+        ROS_INFO_STREAM("Uav "<<uavID<<" takeoff ready");
+    }
+    else
+    {
+        ROS_ERROR_STREAM("Uav "<<uavID<<" takeoff failed");
+    }
+    return(setUavTakeoffReady.response.armed && setUavTakeoffReady.response.offboard_enabled);
+}
 // 从yaml文件中读取参数
 std::vector<geometry_msgs::PoseStamped> FollowCable::loadWaypoints(const YAML::Node& node) {
     std::vector<geometry_msgs::PoseStamped> waypoints;
@@ -209,6 +239,7 @@ std::vector<geometry_msgs::PoseStamped> FollowCable::loadWaypoints(const YAML::N
     }
     return waypoints;
 }
+// 读取起飞点参数
 // 指定无人机到达一系列目标点
 void FollowCable::followCablePoints(const std::vector<geometry_msgs::PoseStamped>& waypoints, uint8_t uavID)
 {
@@ -250,13 +281,25 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
     // 等待无人机起飞
     while(ros::ok() && stateControl_.state_ctrl_type == offboard_control::StateControl::TAKEOFF)
     {
-        // 通过当前位置信息以及offboard模式，判断无人机是否起飞
-        if(isUavArrived(takeOffTarg_,2,targetPointError2))
-        {
-            stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;
-        }
+        
+        // 如果大飞机到了小飞机上方与小飞机连接绳高度的位置，小飞机开始起飞
+        // if(isUavArrived(takeOffTarg2_,2,targetPointError2))
+        // {
+        //     if(setUavTakeoffReady(1))
+        //     {
+        //         // 小无人机起飞成功
+        //         setTargetPoint(takeOffTarg1_,1);
+        //         setTargetPoint(onLineTarg2_,2); //大飞机始终保持在小飞机上方连接绳伸直高度
+        //     }
+        // }
+        // // 大小飞机起飞成功，进入下一状态
+        // if(isUavArrived(takeOffTarg_,2,targetPointError2))
+        // {
+        //     stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
+        //     ROS_INFO_STREAM("Takeoff success, and arrive online point...");
+        // }
         ROS_INFO_STREAM("Waiting for takeoff...");
-        ros::Rate(20).sleep();
+        ros::Rate(1).sleep();
     }
     // 运动控制状态机逻辑
     ROS_INFO("Running control loop...");
@@ -400,15 +443,6 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     YAML::Node config = YAML::LoadFile("/home/chen/offboard_control/src/offboard_control/config/waypoints.yaml"); // 加载yaml文件
     FollowCable followCable(nh);
-    followCable.setArm(); // 解锁
-    followCable.setOffboardMode(); // 设置模式
-    // 目标点位置信息
-    geometry_msgs::PoseStamped targetPoint;
-    targetPoint.pose.position.x = 0;
-    targetPoint.pose.position.y = 0;
-    targetPoint.pose.position.z = 5;
-    followCable.setTargetPoint(targetPoint,2); // 设置目标点
-    
     // 开启回调
     ros::spin();
     return 0;
@@ -462,34 +496,4 @@ void FollowCable::uavPoseLocalCallback(const geometry_msgs::PoseStamped::ConstPt
 {
     // 更新无人机本地位置
     uavPoseLocal_ = *msg;
-}
-// 设置offboard控制模式
-void FollowCable::setOffboardMode()
-{
-    // 设置模式
-    mavros_msgs::SetMode offb_set_mode;
-    offb_set_mode.request.custom_mode = "OFFBOARD";
-    if(setModeClient_.call(offb_set_mode) && offb_set_mode.response.mode_sent)
-    {
-        ROS_INFO_STREAM("Offboard enabled");
-    }
-    else
-    {
-        ROS_ERROR_STREAM("Offboard enable failed");
-    }
-}
-// 解锁
-void FollowCable::setArm()
-{
-    // 解锁
-    mavros_msgs::CommandBool arm_cmd;
-    arm_cmd.request.value = true;
-    if(armingClient_.call(arm_cmd) && arm_cmd.response.success)
-    {
-        ROS_INFO_STREAM("Vehicle armed");
-    }
-    else
-    {
-        ROS_ERROR_STREAM("Arming failed");
-    }
 }

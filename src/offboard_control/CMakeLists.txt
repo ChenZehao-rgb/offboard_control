@@ -64,6 +64,7 @@ add_service_files(
   SetOffboardCtlType.srv
   SetPidGains.srv
   isUavArrived.srv
+  SetUavTakeoffReady.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -207,11 +208,11 @@ target_link_libraries(keyboard_control_node
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+install(FILES
+  config/config.yaml
+  # myfile2
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+)
 
 #############
 ## Testing ##

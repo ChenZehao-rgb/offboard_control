@@ -1,0 +1,11 @@
+<launch>
+    <!-- 定义命名空间参数 -->
+    <arg name="uav1_namespace" default="uav1"/>
+    <arg name="uav2_namespace" default="uav2"/>
+
+    <!-- 启动控制节点，并传递命名空间参数 -->
+    <node pkg="offboard_control" type="offboard_control_node" name="OffboardCtl" output="screen">
+        <param name="uav1_namespace" value="$(arg uav1_namespace)"/>
+        <param name="uav2_namespace" value="$(arg uav2_namespace)"/>
+    </node>
+</launch>

@@ -287,6 +287,7 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/offboard_control_generate_messages_nodejs.dir/DependInfo.cmake"
   "CMakeFiles/offboard_control_gencpp.dir/DependInfo.cmake"
   "CMakeFiles/offboard_control_generate_messages_cpp.dir/DependInfo.cmake"
+  "CMakeFiles/_offboard_control_generate_messages_check_deps_SetUavTakeoffReady.dir/DependInfo.cmake"
   "CMakeFiles/_offboard_control_generate_messages_check_deps_isUavArrived.dir/DependInfo.cmake"
   "CMakeFiles/_offboard_control_generate_messages_check_deps_SetPidGains.dir/DependInfo.cmake"
   "CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint.dir/DependInfo.cmake"

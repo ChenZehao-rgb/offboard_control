@@ -59,6 +59,7 @@ CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/de
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py
+CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetUavTakeoffReady.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py
 CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py
 
@@ -75,13 +76,13 @@ CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/de
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/mavros_msgs/msg/PositionTarget.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetTargetPoint.py: /opt/ros/noetic/share/geometry_msgs/msg/Vector3.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating Python code from SRV offboard_control/SetTargetPoint"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Imavros_msgs:/opt/ros/noetic/share/mavros_msgs/cmake/../msg -Igeographic_msgs:/opt/ros/noetic/share/geographic_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Iuuid_msgs:/opt/ros/noetic/share/uuid_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv
 
@@ -97,13 +98,18 @@ CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/de
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
-/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/geometry_msgs/msg/Pose.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/geometry_msgs/msg/Point.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/geometry_msgs/msg/PoseStamped.msg
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/std_msgs/msg/Header.msg
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py: /opt/ros/noetic/share/geometry_msgs/msg/Quaternion.msg
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating Python code from SRV offboard_control/isUavArrived"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Imavros_msgs:/opt/ros/noetic/share/mavros_msgs/cmake/../msg -Igeographic_msgs:/opt/ros/noetic/share/geographic_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Iuuid_msgs:/opt/ros/noetic/share/uuid_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv
+
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetUavTakeoffReady.py: /opt/ros/noetic/lib/genpy/gensrv_py.py
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetUavTakeoffReady.py: /home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating Python code from SRV offboard_control/SetUavTakeoffReady"
+	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/gensrv_py.py /home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv -Ioffboard_control:/home/chen/offboard_control/src/offboard_control/msg -Istd_msgs:/opt/ros/noetic/share/std_msgs/cmake/../msg -Igeometry_msgs:/opt/ros/noetic/share/geometry_msgs/cmake/../msg -Imavros_msgs:/opt/ros/noetic/share/mavros_msgs/cmake/../msg -Igeographic_msgs:/opt/ros/noetic/share/geographic_msgs/cmake/../msg -Isensor_msgs:/opt/ros/noetic/share/sensor_msgs/cmake/../msg -Iuuid_msgs:/opt/ros/noetic/share/uuid_msgs/cmake/../msg -p offboard_control -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py
@@ -112,7 +118,8 @@ CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/de
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating Python msg __init__.py for offboard_control"
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetUavTakeoffReady.py
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating Python msg __init__.py for offboard_control"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg --initpy
 
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /opt/ros/noetic/lib/genpy/genmsg_py.py
@@ -122,7 +129,8 @@ CMakeFiles/offboard_control_generate_messages_py: /home/chen/offboard_control/de
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating Python srv __init__.py for offboard_control"
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetUavTakeoffReady.py
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/chen/offboard_control/build/offboard_control/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Generating Python srv __init__.py for offboard_control"
 	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genpy/cmake/../../../lib/genpy/genmsg_py.py -o /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv --initpy
 
 offboard_control_generate_messages_py: CMakeFiles/offboard_control_generate_messages_py
@@ -132,6 +140,7 @@ offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.privat
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetOffboardCtlType.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetPidGains.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_isUavArrived.py
+offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/_SetUavTakeoffReady.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py
 offboard_control_generate_messages_py: /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/srv/__init__.py
 offboard_control_generate_messages_py: CMakeFiles/offboard_control_generate_messages_py.dir/build.make

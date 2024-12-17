@@ -4,6 +4,7 @@ file(REMOVE_RECURSE
   "/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/SetOffboardCtlType.lisp"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/SetPidGains.lisp"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/SetTargetPoint.lisp"
+  "/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/SetUavTakeoffReady.lisp"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/srv/isUavArrived.lisp"
   "CMakeFiles/offboard_control_generate_messages_lisp"
 )
