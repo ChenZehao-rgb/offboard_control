@@ -10,6 +10,7 @@
 #include <mavros_msgs/PositionTarget.h>
 #include <mavros_msgs/AttitudeTarget.h>
 #include <control_toolbox/pid.h>
+#include <tf/tf.h>
 
 //自定义的服务类型
 #include <offboard_control/SetTargetPoint.h>

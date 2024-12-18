@@ -9,7 +9,7 @@ takeoff_points:
     orientation_w: 1.0
   uav2:
     position_x: 0.0
-    position_y: 1.0
+    position_y: 0.0
     position_z: 2.0
     orientation_x: 0.0
     orientation_y: 0.0
@@ -19,7 +19,7 @@ online_points:
   cable_point:
     position_x: 5.0
     position_y: 5.0
-    position_z: 50.0
+    position_z: 5.0
     orientation_x: 0.0
     orientation_y: 0.0
     orientation_z: 0.0

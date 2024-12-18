@@ -8,6 +8,15 @@
 #define GOTO_SETPOINT_STEP 0
 #define GOTO_SETPOINT_CLOSED_LOOP 1
 #define GOTO_SETPOINT_SMOOTH 2
+#define GOTO_SETPOINT_RELATIVE 3
+
+void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll,
+              double &pitch, double &yaw) {
+  tf::Quaternion q(quat.x, quat.y, quat.z, quat.w);
+  tf::Matrix3x3 m(q);
+  m.getRPY(roll, pitch, yaw);
+  return;
+}
 
 // 构造函数
 OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_(false), isUpdateTargetPoint_(false)
@@ -57,9 +66,9 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
     // 初始化控制模式
-    // offbCtlType_= GOTO_SETPOINT_STEP;
+    offbCtlType_= GOTO_SETPOINT_STEP;
     // offbCtlType_= GOTO_SETPOINT_CLOSED_LOOP;
-    offbCtlType_= GOTO_SETPOINT_SMOOTH;
+    // offbCtlType_= GOTO_SETPOINT_SMOOTH;
 
     // 初始化pid控制器
     pidX_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
@@ -225,9 +234,11 @@ bool OffboardCtl::isUavArrived(offboard_control::isUavArrived::Request& req, off
         case 1:
             // req.targetPoint由客户端传入，判断是否到达目标点，是则将isArrived赋值为true，否则为false
             res.isArrived = isArrived(req.targetPoint, uavPoseLocal1_,req.precision);
+            ROS_INFO_STREAM("isUavArrived: " << res.isArrived);
             break;
         case 2:
             res.isArrived = isArrived(req.targetPoint, uavPoseLocal2_,req.precision);
+            ROS_INFO_STREAM("isUavArrived: " << res.isArrived);
             break;
         default:
             ROS_ERROR_STREAM("uavID is not correct.");
@@ -244,6 +255,9 @@ bool OffboardCtl::isArrived(const geometry_msgs::PoseStamped& targetPoint, const
                         pow(targetPoint.pose.position.y - uavPoseLocal.pose.position.y, 2) + 
                         pow(targetPoint.pose.position.z - uavPoseLocal.pose.position.z, 2);
     // 判断精度需要根据实际设置
+    ROS_INFO_STREAM("isarrived: " << (distance_2 < pow(precision, 2)));
+    ROS_INFO_STREAM("distance_2: " << distance_2 << "precision: " << pow(precision, 2));
+
     return (distance_2 < pow(precision, 2));
 }
 // 
@@ -345,9 +359,36 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             uavTargetPoint1_.header.stamp = ros::Time::now(); //设置时间戳
             setpointLocalPub1_.publish(uavTargetPoint1_); //发布目标位置
 
-            
             //打印信息
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_SMOOTH");
+            break;
+        }
+        // 相对位置控制
+        case GOTO_SETPOINT_RELATIVE:
+        {
+            uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
+            uavTargetPointRaw1_.coordinate_frame =
+            mavros_msgs::PositionTarget::FRAME_BODY_OFFSET_NED;
+            uavTargetPointRaw1_.type_mask =
+            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            uavTargetPointRaw1_.position = uavTargetPoint1_.pose.position;
+            double rollCurr , pitchCurr , yawCurr;
+            quat2RPY(uavTargetPoint1_.pose.orientation, rollCurr, pitchCurr, yawCurr);
+            uavTargetPointRaw1_.yaw = yawCurr;
+            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布相对位置
+
+            uavTargetPointRaw2_.header.stamp = ros::Time::now(); //设置时间戳
+            uavTargetPointRaw2_.coordinate_frame =
+            mavros_msgs::PositionTarget::FRAME_BODY_OFFSET_NED;
+            uavTargetPointRaw2_.type_mask =
+            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            uavTargetPointRaw2_.position = uavTargetPoint2_.pose.position;
+            double rollCurr2 , pitchCurr2 , yawCurr2;
+            quat2RPY(uavTargetPoint2_.pose.orientation, rollCurr2, pitchCurr2, yawCurr2);
+            uavTargetPointRaw2_.yaw = yawCurr2;
+            setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布相对位置
+            //打印信息
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_RELATIVE");
             break;
         }
     
