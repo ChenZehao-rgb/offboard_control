@@ -156,7 +156,7 @@ bool OffboardCtl::getTargetPointRawLocal1()
         return false;
     }
     // 获取平滑过渡点
-    uavTargetPointRaw2_ = srv.response.setPointRaw;
+    uavTargetPointRaw1_ = srv.response.setPointRaw;
     return true;
 }
 bool OffboardCtl::getTargetPointRawLocal2()
@@ -335,13 +335,15 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
             setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
 
-            getTargetPointRawLocal1(); //获取平滑过渡点
-            uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
-            uavTargetPointRaw1_.coordinate_frame =
-            mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
-            uavTargetPointRaw1_.type_mask =
-            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
-            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布平滑过渡点
+            // getTargetPointRawLocal1(); //获取平滑过渡点
+            // uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
+            // uavTargetPointRaw1_.coordinate_frame =
+            // mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
+            // uavTargetPointRaw1_.type_mask =
+            // mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            // setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布平滑过渡点
+            uavTargetPoint1_.header.stamp = ros::Time::now(); //设置时间戳
+            setpointLocalPub1_.publish(uavTargetPoint1_); //发布目标位置
 
             
             //打印信息

@@ -1,18 +1,18 @@
 
 "use strict";
 
-let SetTargetPoint = require('./SetTargetPoint.js')
+let SetOffboardCtlType = require('./SetOffboardCtlType.js')
+let GenTrajOnline = require('./GenTrajOnline.js')
 let isUavArrived = require('./isUavArrived.js')
 let SetPidGains = require('./SetPidGains.js')
 let SetUavTakeoffReady = require('./SetUavTakeoffReady.js')
-let SetOffboardCtlType = require('./SetOffboardCtlType.js')
-let GenTrajOnline = require('./GenTrajOnline.js')
+let SetTargetPoint = require('./SetTargetPoint.js')
 
 module.exports = {
-  SetTargetPoint: SetTargetPoint,
+  SetOffboardCtlType: SetOffboardCtlType,
+  GenTrajOnline: GenTrajOnline,
   isUavArrived: isUavArrived,
   SetPidGains: SetPidGains,
   SetUavTakeoffReady: SetUavTakeoffReady,
-  SetOffboardCtlType: SetOffboardCtlType,
-  GenTrajOnline: GenTrajOnline,
+  SetTargetPoint: SetTargetPoint,
 };

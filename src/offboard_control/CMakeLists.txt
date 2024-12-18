@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   control_toolbox
   tf
-  geodesy
 )
 
 ## System dependencies are found with CMake's conventions

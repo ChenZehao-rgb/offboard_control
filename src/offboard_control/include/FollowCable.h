@@ -8,8 +8,6 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geographic_msgs/GeoPoint.h>
 #include <geographic_msgs/GeoPoseStamped.h>
-#include <geodesy/utm.h>
-#include <sensor_msgs/NavSatFix.h>
 #include <mavros_msgs/HomePosition.h>
 #include <tf/tf.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
