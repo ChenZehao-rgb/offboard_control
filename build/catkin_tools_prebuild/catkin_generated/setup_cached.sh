@@ -11,3 +11,4 @@ export LD_LIBRARY_PATH='/home/chen/ros_new/devel/lib:/home/chen/mav_px4/devel/li
 export PKG_CONFIG_PATH='/home/chen/ros_new/devel/lib/pkgconfig:/home/chen/mav_px4/devel/lib/pkgconfig:/opt/ros/noetic/lib/pkgconfig'
 export PWD='/home/chen/offboard_control/build/catkin_tools_prebuild'
 export PYTHONPATH='/home/chen/mav_px4/devel/lib/python3/dist-packages:/opt/ros/noetic/lib/python3/dist-packages'
+export ROS_PACKAGE_PATH='/home/chen/offboard_control/src/offboard_control:/home/chen/offboard_control/build/catkin_tools_prebuild:/home/chen/ros_new/src:/home/chen/mav_px4/src/mav_offboard:/home/chen/mav_px4/src/px4_offboard:/opt/ros/noetic/share'

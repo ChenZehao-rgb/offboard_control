@@ -18,6 +18,7 @@
 #include <offboard_control/isUavArrived.h>
 #include <offboard_control/SetPidGains.h>
 #include <offboard_control/SetUavTakeoffReady.h>
+#include <offboard_control/GenTrajOnline.h>
 #include <ros/ros.h>
 class OffboardCtl {
 public:
@@ -52,6 +53,7 @@ private:
     ros::ServiceServer isUavArrivedSrv_; //判断无人机是否到点服务
     ros::ServiceServer setUavTakeoffReadySrv_; //设置offboard和解锁服务
 
+    ros::ServiceClient trajGeneratorClient_; //轨迹生成器客户端
     //状态切换定时器
     ros::Timer stateSwitchTimer_;
     void stateSwitchTimerCallback(const ros::TimerEvent& event);
@@ -68,9 +70,11 @@ private:
     geometry_msgs::PoseStamped uavPoseLocal1_,uavPoseLocal2_; //订阅得到的无人机本地位置
     geometry_msgs::TwistStamped uavTwistLocal1_,uavTwistLocal2_; //订阅得到的无人机本地速度
     geometry_msgs::AccelWithCovarianceStamped uavAccLocal1_,uavAccLocal2_; //订阅得到的无人机本地加速度
+    mavros_msgs::PositionTarget uavTargetPointRaw1_, uavTargetPointRaw2_; //平滑过渡设置的目标位置
 
     //定义是否获得无人机目标位置
     bool isGetTargetPoint_;
+    bool isUpdateTargetPoint_;
     
     geometry_msgs::PoseStamped uavTargetPoint1_,uavTargetPoint2_; //位置服务函数中设置的目标位置
     int offbCtlType_; //控制模式服务函数中设置的控制模式
@@ -87,7 +91,9 @@ private:
     bool isArrived(const geometry_msgs::PoseStamped& targetPoint, const geometry_msgs::PoseStamped& uavPoseLocal, double precision);
     // 设置offboard和解锁服务函数
     bool setUavTakeoffReady(offboard_control::SetUavTakeoffReady::Request& req, offboard_control::SetUavTakeoffReady::Response& res);
-
+    // 获取平滑到点
+    bool getTargetPointRawLocal1();
+    bool getTargetPointRawLocal2();
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
     // 位置环pid控制

@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/manifest.l"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/OffboardCtlType.l"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/StateControl.l"
+  "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/GenTrajOnline.l"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetOffboardCtlType.l"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetPidGains.l"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/srv/SetTargetPoint.l"

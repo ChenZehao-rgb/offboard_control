@@ -168,6 +168,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named online_traj_generator
+
+# Build rule for target.
+online_traj_generator: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 online_traj_generator
+.PHONY : online_traj_generator
+
+# fast build rule for target.
+online_traj_generator/fast:
+	$(MAKE) -f CMakeFiles/online_traj_generator.dir/build.make CMakeFiles/online_traj_generator.dir/build
+.PHONY : online_traj_generator/fast
+
+#=============================================================================
 # Target rules for targets named offboard_control_genpy
 
 # Build rule for target.
@@ -218,6 +231,19 @@ offboard_control_generate_messages_cpp: cmake_check_build_system
 offboard_control_generate_messages_cpp/fast:
 	$(MAKE) -f CMakeFiles/offboard_control_generate_messages_cpp.dir/build.make CMakeFiles/offboard_control_generate_messages_cpp.dir/build
 .PHONY : offboard_control_generate_messages_cpp/fast
+
+#=============================================================================
+# Target rules for targets named _offboard_control_generate_messages_check_deps_GenTrajOnline
+
+# Build rule for target.
+_offboard_control_generate_messages_check_deps_GenTrajOnline: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _offboard_control_generate_messages_check_deps_GenTrajOnline
+.PHONY : _offboard_control_generate_messages_check_deps_GenTrajOnline
+
+# fast build rule for target.
+_offboard_control_generate_messages_check_deps_GenTrajOnline/fast:
+	$(MAKE) -f CMakeFiles/_offboard_control_generate_messages_check_deps_GenTrajOnline.dir/build.make CMakeFiles/_offboard_control_generate_messages_check_deps_GenTrajOnline.dir/build
+.PHONY : _offboard_control_generate_messages_check_deps_GenTrajOnline/fast
 
 #=============================================================================
 # Target rules for targets named _offboard_control_generate_messages_check_deps_SetUavTakeoffReady
@@ -335,6 +361,19 @@ actionlib_generate_messages_py: cmake_check_build_system
 actionlib_generate_messages_py/fast:
 	$(MAKE) -f CMakeFiles/actionlib_generate_messages_py.dir/build.make CMakeFiles/actionlib_generate_messages_py.dir/build
 .PHONY : actionlib_generate_messages_py/fast
+
+#=============================================================================
+# Target rules for targets named online_traj_generator_node
+
+# Build rule for target.
+online_traj_generator_node: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 online_traj_generator_node
+.PHONY : online_traj_generator_node
+
+# fast build rule for target.
+online_traj_generator_node/fast:
+	$(MAKE) -f CMakeFiles/online_traj_generator_node.dir/build.make CMakeFiles/online_traj_generator_node.dir/build
+.PHONY : online_traj_generator_node/fast
 
 #=============================================================================
 # Target rules for targets named actionlib_generate_messages_nodejs
@@ -1720,6 +1759,36 @@ src/OffboardCtl.cpp.s:
 	$(MAKE) -f CMakeFiles/offboard_control.dir/build.make CMakeFiles/offboard_control.dir/src/OffboardCtl.cpp.s
 .PHONY : src/OffboardCtl.cpp.s
 
+src/traj_generator/online_traj_generator.o: src/traj_generator/online_traj_generator.cpp.o
+
+.PHONY : src/traj_generator/online_traj_generator.o
+
+# target to build an object file
+src/traj_generator/online_traj_generator.cpp.o:
+	$(MAKE) -f CMakeFiles/online_traj_generator.dir/build.make CMakeFiles/online_traj_generator.dir/src/traj_generator/online_traj_generator.cpp.o
+	$(MAKE) -f CMakeFiles/online_traj_generator_node.dir/build.make CMakeFiles/online_traj_generator_node.dir/src/traj_generator/online_traj_generator.cpp.o
+.PHONY : src/traj_generator/online_traj_generator.cpp.o
+
+src/traj_generator/online_traj_generator.i: src/traj_generator/online_traj_generator.cpp.i
+
+.PHONY : src/traj_generator/online_traj_generator.i
+
+# target to preprocess a source file
+src/traj_generator/online_traj_generator.cpp.i:
+	$(MAKE) -f CMakeFiles/online_traj_generator.dir/build.make CMakeFiles/online_traj_generator.dir/src/traj_generator/online_traj_generator.cpp.i
+	$(MAKE) -f CMakeFiles/online_traj_generator_node.dir/build.make CMakeFiles/online_traj_generator_node.dir/src/traj_generator/online_traj_generator.cpp.i
+.PHONY : src/traj_generator/online_traj_generator.cpp.i
+
+src/traj_generator/online_traj_generator.s: src/traj_generator/online_traj_generator.cpp.s
+
+.PHONY : src/traj_generator/online_traj_generator.s
+
+# target to generate assembly for a file
+src/traj_generator/online_traj_generator.cpp.s:
+	$(MAKE) -f CMakeFiles/online_traj_generator.dir/build.make CMakeFiles/online_traj_generator.dir/src/traj_generator/online_traj_generator.cpp.s
+	$(MAKE) -f CMakeFiles/online_traj_generator_node.dir/build.make CMakeFiles/online_traj_generator_node.dir/src/traj_generator/online_traj_generator.cpp.s
+.PHONY : src/traj_generator/online_traj_generator.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1729,11 +1798,13 @@ help:
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... test"
+	@echo "... online_traj_generator"
 	@echo "... offboard_control_genpy"
 	@echo "... offboard_control_generate_messages_nodejs"
 	@echo "... install/local"
 	@echo "... offboard_control_gencpp"
 	@echo "... offboard_control_generate_messages_cpp"
+	@echo "... _offboard_control_generate_messages_check_deps_GenTrajOnline"
 	@echo "... _offboard_control_generate_messages_check_deps_SetUavTakeoffReady"
 	@echo "... _offboard_control_generate_messages_check_deps_isUavArrived"
 	@echo "... _offboard_control_generate_messages_check_deps_SetPidGains"
@@ -1743,6 +1814,7 @@ help:
 	@echo "... tf2_msgs_generate_messages_nodejs"
 	@echo "... tf2_msgs_generate_messages_lisp"
 	@echo "... actionlib_generate_messages_py"
+	@echo "... online_traj_generator_node"
 	@echo "... actionlib_generate_messages_nodejs"
 	@echo "... offboard_control_gennodejs"
 	@echo "... _offboard_control_generate_messages_check_deps_StateControl"
@@ -1855,6 +1927,9 @@ help:
 	@echo "... src/OffboardCtl.o"
 	@echo "... src/OffboardCtl.i"
 	@echo "... src/OffboardCtl.s"
+	@echo "... src/traj_generator/online_traj_generator.o"
+	@echo "... src/traj_generator/online_traj_generator.i"
+	@echo "... src/traj_generator/online_traj_generator.s"
 .PHONY : help
 
 

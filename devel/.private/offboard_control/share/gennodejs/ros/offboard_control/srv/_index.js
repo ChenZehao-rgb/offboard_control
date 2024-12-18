@@ -6,6 +6,7 @@ let isUavArrived = require('./isUavArrived.js')
 let SetPidGains = require('./SetPidGains.js')
 let SetUavTakeoffReady = require('./SetUavTakeoffReady.js')
 let SetOffboardCtlType = require('./SetOffboardCtlType.js')
+let GenTrajOnline = require('./GenTrajOnline.js')
 
 module.exports = {
   SetTargetPoint: SetTargetPoint,
@@ -13,4 +14,5 @@ module.exports = {
   SetPidGains: SetPidGains,
   SetUavTakeoffReady: SetUavTakeoffReady,
   SetOffboardCtlType: SetOffboardCtlType,
+  GenTrajOnline: GenTrajOnline,
 };

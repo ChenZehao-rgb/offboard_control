@@ -7,9 +7,10 @@
 //几种控制模式定义
 #define GOTO_SETPOINT_STEP 0
 #define GOTO_SETPOINT_CLOSED_LOOP 1
+#define GOTO_SETPOINT_SMOOTH 2
 
 // 构造函数
-OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_(false)
+OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_(false), isUpdateTargetPoint_(false)
 {
     // 订阅无人机本地位置
     uavPoseLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback1, this);
@@ -49,13 +50,16 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // 设置模式客户端
     setModeClient1_ = nh_.serviceClient<mavros_msgs::SetMode>("uav1/mavros/set_mode");
     setModeClient2_ = nh_.serviceClient<mavros_msgs::SetMode>("uav2/mavros/set_mode");
- 
+    
+    // 轨迹生成器客户端
+    trajGeneratorClient_ = nh_.serviceClient<offboard_control::GenTrajOnline>("online_traj_generator/gen_traj_online");
     // 状态切换定时器
     stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
     // 初始化控制模式
-    offbCtlType_= GOTO_SETPOINT_STEP;
+    // offbCtlType_= GOTO_SETPOINT_STEP;
     // offbCtlType_= GOTO_SETPOINT_CLOSED_LOOP;
+    offbCtlType_= GOTO_SETPOINT_SMOOTH;
 
     // 初始化pid控制器
     pidX_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
@@ -127,6 +131,56 @@ bool OffboardCtl::setTargetPoint(offboard_control::SetTargetPoint::Request& req,
     res.success = true;
     // 设置目标位置成功
     isGetTargetPoint_ = true;
+    isUpdateTargetPoint_ = true;
+    return true;
+}
+// 获取平滑过渡点
+bool OffboardCtl::getTargetPointRawLocal1()
+{
+    offboard_control::GenTrajOnline srv;
+    srv.request.targPoint = uavTargetPoint1_;
+    srv.request.pose = uavPoseLocal1_;
+    srv.request.twist = uavTwistLocal1_;
+    if(isUpdateTargetPoint_)
+    {
+        srv.request.isUpdateState = true;
+        isUpdateTargetPoint_ = false;
+    }
+    else
+    {
+        srv.request.isUpdateState = false;
+    }
+    if(!trajGeneratorClient_.call(srv))
+    {
+        ROS_ERROR_STREAM("getTargetPointRawLocal: trajGeneratorClient_ failed");
+        return false;
+    }
+    // 获取平滑过渡点
+    uavTargetPointRaw2_ = srv.response.setPointRaw;
+    return true;
+}
+bool OffboardCtl::getTargetPointRawLocal2()
+{
+    offboard_control::GenTrajOnline srv;
+    srv.request.targPoint = uavTargetPoint2_;
+    srv.request.pose = uavPoseLocal2_;
+    srv.request.twist = uavTwistLocal2_;
+    if(isUpdateTargetPoint_)
+    {
+        srv.request.isUpdateState = true;
+        isUpdateTargetPoint_ = false;
+    }
+    else
+    {
+        srv.request.isUpdateState = false;
+    }
+    if(!trajGeneratorClient_.call(srv))
+    {
+        ROS_ERROR_STREAM("getTargetPointRawLocal: trajGeneratorClient_ failed");
+        return false;
+    }
+    // 获取平滑过渡点
+    uavTargetPointRaw2_ = srv.response.setPointRaw;
     return true;
 }
 
@@ -148,7 +202,6 @@ bool OffboardCtl::setPidGains(offboard_control::SetPidGains::Request& req, offbo
         case 0:
             pidX_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
             break;
-        
         case 1:
             pidY_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
             break;
@@ -269,6 +322,30 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             //打印信息
             // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << targetPoint_);
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << uavPoseLocal1_);
+            break;
+        }
+        // 到点平滑过渡
+        case GOTO_SETPOINT_SMOOTH:
+        {
+            getTargetPointRawLocal2(); //获取平滑过渡点
+            uavTargetPointRaw2_.header.stamp = ros::Time::now(); //设置时间戳
+            uavTargetPointRaw2_.coordinate_frame =
+            mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
+            uavTargetPointRaw2_.type_mask =
+            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
+
+            getTargetPointRawLocal1(); //获取平滑过渡点
+            uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
+            uavTargetPointRaw1_.coordinate_frame =
+            mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
+            uavTargetPointRaw1_.type_mask =
+            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布平滑过渡点
+
+            
+            //打印信息
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_SMOOTH");
             break;
         }
     

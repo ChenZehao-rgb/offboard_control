@@ -1,7 +1,7 @@
 # generated from genmsg/cmake/pkg-genmsg.context.in
 
 messages_str = "/home/chen/offboard_control/src/offboard_control/msg/OffboardCtlType.msg;/home/chen/offboard_control/src/offboard_control/msg/StateControl.msg"
-services_str = "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv;/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv;/home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv;/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv;/home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv"
+services_str = "/home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv;/home/chen/offboard_control/src/offboard_control/srv/SetOffboardCtlType.srv;/home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv;/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv;/home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv;/home/chen/offboard_control/src/offboard_control/srv/GenTrajOnline.srv"
 pkg_name = "offboard_control"
 dependencies_str = "std_msgs;geometry_msgs;mavros_msgs"
 langs = "gencpp;geneus;genlisp;gennodejs;genpy"

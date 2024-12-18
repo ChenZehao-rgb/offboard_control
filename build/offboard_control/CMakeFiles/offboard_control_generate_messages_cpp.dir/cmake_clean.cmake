@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/GenTrajOnline.h"
   "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/OffboardCtlType.h"
   "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlType.h"
   "/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetPidGains.h"

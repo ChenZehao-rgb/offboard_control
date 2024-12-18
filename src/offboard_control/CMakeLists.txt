@@ -15,11 +15,14 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   control_toolbox
   tf
+  geodesy
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(ruckig REQUIRED)
+# find_package(motion_primitive_library REQUIRED)
+# include_directories(${MOTION_PRIMITIVE_LIBRARY_INCLUDE_DIRS})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -65,6 +68,7 @@ add_service_files(
   SetPidGains.srv
   isUavArrived.srv
   SetUavTakeoffReady.srv
+  GenTrajOnline.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -114,7 +118,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_pkg
-  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf
+  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf geodesy
 #  DEPENDS system_lib
 )
 
@@ -134,11 +138,17 @@ include_directories(
 add_library(${PROJECT_NAME}
   src/OffboardCtl.cpp
 )
+add_library(online_traj_generator
+  src/traj_generator/online_traj_generator.cpp
+)
+
+# Add cmake target dependencies of the library
+add_dependencies(online_traj_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -147,6 +157,7 @@ add_library(${PROJECT_NAME}
 add_executable(offboard_control_node src/OffboardCtl.cpp)
 add_executable(follow_cable_node src/FollowCable.cpp)
 add_executable(keyboard_control_node src/KeyboardControl.cpp)
+add_executable(online_traj_generator_node src/traj_generator/online_traj_generator.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -170,6 +181,14 @@ target_link_libraries(follow_cable_node
 )
 target_link_libraries(keyboard_control_node
   ${catkin_LIBRARIES}
+)
+target_link_libraries(online_traj_generator
+  ${catkin_LIBRARIES}
+  ruckig::ruckig
+)
+target_link_libraries(online_traj_generator_node
+  ${catkin_LIBRARIES}
+  online_traj_generator
 )
 
 #############

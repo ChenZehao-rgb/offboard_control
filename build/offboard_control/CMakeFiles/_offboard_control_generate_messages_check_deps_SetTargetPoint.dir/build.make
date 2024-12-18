@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /home/chen/offboard_control/build/offboard_control
 include CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint.dir/progress.make
 
 CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint:
-	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py offboard_control /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv geometry_msgs/Pose:geometry_msgs/Point:geometry_msgs/PoseStamped:std_msgs/Header:geometry_msgs/Quaternion:mavros_msgs/PositionTarget:geometry_msgs/Vector3
+	catkin_generated/env_cached.sh /usr/bin/python3 /opt/ros/noetic/share/genmsg/cmake/../../../lib/genmsg/genmsg_check_deps.py offboard_control /home/chen/offboard_control/src/offboard_control/srv/SetTargetPoint.srv geometry_msgs/Quaternion:geometry_msgs/Point:geometry_msgs/PoseStamped:std_msgs/Header:geometry_msgs/Pose:mavros_msgs/PositionTarget:geometry_msgs/Vector3
 
 _offboard_control_generate_messages_check_deps_SetTargetPoint: CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint
 _offboard_control_generate_messages_check_deps_SetTargetPoint: CMakeFiles/_offboard_control_generate_messages_check_deps_SetTargetPoint.dir/build.make

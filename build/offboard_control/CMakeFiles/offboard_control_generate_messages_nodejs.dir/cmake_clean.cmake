@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/OffboardCtlType.js"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/StateControl.js"
+  "/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/GenTrajOnline.js"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetOffboardCtlType.js"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetPidGains.js"
   "/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetTargetPoint.js"

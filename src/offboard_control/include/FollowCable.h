@@ -6,9 +6,15 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/PositionTarget.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geographic_msgs/GeoPoint.h>
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <geodesy/utm.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <mavros_msgs/HomePosition.h>
 #include <tf/tf.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf/transform_listener.h>
+#include <tf/transform_datatypes.h>
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
@@ -31,7 +37,7 @@ public:
     void keyboardCallback(const std_msgs::String::ConstPtr& msg);
     // 设置offboard和解锁函数
     bool setUavTakeoffReady(uint8_t uavID);
-    void loadTakeoffTarg();
+    void loadConfigParam(const std::string& filename);
 
 private:
     ros::NodeHandle nh_;
@@ -42,11 +48,11 @@ private:
     ros::ServiceClient setPidGainsClient_; //设置pid参数客户端
     ros::ServiceClient isUavArrivedClient_; //判断是否到达目标点客户端
     ros::ServiceClient setUavTakeoffReadyClient_; //设置offboard和解锁客户端
-
     // 键盘输入
     ros::Subscriber keyboardSub_;
     // 订阅无人机本地位置
-    ros::Subscriber uavPoseLocalSub_;
+    ros::Subscriber uavPoseLocalSub1_;
+    ros::Subscriber uavPoseLocalSub2_;
 
     // 控制状态机
     ros::Timer controlLoop_;
@@ -54,9 +60,13 @@ private:
     offboard_control::StateControl stateControl_;
 
     // 无人机本地位置
-    geometry_msgs::PoseStamped uavPoseLocal_;
+    geometry_msgs::PoseStamped uavPoseLocal1_;
+    geometry_msgs::PoseStamped uavPoseLocal2_;
+
     // 本地位置回调函数
-    void uavPoseLocalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    
     // 判断是否到达目标点服务函数
     bool isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID, double precision);
     // 根据线结构传感器的测量结果，判断姿态调整是否到位
@@ -89,6 +99,10 @@ private:
     std::vector<geometry_msgs::PoseStamped> wayPoints_;
     // 跟踪索道点
     void followCablePoints(const std::vector<geometry_msgs::PoseStamped>& waypoints, uint8_t uavID);
+    // 全局坐标转换为本地坐标
+    geometry_msgs::PoseStamped uavPoseGlobal2Local1(const geometry_msgs::PoseStamped& globalPose);
+    geometry_msgs::PoseStamped uavPoseGlobal2Local2(const geometry_msgs::PoseStamped& globalPose);
+
 
 };
 

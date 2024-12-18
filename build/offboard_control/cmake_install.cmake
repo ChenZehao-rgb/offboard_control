@@ -142,6 +142,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
     "/home/chen/offboard_control/src/offboard_control/srv/SetPidGains.srv"
     "/home/chen/offboard_control/src/offboard_control/srv/isUavArrived.srv"
     "/home/chen/offboard_control/src/offboard_control/srv/SetUavTakeoffReady.srv"
+    "/home/chen/offboard_control/src/offboard_control/srv/GenTrajOnline.srv"
     )
 endif()
 

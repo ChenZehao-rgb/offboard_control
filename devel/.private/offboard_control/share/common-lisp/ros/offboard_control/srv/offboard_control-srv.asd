@@ -6,6 +6,8 @@
                :mavros_msgs-msg
 )
   :components ((:file "_package")
+    (:file "GenTrajOnline" :depends-on ("_package_GenTrajOnline"))
+    (:file "_package_GenTrajOnline" :depends-on ("_package"))
     (:file "SetOffboardCtlType" :depends-on ("_package_SetOffboardCtlType"))
     (:file "_package_SetOffboardCtlType" :depends-on ("_package"))
     (:file "SetPidGains" :depends-on ("_package_SetPidGains"))
