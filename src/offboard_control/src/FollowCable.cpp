@@ -47,8 +47,6 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     takeOffPoint1_= uavPoseGlobal2Local1(takeOffPoint1_);
     setTargetPoint(takeOffPoint1_,1);
 
-    testPoseTrans(); // 测试坐标转换
-    
     // 假设cablePose数值
     cablePose_.pose.position.x = 0.0;
     cablePose_.pose.position.y = 0.0;
@@ -70,21 +68,27 @@ void FollowCable::testPoseTrans()
     // 延时10s,等待无人机起飞
     ros::Duration(10).sleep();
     // 测试全局坐标转换为本地坐标
-    geometry_msgs::PoseStamped testPose;
-    testPose.pose.position.x = 1.0;
-    testPose.pose.position.y = 1.0;
-    testPose.pose.position.z = 1.0;
-    testPose.pose.orientation.x = 0.0;
-    testPose.pose.orientation.y = 0.0;
-    testPose.pose.orientation.z = 0.0;
-    testPose.pose.orientation.w = 1.0;
-    setTargetPoint(testPose,1);
-    ROS_INFO_STREAM("testPoseTrans: " << testPose);
+    geometry_msgs::PoseStamped testPose1, testPose2;
+    testPose1.pose.position.x = 1.0;
+    testPose1.pose.position.y = 1.0;
+    testPose1.pose.position.z = 1.0;
+    testPose1.pose.orientation.x = 0.0;
+    testPose1.pose.orientation.y = 0.0;
+    testPose1.pose.orientation.z = 0.0;
+    testPose1.pose.orientation.w = 1.0;
+    testPose2 = testPose1;
+    testPose2.pose.position.x += -2;
+    testPose2.pose.position.y += -2;
+    setTargetPoint(testPose1,1);
+    setTargetPoint(testPose2,2);
+    ROS_INFO_STREAM("testPoseTrans: " << testPose1);
+    ROS_INFO_STREAM("testPoseTrans: " << testPose2);
     while(1)
     {
         ros::spinOnce();
         ros::Rate(1).sleep();
         ROS_INFO_STREAM("uavPoseLocalSub1_: " << uavPoseLocalSub1_);
+        ROS_INFO_STREAM("uavPoseLocalSub2_: " << uavPoseLocalSub2_);
     }
 }
 // 线传感器数据处理,现假设是通过另一个节点发布的
@@ -319,6 +323,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         // 控制大小无人机均到达上线点
         case offboard_control::StateControl::ARRIVE_ONLINE_POINT:
         {
+            // testPoseTrans(); // 测试坐标转换
             // 获取上线坐标
             if(!isGetOnlinePoint_)
             {
@@ -336,7 +341,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 setTargetPoint(onLinePoint1_,1);
                 isSendOnlinePoint_ = true;
             }
-            // 判断小飞机是否到达onLineTarg1_
+            // 判断小飞机是否到达onLinePoint1_
             if(isUavArrived(onLinePoint1_,1,targetPointError1))
             {
                 stateControl_.state_ctrl_type = offboard_control::StateControl::AJUST_ATTITUDE;
