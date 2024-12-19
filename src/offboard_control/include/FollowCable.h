@@ -123,7 +123,8 @@ private:
     void setPidGains(int axis, double kp, double ki, double kd);
     void keyboardCallback(const std_msgs::String::ConstPtr& msg);
     
-    
+    // 测试坐标转换以及运动模式
+    void testPoseTrans();
     
 
 };

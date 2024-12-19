@@ -46,6 +46,9 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     setUavTakeoffReady(1);
     takeOffPoint1_= uavPoseGlobal2Local1(takeOffPoint1_);
     setTargetPoint(takeOffPoint1_,1);
+
+    testPoseTrans(); // 测试坐标转换
+    
     // 假设cablePose数值
     cablePose_.pose.position.x = 0.0;
     cablePose_.pose.position.y = 0.0;
@@ -59,6 +62,30 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
 FollowCable::~FollowCable()
 {
     // 在这里添加任何需要的清理代码
+}
+// 测试函数
+void FollowCable::testPoseTrans()
+{
+    setOffboardCtlType(GOTO_SETPOINT_RELATIVE); // 设置相对位置控制模式
+    // 延时10s,等待无人机起飞
+    ros::Duration(10).sleep();
+    // 测试全局坐标转换为本地坐标
+    geometry_msgs::PoseStamped testPose;
+    testPose.pose.position.x = 1.0;
+    testPose.pose.position.y = 1.0;
+    testPose.pose.position.z = 1.0;
+    testPose.pose.orientation.x = 0.0;
+    testPose.pose.orientation.y = 0.0;
+    testPose.pose.orientation.z = 0.0;
+    testPose.pose.orientation.w = 1.0;
+    setTargetPoint(testPose,1);
+    ROS_INFO_STREAM("testPoseTrans: " << testPose);
+    while(1)
+    {
+        ros::spinOnce();
+        ros::Rate(1).sleep();
+        ROS_INFO_STREAM("uavPoseLocalSub1_: " << uavPoseLocalSub1_);
+    }
 }
 // 线传感器数据处理,现假设是通过另一个节点发布的
 void FollowCable::getCablePose(const geometry_msgs::PoseStamped::ConstPtr& msg)
@@ -239,96 +266,19 @@ void FollowCable::setOffboardCtlType(uint8_t ctlType)
         ROS_ERROR_STREAM("Set control type failed");
     }
 }
-// 从yaml文件中读取参数
-std::vector<geometry_msgs::PoseStamped> FollowCable::loadWaypoints(const std::string& filename) {
-    YAML::Node config = YAML::LoadFile(filename);
-    std::vector<geometry_msgs::PoseStamped> waypoints;
-    for (const auto& item : config["waypoints_set_1"]) {
-        geometry_msgs::PoseStamped waypoint;
-        waypoint.pose.position.x = item["position"]["x"].as<double>();
-        waypoint.pose.position.y = item["position"]["y"].as<double>();
-        waypoint.pose.position.z = item["position"]["z"].as<double>();
-        waypoint.pose.orientation.x = item["orientation"]["x"].as<double>();
-        waypoint.pose.orientation.y = item["orientation"]["y"].as<double>();
-        waypoint.pose.orientation.z = item["orientation"]["z"].as<double>();
-        waypoint.pose.orientation.w = item["orientation"]["w"].as<double>();
-        waypoints.push_back(waypoint);
-    }
-    return waypoints;
-}
-// 从config.yaml文件中读取参数
-void FollowCable::loadConfigParam(const std::string& filename)
-{
-    YAML::Node config = YAML::LoadFile(filename);
-    // 读取uav1起飞点
-    auto uav1 = config["takeoff_points"]["uav1"];
-    takeOffPoint1_.pose.position.x = uav1["position_x"].as<double>();
-    takeOffPoint1_.pose.position.y = uav1["position_y"].as<double>();
-    takeOffPoint1_.pose.position.z = uav1["position_z"].as<double>();
-    takeOffPoint1_.pose.orientation.x = uav1["orientation_x"].as<double>();
-    takeOffPoint1_.pose.orientation.y = uav1["orientation_y"].as<double>();
-    takeOffPoint1_.pose.orientation.z = uav1["orientation_z"].as<double>();
-    takeOffPoint1_.pose.orientation.w = uav1["orientation_w"].as<double>();
-    // 读取uav2起飞点
-    auto uav2 = config["takeoff_points"]["uav2"];
-    takeOffPoint2_.pose.position.x = uav2["position_x"].as<double>();
-    takeOffPoint2_.pose.position.y = uav2["position_y"].as<double>();
-    takeOffPoint2_.pose.position.z = uav2["position_z"].as<double>();
-    takeOffPoint2_.pose.orientation.x = uav2["orientation_x"].as<double>();
-    takeOffPoint2_.pose.orientation.y = uav2["orientation_y"].as<double>();
-    takeOffPoint2_.pose.orientation.z = uav2["orientation_z"].as<double>();
-    takeOffPoint2_.pose.orientation.w = uav2["orientation_w"].as<double>();
-    // 读取索道上的上线点
-    auto onLine = config["online_points"]["cable_point"];
-    onLinePoint_.pose.position.x = onLine["position_x"].as<double>();
-    onLinePoint_.pose.position.y = onLine["position_y"].as<double>();
-    onLinePoint_.pose.position.z = onLine["position_z"].as<double>();
-    onLinePoint_.pose.orientation.x = onLine["orientation_x"].as<double>();
-    onLinePoint_.pose.orientation.y = onLine["orientation_y"].as<double>();
-    onLinePoint_.pose.orientation.z = onLine["orientation_z"].as<double>();
-    onLinePoint_.pose.orientation.w = onLine["orientation_w"].as<double>();
-    // 读取小飞机携带爪子尺寸
-    auto claw = config["size"]["claw"];
-    claw_diameter = claw["diameter"].as<double>();
-    // 读取连接绳长度
-    auto rope = config["size"]["rope"];
-    rope_length = rope["length"].as<double>();
-    // 读取home_points
-    auto home1 = config["home_points"]["uav1"];
-    uavHomePoint1_.pose.position.x = home1["position_x"].as<double>();
-    uavHomePoint1_.pose.position.y = home1["position_y"].as<double>();
-    uavHomePoint1_.pose.position.z = home1["position_z"].as<double>();
-    uavHomePoint1_.pose.orientation.x = home1["orientation_x"].as<double>();
-    uavHomePoint1_.pose.orientation.y = home1["orientation_y"].as<double>();
-    uavHomePoint1_.pose.orientation.z = home1["orientation_z"].as<double>();
-    uavHomePoint1_.pose.orientation.w = home1["orientation_w"].as<double>();
-
-    auto home2 = config["home_points"]["uav2"];
-    uavHomePoint2_.pose.position.x = home2["position_x"].as<double>();
-    uavHomePoint2_.pose.position.y = home2["position_y"].as<double>();
-    uavHomePoint2_.pose.position.z = home2["position_z"].as<double>();
-    uavHomePoint2_.pose.orientation.x = home2["orientation_x"].as<double>();
-    uavHomePoint2_.pose.orientation.y = home2["orientation_y"].as<double>();
-    uavHomePoint2_.pose.orientation.z = home2["orientation_z"].as<double>();
-    uavHomePoint2_.pose.orientation.w = home2["orientation_w"].as<double>();
-
-    // 打印读取到的参数
-    ROS_INFO_STREAM("Takeoff point of uav1: " << takeOffPoint1_ << ", uav2: " << takeOffPoint2_);
-    ROS_INFO_STREAM("Online point of cable: " << onLinePoint_);
-    ROS_INFO_STREAM("Claw diameter: " << claw_diameter << ", rope length: " << rope_length);
-    ROS_INFO_STREAM("Home point of uav1: " << uavHomePoint1_ << ", uav2: " << uavHomePoint2_);
-}
 // 指定无人机到达一系列目标点
 void FollowCable::followCablePoints(const std::vector<geometry_msgs::PoseStamped>& waypoints)
 {
     for (const auto& waypoint : waypoints)
     {
-        geometry_msgs::PoseStamped wayPointUav1, wayPointUav2;
-        wayPointUav1 = uavPoseGlobal2Local1(waypoint);
-        setTargetPoint(wayPointUav1, 1);
+        geometry_msgs::PoseStamped wayPointUav1, wayPointUav2; // 定义无人机本地坐标系下的目标点
+        // 大无人机坐标
         wayPointUav2 = uavPoseGlobal2Local2(waypoint);
         wayPointUav2.pose.position.z += rope_length;
         setTargetPoint(wayPointUav2, 2);
+        // 小无人机坐标
+        wayPointUav1 = uavPoseGlobal2Local1(waypoint);
+        setTargetPoint(wayPointUav1, 1);
         // 等待到达每个目标点
         while (ros::ok())
         {
@@ -377,6 +327,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 onLinePoint1_ = uavPoseGlobal2Local1(onLinePoint1_);
                 onLinePoint2_ = uavPoseGlobal2Local2(onLinePoint2_);
                 isGetOnlinePoint_ = true;
+
             }
             // 发送大飞机上线点
             if(!isSendOnlinePoint_)
@@ -583,4 +534,83 @@ void FollowCable::uavHomePoseCallback2(const mavros_msgs::HomePosition::ConstPtr
 {
     // 更新无人机home位置
     uavHomePoseSub2_ = *msg;
+}
+// 从yaml文件中读取参数
+std::vector<geometry_msgs::PoseStamped> FollowCable::loadWaypoints(const std::string& filename) {
+    YAML::Node config = YAML::LoadFile(filename);
+    std::vector<geometry_msgs::PoseStamped> waypoints;
+    for (const auto& item : config["waypoints_set_1"]) {
+        geometry_msgs::PoseStamped waypoint;
+        waypoint.pose.position.x = item["position"]["x"].as<double>();
+        waypoint.pose.position.y = item["position"]["y"].as<double>();
+        waypoint.pose.position.z = item["position"]["z"].as<double>();
+        waypoint.pose.orientation.x = item["orientation"]["x"].as<double>();
+        waypoint.pose.orientation.y = item["orientation"]["y"].as<double>();
+        waypoint.pose.orientation.z = item["orientation"]["z"].as<double>();
+        waypoint.pose.orientation.w = item["orientation"]["w"].as<double>();
+        waypoints.push_back(waypoint);
+    }
+    return waypoints;
+}
+// 从config.yaml文件中读取参数
+void FollowCable::loadConfigParam(const std::string& filename)
+{
+    YAML::Node config = YAML::LoadFile(filename);
+    // 读取uav1起飞点
+    auto uav1 = config["takeoff_points"]["uav1"];
+    takeOffPoint1_.pose.position.x = uav1["position_x"].as<double>();
+    takeOffPoint1_.pose.position.y = uav1["position_y"].as<double>();
+    takeOffPoint1_.pose.position.z = uav1["position_z"].as<double>();
+    takeOffPoint1_.pose.orientation.x = uav1["orientation_x"].as<double>();
+    takeOffPoint1_.pose.orientation.y = uav1["orientation_y"].as<double>();
+    takeOffPoint1_.pose.orientation.z = uav1["orientation_z"].as<double>();
+    takeOffPoint1_.pose.orientation.w = uav1["orientation_w"].as<double>();
+    // 读取uav2起飞点
+    auto uav2 = config["takeoff_points"]["uav2"];
+    takeOffPoint2_.pose.position.x = uav2["position_x"].as<double>();
+    takeOffPoint2_.pose.position.y = uav2["position_y"].as<double>();
+    takeOffPoint2_.pose.position.z = uav2["position_z"].as<double>();
+    takeOffPoint2_.pose.orientation.x = uav2["orientation_x"].as<double>();
+    takeOffPoint2_.pose.orientation.y = uav2["orientation_y"].as<double>();
+    takeOffPoint2_.pose.orientation.z = uav2["orientation_z"].as<double>();
+    takeOffPoint2_.pose.orientation.w = uav2["orientation_w"].as<double>();
+    // 读取索道上的上线点
+    auto onLine = config["online_points"]["cable_point"];
+    onLinePoint_.pose.position.x = onLine["position_x"].as<double>();
+    onLinePoint_.pose.position.y = onLine["position_y"].as<double>();
+    onLinePoint_.pose.position.z = onLine["position_z"].as<double>();
+    onLinePoint_.pose.orientation.x = onLine["orientation_x"].as<double>();
+    onLinePoint_.pose.orientation.y = onLine["orientation_y"].as<double>();
+    onLinePoint_.pose.orientation.z = onLine["orientation_z"].as<double>();
+    onLinePoint_.pose.orientation.w = onLine["orientation_w"].as<double>();
+    // 读取小飞机携带爪子尺寸
+    auto claw = config["size"]["claw"];
+    claw_diameter = claw["diameter"].as<double>();
+    // 读取连接绳长度
+    auto rope = config["size"]["rope"];
+    rope_length = rope["length"].as<double>();
+    // 读取home_points
+    auto home1 = config["home_points"]["uav1"];
+    uavHomePoint1_.pose.position.x = home1["position_x"].as<double>();
+    uavHomePoint1_.pose.position.y = home1["position_y"].as<double>();
+    uavHomePoint1_.pose.position.z = home1["position_z"].as<double>();
+    uavHomePoint1_.pose.orientation.x = home1["orientation_x"].as<double>();
+    uavHomePoint1_.pose.orientation.y = home1["orientation_y"].as<double>();
+    uavHomePoint1_.pose.orientation.z = home1["orientation_z"].as<double>();
+    uavHomePoint1_.pose.orientation.w = home1["orientation_w"].as<double>();
+
+    auto home2 = config["home_points"]["uav2"];
+    uavHomePoint2_.pose.position.x = home2["position_x"].as<double>();
+    uavHomePoint2_.pose.position.y = home2["position_y"].as<double>();
+    uavHomePoint2_.pose.position.z = home2["position_z"].as<double>();
+    uavHomePoint2_.pose.orientation.x = home2["orientation_x"].as<double>();
+    uavHomePoint2_.pose.orientation.y = home2["orientation_y"].as<double>();
+    uavHomePoint2_.pose.orientation.z = home2["orientation_z"].as<double>();
+    uavHomePoint2_.pose.orientation.w = home2["orientation_w"].as<double>();
+
+    // 打印读取到的参数
+    ROS_INFO_STREAM("Takeoff point of uav1: " << takeOffPoint1_ << ", uav2: " << takeOffPoint2_);
+    ROS_INFO_STREAM("Online point of cable: " << onLinePoint_);
+    ROS_INFO_STREAM("Claw diameter: " << claw_diameter << ", rope length: " << rope_length);
+    ROS_INFO_STREAM("Home point of uav1: " << uavHomePoint1_ << ", uav2: " << uavHomePoint2_);
 }
