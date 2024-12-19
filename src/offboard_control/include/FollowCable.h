@@ -45,6 +45,9 @@ private:
     // 订阅无人机home位置
     ros::Subscriber uavHomeSub1_;
     ros::Subscriber uavHomeSub2_;
+    // 发布无人机转换坐标后的本地位置
+    ros::Publisher uavPoseGlobalPub1_;
+    ros::Publisher uavPoseGlobalPub2_;
     // 控制状态机
     ros::Timer controlLoop_;
     /******************** 使用变量定义 **********************/
@@ -59,6 +62,8 @@ private:
     // mavros订阅home位置
     mavros_msgs::HomePosition uavHomePoseSub1_;
     mavros_msgs::HomePosition uavHomePoseSub2_;
+    // 转换后的无人机本地位置
+    geometry_msgs::PoseStamped uavPoseGlobal1_, uavPoseGlobal2_;
     // 无人机相关参数
     geometry_msgs::PoseStamped takeOffPoint1_, takeOffPoint2_; // 起飞点
     geometry_msgs::PoseStamped uavHomePoint1_, uavHomePoint2_; // 无人机home点
@@ -114,6 +119,9 @@ private:
     // 全局坐标转换为本地坐标
     geometry_msgs::PoseStamped uavPoseGlobal2Local1(const geometry_msgs::PoseStamped globalPose);
     geometry_msgs::PoseStamped uavPoseGlobal2Local2(const geometry_msgs::PoseStamped globalPose);
+    // 本地坐标转换为全局坐标
+    geometry_msgs::PoseStamped uavPoseLocal2Global1(const geometry_msgs::PoseStamped localPose);
+    geometry_msgs::PoseStamped uavPoseLocal2Global2(const geometry_msgs::PoseStamped localPose);
 
     // 跟随索道点无人机本地坐标处理
     void wayPointsGlobal2Local(std::vector<geometry_msgs::PoseStamped> waypoints);
@@ -125,8 +133,6 @@ private:
     
     // 测试坐标转换以及运动模式
     void testPoseTrans();
-    
-
 };
 
 #endif // FOLLOWCABLE_H
