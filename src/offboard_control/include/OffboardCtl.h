@@ -54,7 +54,8 @@ private:
     ros::ServiceServer isUavArrivedSrv_; //判断无人机是否到点服务
     ros::ServiceServer setUavTakeoffReadySrv_; //设置offboard和解锁服务
 
-    ros::ServiceClient trajGeneratorClient_; //轨迹生成器客户端
+    ros::ServiceClient trajGeneratorClient1_; //轨迹生成器客户端
+    ros::ServiceClient trajGeneratorClient2_; //轨迹生成器客户端
     //状态切换定时器
     ros::Timer stateSwitchTimer_;
     void stateSwitchTimerCallback(const ros::TimerEvent& event);

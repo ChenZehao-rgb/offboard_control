@@ -37,6 +37,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     loadConfigParam("/home/chen/offboard_control/src/offboard_control/config/config.yaml");
     // 读取索道点
     wayPoints_ = loadWaypoints("/home/chen/offboard_control/src/offboard_control/config/waypoints.yaml");
+    // 设置模式
+    setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
     // 大小无人机起飞
     setUavTakeoffReady(2);
     takeOffPoint2_= uavPoseGlobal2Local2(takeOffPoint2_);
@@ -151,6 +153,7 @@ bool FollowCable::graspCable()
     // 控制指令
 
     //等待20s
+    ROS_INFO_STREAM("Grasp cable...");
     ros::Duration(20).sleep();
     // 判断是否抓住索道
     return (1>0); // 某个值大于阈值
@@ -161,6 +164,7 @@ bool FollowCable::releaseCable()
     // 控制指令
 
     //等待20s
+    ROS_INFO_STREAM("Release cable...");
     ros::Duration(20).sleep();
     // 判断是否松开索道
     return (1<0); // 某个值小于阈值
@@ -171,6 +175,7 @@ bool FollowCable::storeCableInfo()
     // 控制指令
 
     //等待3s
+    ROS_INFO_STREAM("Store cable info...");
     ros::Duration(3).sleep();
     // 判断是否获取索道采集信息
     return (1>0); // 某个值大于阈值
@@ -407,8 +412,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 setTargetPoint(uavRalPose1_,1);
                 setTargetPoint(uavRalPose2_,2);
                 isGetAjustPose_ = true;
-                // setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
-                setOffboardCtlType(GOTO_SETPOINT_STEP);
             }
             // 通过获取线结构传感器的测量结果，判断大小飞机是否到达相对位置/角度
             if(isAjusted(cablePose_))
@@ -416,6 +419,8 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 // 已经调整好位置，准备降落上线
                 stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;
                 ROS_INFO_STREAM("Ajust attitude success, and prepare to land on line...");
+                setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
+                // setOffboardCtlType(GOTO_SETPOINT_STEP);
             }
             else
             {

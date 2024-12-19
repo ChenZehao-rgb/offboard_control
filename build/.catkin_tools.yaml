@@ -1,6 +1,0 @@
-devel_space: /home/chen/offboard_control/devel
-install: false
-install_space: /home/chen/offboard_control/install
-profile: default
-source_space: /home/chen/offboard_control/src
-workspace: /home/chen/offboard_control
