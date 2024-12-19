@@ -1,6 +1,5 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <std_msgs/String.h>
 #include "FollowCable.h"
 //几种控制模式定义
 #define GOTO_SETPOINT_STEP 0
@@ -559,14 +558,24 @@ void FollowCable::uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstP
     // 更新无人机本地位置
     uavPoseLocalSub1_ = *msg;
     uavPoseGlobal1_= uavPoseLocal2Global1(uavPoseLocalSub1_);
-    uavPoseGlobalPub1_.publish(uavPoseGlobal1_);
+    static tf::TransformBroadcaster br;
+    tf::Transform transform;
+    transform.setOrigin(tf::Vector3(uavPoseGlobal1_.pose.position.x, uavPoseGlobal1_.pose.position.y, uavPoseGlobal1_.pose.position.z));
+    transform.setRotation(tf::Quaternion(uavPoseGlobal1_.pose.orientation.x, uavPoseGlobal1_.pose.orientation.y, uavPoseGlobal1_.pose.orientation.z, uavPoseGlobal1_.pose.orientation.w));
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "uav1"));
+    // uavPoseGlobalPub1_.publish(uavPoseGlobal1_);
 }
 void FollowCable::uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     // 更新无人机本地位置
     uavPoseLocalSub2_ = *msg;
     uavPoseGlobal2_= uavPoseLocal2Global2(uavPoseLocalSub2_);
-    uavPoseGlobalPub2_.publish(uavPoseGlobal2_);
+    static tf::TransformBroadcaster br;
+    tf::Transform transform;
+    transform.setOrigin(tf::Vector3(uavPoseGlobal2_.pose.position.x, uavPoseGlobal2_.pose.position.y, uavPoseGlobal2_.pose.position.z));
+    transform.setRotation(tf::Quaternion(uavPoseGlobal2_.pose.orientation.x, uavPoseGlobal2_.pose.orientation.y, uavPoseGlobal2_.pose.orientation.z, uavPoseGlobal2_.pose.orientation.w));
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "uav2"));
+    // uavPoseGlobalPub2_.publish(uavPoseGlobal2_);
 }
 // 无人机home位置回调函数
 void FollowCable::uavHomePoseCallback1(const mavros_msgs::HomePosition::ConstPtr& msg)

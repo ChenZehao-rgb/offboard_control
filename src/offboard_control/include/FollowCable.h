@@ -13,6 +13,8 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
+#include <std_msgs/String.h> // 确保包含了正确的头文件
 #include <vector>
 #include <yaml-cpp/yaml.h>
 

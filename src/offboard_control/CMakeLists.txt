@@ -157,6 +157,7 @@ add_executable(offboard_control_node src/OffboardCtl.cpp)
 add_executable(follow_cable_node src/FollowCable.cpp)
 add_executable(keyboard_control_node src/KeyboardControl.cpp)
 add_executable(online_traj_generator_node src/traj_generator/online_traj_generator.cpp)
+add_executable(uav_tf_broadcaster_node src/uav_tf_broadcaster.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -188,6 +189,9 @@ target_link_libraries(online_traj_generator
 target_link_libraries(online_traj_generator_node
   ${catkin_LIBRARIES}
   online_traj_generator
+)
+target_link_libraries(uav_tf_broadcaster_node
+  ${catkin_LIBRARIES}
 )
 
 #############
