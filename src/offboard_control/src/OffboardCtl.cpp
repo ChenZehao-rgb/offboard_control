@@ -367,27 +367,6 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         // 相对位置控制
         case GOTO_SETPOINT_RELATIVE:
         {
-            uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
-            uavTargetPointRaw1_.coordinate_frame =
-            mavros_msgs::PositionTarget::FRAME_BODY_OFFSET_NED;
-            uavTargetPointRaw1_.type_mask =
-            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
-            uavTargetPointRaw1_.position = uavTargetPoint1_.pose.position;
-            double rollCurr , pitchCurr , yawCurr;
-            quat2RPY(uavTargetPoint1_.pose.orientation, rollCurr, pitchCurr, yawCurr);
-            uavTargetPointRaw1_.yaw = yawCurr;
-            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布相对位置
-
-            uavTargetPointRaw2_.header.stamp = ros::Time::now(); //设置时间戳
-            uavTargetPointRaw2_.coordinate_frame =
-            mavros_msgs::PositionTarget::FRAME_BODY_OFFSET_NED;
-            uavTargetPointRaw2_.type_mask =
-            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
-            uavTargetPointRaw2_.position = uavTargetPoint2_.pose.position;
-            double rollCurr2 , pitchCurr2 , yawCurr2;
-            quat2RPY(uavTargetPoint2_.pose.orientation, rollCurr2, pitchCurr2, yawCurr2);
-            uavTargetPointRaw2_.yaw = yawCurr2;
-            setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布相对位置
             //打印信息
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_RELATIVE");
             break;

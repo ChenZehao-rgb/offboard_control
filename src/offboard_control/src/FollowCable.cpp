@@ -31,6 +31,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 发布无人机转换坐标后的本地位置
     uavPoseGlobalPub1_ = nh_.advertise<geometry_msgs::PoseStamped>("/offboard_control/uav1_local_position", 10);
     uavPoseGlobalPub2_ = nh_.advertise<geometry_msgs::PoseStamped>("/offboard_control/uav2_local_position", 10);
+    // 发布状态机控制状态
+    stateControlPub_ = nh_.advertise<offboard_control::StateControl>("/follow_state/state", 10);
     // 控制状态机
     controlLoop_ = nh_.createTimer(ros::Duration(controlPeriod), &FollowCable::controlLoop, this);
     // 初始化状态
@@ -38,7 +40,7 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 读取参数
     loadConfigParam("/home/chen/offboard_control/src/offboard_control/config/config.yaml");
     // 读取索道点
-    wayPoints_ = loadWaypoints("/home/chen/offboard_control/src/offboard_control/config/waypoints.yaml");
+    all_waypoints_ = loadWaypoints("/home/chen/offboard_control/src/offboard_control/config/waypoints.yaml");
     // 设置模式
     setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
     // 大小无人机起飞
@@ -141,19 +143,6 @@ geometry_msgs::PoseStamped FollowCable::uavPoseLocal2Global2(const geometry_msgs
     globalPose.pose.position.z = localPose.pose.position.z;
     globalPose.pose.orientation = localPose.pose.orientation;
     return globalPose;
-}
-// 跟随索道点无人机本地坐标处理
-void FollowCable::wayPointsGlobal2Local(std::vector<geometry_msgs::PoseStamped> waypoints)
-{
-    for(auto& point : waypoints)
-    {
-        geometry_msgs::PoseStamped wayPointUav1, wayPointUav2;
-        wayPointUav1 = uavPoseGlobal2Local1(point);
-        wayPointsUav1_.push_back(wayPointUav1);
-        wayPointUav2 = uavPoseGlobal2Local2(point);
-        wayPointUav2.pose.position.z += rope_length;
-        wayPointsUav2_.push_back(wayPointUav2);
-    }
 }
 // 上线操作中索道坐标->大小飞机坐标，onlineTarg只得是通过雷达离线采点得到的全局坐标，包含x,y,z以及orientation
 void FollowCable::onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high)
@@ -305,10 +294,11 @@ void FollowCable::setOffboardCtlType(uint8_t ctlType)
     }
 }
 // 指定无人机到达一系列目标点
-void FollowCable::followCablePoints(const std::vector<geometry_msgs::PoseStamped>& waypoints)
+void FollowCable::followCablePoints(std::vector<geometry_msgs::PoseStamped> waypoints)
 {
-    for (const auto& waypoint : waypoints)
+    while (!waypoints.empty())
     {
+        geometry_msgs::PoseStamped waypoint = waypoints.front(); // 获取第一个目标点
         geometry_msgs::PoseStamped wayPointUav1, wayPointUav2; // 定义无人机本地坐标系下的目标点
         // 大无人机坐标
         wayPointUav2 = uavPoseGlobal2Local2(waypoint);
@@ -317,7 +307,7 @@ void FollowCable::followCablePoints(const std::vector<geometry_msgs::PoseStamped
         // 小无人机坐标
         wayPointUav1 = uavPoseGlobal2Local1(waypoint);
         setTargetPoint(wayPointUav1, 1);
-        // 等待到达每个目标点
+        // 等待到达目标点
         while (ros::ok())
         {
             ros::spinOnce();
@@ -326,10 +316,11 @@ void FollowCable::followCablePoints(const std::vector<geometry_msgs::PoseStamped
             if (isUavArrived(wayPointUav2, 2, targetPointError1))
             {
                 // 存储采集到的索道信息
-                if(storeCableInfo()) 
+                if (storeCableInfo())
                 {
                     ROS_INFO_STREAM("Arrived waypoint: " << wayPointUav2 << ", get cable info ...");
-                    break; // 跳出 while 循环，继续 for 循环的下一次迭代
+                    waypoints.erase(waypoints.begin()); // 删除已经到达的点
+                    break; // 跳出 while 循环，继续下一个目标点
                 }
             }
         }
@@ -469,15 +460,25 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         {
             ROS_INFO("Following cable...");
             // 跟随索道，沿离线采集的点运动
-            followCablePoints(wayPoints_);
-            // 任务完成，返航
-            stateControl_.state_ctrl_type = offboard_control::StateControl::LAND;
-            break;
-        }
-        case offboard_control::StateControl::APPROACH_NODE:
-        {
-            // 靠近节点
-            ROS_INFO("Approaching node...");
+            // 这里面加个保险措施，出问题了，先松爪、退出offboard转人工或者直接返航
+            if (!all_waypoints_.empty())
+            {
+                followCablePoints(all_waypoints_.front());
+                // 检测完这一段后后面还有点
+                if (all_waypoints_.front().empty())
+                {
+                    all_waypoints_.erase(all_waypoints_.begin());
+                }
+            }
+            if (all_waypoints_.empty())
+            {
+                // 任务完成，返航
+                stateControl_.state_ctrl_type = offboard_control::StateControl::LAND;
+            }
+            else
+            {
+                stateControl_.state_ctrl_type = offboard_control::StateControl::CROSS_NODE;
+            }
             break;
         }
         case offboard_control::StateControl::CROSS_NODE:
@@ -589,21 +590,27 @@ void FollowCable::uavHomePoseCallback2(const mavros_msgs::HomePosition::ConstPtr
     uavHomePoseSub2_ = *msg;
 }
 // 从yaml文件中读取参数
-std::vector<geometry_msgs::PoseStamped> FollowCable::loadWaypoints(const std::string& filename) {
+std::vector<std::vector<geometry_msgs::PoseStamped>> FollowCable::loadWaypoints(const std::string& filename) 
+{
     YAML::Node config = YAML::LoadFile(filename);
-    std::vector<geometry_msgs::PoseStamped> waypoints;
-    for (const auto& item : config["waypoints_set_1"]) {
-        geometry_msgs::PoseStamped waypoint;
-        waypoint.pose.position.x = item["position"]["x"].as<double>();
-        waypoint.pose.position.y = item["position"]["y"].as<double>();
-        waypoint.pose.position.z = item["position"]["z"].as<double>();
-        waypoint.pose.orientation.x = item["orientation"]["x"].as<double>();
-        waypoint.pose.orientation.y = item["orientation"]["y"].as<double>();
-        waypoint.pose.orientation.z = item["orientation"]["z"].as<double>();
-        waypoint.pose.orientation.w = item["orientation"]["w"].as<double>();
-        waypoints.push_back(waypoint);
+    std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints;
+
+    for (const auto& set_name : {"waypoints_set_1", "waypoints_set_2"}) {
+        std::vector<geometry_msgs::PoseStamped> waypoints;
+        for (const auto& item : config[set_name]) {
+            geometry_msgs::PoseStamped waypoint;
+            waypoint.pose.position.x = item["position"]["x"].as<double>();
+            waypoint.pose.position.y = item["position"]["y"].as<double>();
+            waypoint.pose.position.z = item["position"]["z"].as<double>();
+            waypoint.pose.orientation.x = item["orientation"]["x"].as<double>();
+            waypoint.pose.orientation.y = item["orientation"]["y"].as<double>();
+            waypoint.pose.orientation.z = item["orientation"]["z"].as<double>();
+            waypoint.pose.orientation.w = item["orientation"]["w"].as<double>();
+            waypoints.push_back(waypoint);
+        }
+        all_waypoints.push_back(waypoints);
     }
-    return waypoints;
+    return all_waypoints;
 }
 // 从config.yaml文件中读取参数
 void FollowCable::loadConfigParam(const std::string& filename)

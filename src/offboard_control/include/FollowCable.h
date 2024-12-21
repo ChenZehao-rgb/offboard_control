@@ -50,6 +50,8 @@ private:
     // 发布无人机转换坐标后的本地位置
     ros::Publisher uavPoseGlobalPub1_;
     ros::Publisher uavPoseGlobalPub2_;
+    // 发布状态机控制状态
+    ros::Publisher stateControlPub_;
     // 控制状态机
     ros::Timer controlLoop_;
     /******************** 使用变量定义 **********************/
@@ -79,7 +81,7 @@ private:
     geometry_msgs::PoseStamped uavRalPose1_, uavRalPose2_;
     double targetPointError1 = 0.1, targetPointError2 = 0.5; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
     // 沿索道运动目标点
-    std::vector<geometry_msgs::PoseStamped> wayPoints_, wayPointsUav1_, wayPointsUav2_;
+    std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
     /******************** 状态机运行中的标志位 **********************/
     // 上线操作中的标志位
     bool isGetOnlinePoint_; // 获取上线点标志位
@@ -115,9 +117,9 @@ private:
     // 从yaml文件中读取参数
     // 读取无人机初始化参数
     void loadConfigParam(const std::string& filename);
-    std::vector<geometry_msgs::PoseStamped> loadWaypoints(const std::string& filename);
+    std::vector<std::vector<geometry_msgs::PoseStamped>> loadWaypoints(const std::string& filename);
     // 跟踪索道点
-    void followCablePoints(const std::vector<geometry_msgs::PoseStamped>& waypoints);
+    void followCablePoints(std::vector<geometry_msgs::PoseStamped> waypoints);
     // 全局坐标转换为本地坐标
     geometry_msgs::PoseStamped uavPoseGlobal2Local1(const geometry_msgs::PoseStamped globalPose);
     geometry_msgs::PoseStamped uavPoseGlobal2Local2(const geometry_msgs::PoseStamped globalPose);
