@@ -364,13 +364,6 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_SMOOTH");
             break;
         }
-        // 相对位置控制
-        case GOTO_SETPOINT_RELATIVE:
-        {
-            //打印信息
-            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_RELATIVE");
-            break;
-        }
     
         default:
             break;

@@ -16,10 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   control_toolbox
   tf
 )
-
-## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(ruckig REQUIRED)
+
 # find_package(motion_primitive_library REQUIRED)
 # include_directories(${MOTION_PRIMITIVE_LIBRARY_INCLUDE_DIRS})
 
@@ -117,7 +116,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_pkg
-  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf geodesy
+  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf
 #  DEPENDS system_lib
 )
 
@@ -157,7 +156,7 @@ add_executable(offboard_control_node src/OffboardCtl.cpp)
 add_executable(follow_cable_node src/FollowCable.cpp)
 add_executable(keyboard_control_node src/KeyboardControl.cpp)
 add_executable(online_traj_generator_node src/traj_generator/online_traj_generator.cpp)
-add_executable(uav_tf_broadcaster_node src/uav_tf_broadcaster.cpp)
+add_executable(uav_coordinate_trans_node src/uav_coordinate_trans.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -190,7 +189,7 @@ target_link_libraries(online_traj_generator_node
   ${catkin_LIBRARIES}
   online_traj_generator
 )
-target_link_libraries(uav_tf_broadcaster_node
+target_link_libraries(uav_coordinate_trans_node
   ${catkin_LIBRARIES}
 )
 

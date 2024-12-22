@@ -17,7 +17,7 @@ offboard_control
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/keyboard_control_node /home/chen/offboard_control/devel/lib/offboard_control/keyboard_control_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/online_traj_generator_node /home/chen/offboard_control/devel/lib/offboard_control/online_traj_generator_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/follow_cable_node /home/chen/offboard_control/devel/lib/offboard_control/follow_cable_node
-/home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/uav_tf_broadcaster_node /home/chen/offboard_control/devel/lib/offboard_control/uav_tf_broadcaster_node
+/home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/uav_coordinate_trans_node /home/chen/offboard_control/devel/lib/offboard_control/uav_coordinate_trans_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/offboard_control_node /home/chen/offboard_control/devel/lib/offboard_control/offboard_control_node
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetUavTakeoffReadyRequest.h /home/chen/offboard_control/devel/include/offboard_control/SetUavTakeoffReadyRequest.h
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrivedResponse.h /home/chen/offboard_control/devel/include/offboard_control/isUavArrivedResponse.h
