@@ -8,7 +8,7 @@
 #define GOTO_SETPOINT_STEP 0
 #define GOTO_SETPOINT_CLOSED_LOOP 1
 #define GOTO_SETPOINT_SMOOTH 2
-#define GOTO_SETPOINT_RELATIVE 3
+#define GOTO_SETPOINT_ACTUAL 3
 
 void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll,
               double &pitch, double &yaw) {
@@ -19,11 +19,14 @@ void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll,
 }
 
 // 构造函数
-OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_(false), isUpdateTargetPoint_(false)
+OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_(false), isUpdateTargetPoint_(false), isGetSmallUavPoseInBigUavFrameInit_(false)
 {
     // 订阅无人机本地位置
     uavPoseLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback1, this);
     uavPoseLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/pose", 10, &OffboardCtl::uavPoseLocalCallback2, this);
+
+    // 小无人机在大无人机坐标系下的local坐标订阅
+    smallUavPoseInBigUavFrameSub_ = nh_.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &OffboardCtl::smallUavPoseInBigUavFrameCallback, this);
     // 订阅无人机本地速度
     uavTwistLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback1, this);
     uavTwistLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback2, this);
@@ -72,9 +75,9 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // offbCtlType_= GOTO_SETPOINT_SMOOTH;
 
     // 初始化pid控制器
-    pidX_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
-    pidY_.initPid(1.0, 0.0, 0.1, 0.0, 0.0, 0);
-    pidZ_.initPid(5.0, 0.0, 0.1, 0.0, 0.0, 0);
+    pidX_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
+    pidY_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
+    pidZ_.initPid(0.8, 0.0, 0.1, 0.0, 0.0, 0);
 }
 OffboardCtl::~OffboardCtl()
 {
@@ -261,8 +264,17 @@ bool OffboardCtl::isArrived(const geometry_msgs::PoseStamped& targetPoint, const
 
     return (distance_2 < pow(precision, 2));
 }
-// 
+
 // 回调函数
+// 小无人机在大无人机坐标系下的local坐标回调函数
+void OffboardCtl::smallUavPoseInBigUavFrameCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+    if(!isGetSmallUavPoseInBigUavFrameInit_)
+    {
+        smallUavPoseInBigUavFrameInit_ = *msg;
+        isGetSmallUavPoseInBigUavFrameInit_ = true;
+    }
+}
 void OffboardCtl::uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     uavPoseLocal1_ = *msg;
@@ -300,6 +312,16 @@ void OffboardCtl::uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceS
     // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
 }
 
+// 小无人机在大无人机坐标系下的目标位置->小无人机在自己local坐标系下的目标位置
+geometry_msgs::PoseStamped OffboardCtl::uav1PoseInUav2FrameToUav1Frame(const geometry_msgs::PoseStamped& smallUavPoseInBigUavFrame)
+{
+    geometry_msgs::PoseStamped smallUavPoseInSmallUavFrame;
+    smallUavPoseInSmallUavFrame = smallUavPoseInBigUavFrame;
+    // 小无人机在大无人机坐标系下的local坐标转换为小无人机在自己local坐标系下的local坐标
+    smallUavPoseInSmallUavFrame.pose.position.x -= smallUavPoseInBigUavFrameInit_.pose.position.x;
+    smallUavPoseInSmallUavFrame.pose.position.y -= smallUavPoseInBigUavFrameInit_.pose.position.y;
+    return smallUavPoseInSmallUavFrame;
+}
 // 运动模式切换
 void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
 {
@@ -311,7 +333,7 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         //运行频率20hz
         ros::Rate(20).sleep();
         // 原理是因为offborad模式，需要无人机持续接收位置信息，如果没有接收到位置信息，无人机会自动降落
-        setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
+        // setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
         setpointLocalPub2_.publish(uavPoseLocal2_);
         
     }
@@ -350,6 +372,10 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
             setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
 
+            uavTargetPoint1_ = uavTargetPoint2_;
+            uavTargetPoint1_.pose.position.z -= 1.0;
+            // setpointRawLocalPub1_.publish(positionCtl(uav1PoseInUav2FrameToUav1Frame(uavTargetPoint1_), uavPoseLocal1_)); //位置环pid控制
+            uavTargetPoint1_ = uav1PoseInUav2FrameToUav1Frame(uavTargetPoint1_);
             getTargetPointRawLocal1(); //获取平滑过渡点
             uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
             uavTargetPointRaw1_.coordinate_frame =
@@ -357,11 +383,34 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             uavTargetPointRaw1_.type_mask =
             mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
             setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布平滑过渡点
-            // uavTargetPoint1_.header.stamp = ros::Time::now(); //设置时间戳
-            // setpointLocalPub1_.publish(uavTargetPoint1_); //发布目标位置
 
             //打印信息
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_SMOOTH");
+            break;
+        }
+        // 实际控制,大无人机定点，小无人机跟随，只控制小无人机姿态
+        case GOTO_SETPOINT_ACTUAL:
+        {
+            //获取平滑过渡点
+            getTargetPointRawLocal2();
+            uavTargetPointRaw2_.header.stamp = ros::Time::now(); //设置时间戳
+            uavTargetPointRaw2_.coordinate_frame =
+            mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
+            uavTargetPointRaw2_.type_mask =
+            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
+
+            //获取平滑过渡点
+            getTargetPointRawLocal1();
+            uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
+            uavTargetPointRaw1_.coordinate_frame =
+            mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
+            uavTargetPointRaw1_.type_mask =
+            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
+            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布平滑过渡点
+
+            //打印信息
+            ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_ACTUAL");
             break;
         }
     
@@ -402,16 +451,17 @@ int main(int argc, char **argv)
     // 创建 OffboardCtl 对象,创建了使用nh句柄的各种订阅、发布、服务等
     OffboardCtl offboardctl(nh);
 
+    //等待其他节点启动
+    ros::Duration(5).sleep();
+
     // 开启异步线程处理回调函数
     ros::MultiThreadedSpinner spinner(6);
     spinner.spin();
 
     ROS_INFO("OffboardCtl node has started.");
 
-    //延时等待5s
-    ros::Duration(5).sleep();
-    // 循环等待回调函数，需要解决，回调函数的频率，为啥回调位置觉得这么慢
-    ros::spin();
+    
+    
 
     return 0;
 }

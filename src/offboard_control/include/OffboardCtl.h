@@ -45,6 +45,9 @@ private:
     ros::Publisher setpointRawLocalPub2_; //发布无人机本地原始位置
     ros::Publisher setpointRawAttPub2_; //发布无人机原始姿态
 
+    // 订阅小无人机在大无人机坐标系下的local坐标
+    ros::Subscriber smallUavPoseInBigUavFrameSub_;
+
     ros::ServiceClient armingClient2_; //解锁客户端
     ros::ServiceClient setModeClient2_; //设置模式客户端
 
@@ -67,17 +70,23 @@ private:
     void uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void uavTwistLocalCallback2(const geometry_msgs::TwistStamped::ConstPtr& msg);
     void uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
-
+    // 小无人机在大无人机坐标系下的local坐标回调函数
+    void smallUavPoseInBigUavFrameCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    // 小无人机在大无人机坐标系下的目标位置->小无人机在自己local坐标系下的目标位置
+    geometry_msgs::PoseStamped uav1PoseInUav2FrameToUav1Frame(const geometry_msgs::PoseStamped& smallUavPoseInBigUavFrame);
+    // 一开始读到的小无人机在大无人机坐标系下的local坐标
+    geometry_msgs::PoseStamped smallUavPoseInBigUavFrameInit_;
     //定义的消息类型
     geometry_msgs::PoseStamped uavPoseLocal1_,uavPoseLocal2_; //订阅得到的无人机本地位置
     geometry_msgs::TwistStamped uavTwistLocal1_,uavTwistLocal2_; //订阅得到的无人机本地速度
     geometry_msgs::AccelWithCovarianceStamped uavAccLocal1_,uavAccLocal2_; //订阅得到的无人机本地加速度
     mavros_msgs::PositionTarget uavTargetPointRaw1_, uavTargetPointRaw2_; //平滑过渡设置的目标位置
-
+    mavros_msgs::AttitudeTarget uavTargetAttRaw1_; // 小无人机单独控制
     //定义是否获得无人机目标位置
     bool isGetTargetPoint_;
     bool isUpdateTargetPoint_;
-    
+    // 是否获取初始化的小无人机在大无人机坐标系下的local坐标
+    bool isGetSmallUavPoseInBigUavFrameInit_;
     geometry_msgs::PoseStamped uavTargetPoint1_,uavTargetPoint2_; //位置服务函数中设置的目标位置
     int offbCtlType_; //控制模式服务函数中设置的控制模式
     

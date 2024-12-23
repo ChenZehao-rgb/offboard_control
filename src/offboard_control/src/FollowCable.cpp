@@ -23,14 +23,14 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
-    uavPoseSub1_ = nh_.subscribe("uav1/mavros/local_position/pose", 10, &FollowCable::uavPoseLocalCallback1, this);
     uavPoseSub2_ = nh_.subscribe("uav2/mavros/local_position/pose", 10, &FollowCable::uavPoseLocalCallback2, this);
     // 无人机home位置订阅
     uavHomeSub1_ = nh_.subscribe("uav1/mavros/home_position/home", 10, &FollowCable::uavHomePoseCallback1, this);
     uavHomeSub2_ = nh_.subscribe("uav2/mavros/home_position/home", 10, &FollowCable::uavHomePoseCallback2, this);
-    // 发布无人机转换坐标后的本地位置
-    uavPoseGlobalPub1_ = nh_.advertise<geometry_msgs::PoseStamped>("/offboard_control/uav1_local_position", 10);
-    uavPoseGlobalPub2_ = nh_.advertise<geometry_msgs::PoseStamped>("/offboard_control/uav2_local_position", 10);
+    // 小无人机在大无人机坐标系下的local坐标订阅
+    smallUavPoseInBigUavFrameSub_ = nh_.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &FollowCable::smallUavPoseInBigUavFrameCallback, this);
+    // 由小无人机相对坐标转换得到的大无人机目标位置订阅
+    bigUavTargetPoseSub_ = nh_.subscribe("/transform/big_uav_target_pose", 10, &FollowCable::bigUavTargetPoseCallback, this);
     // 发布状态机控制状态
     stateControlPub_ = nh_.advertise<offboard_control::StateControl>("/follow_state/state", 10);
     // 控制状态机
@@ -41,24 +41,16 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     loadConfigParam("/home/chen/offboard_control/src/offboard_control/config/config.yaml");
     // 读取索道点
     all_waypoints_ = loadWaypoints("/home/chen/offboard_control/src/offboard_control/config/waypoints.yaml");
-    // 设置模式
+    // 等待其他节点启动
+    ros::Duration(10).sleep();
     setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
-    // 大小无人机起飞
+    // 发送大无人机目标位置
     setUavTakeoffReady(2);
-    takeOffPoint2_= uavPoseGlobal2Local2(takeOffPoint2_);
     setTargetPoint(takeOffPoint2_,2);
+    // 发送小无人机解锁指令，offboardCtl会自动获取大无人机下方1m位置作为小无人机的起飞位置
     setUavTakeoffReady(1);
-    takeOffPoint1_= uavPoseGlobal2Local1(takeOffPoint1_);
-    setTargetPoint(takeOffPoint1_,1);
-
-    // 假设cablePose数值
-    cablePose_.pose.position.x = 0.0;
-    cablePose_.pose.position.y = 0.0;
-    cablePose_.pose.position.z = 0.0;
-    cablePose_.pose.orientation.x = 0.0;
-    cablePose_.pose.orientation.y = 0.0;
-    cablePose_.pose.orientation.z = 0.0;
-    cablePose_.pose.orientation.w = 1.0;
+    // 延时5s,等待无人机起飞
+    ros::Duration(5).sleep();
 }
 
 FollowCable::~FollowCable()
@@ -95,55 +87,6 @@ void FollowCable::testPoseTrans()
         ROS_INFO_STREAM("uavPoseLocalSub2_: " << uavPoseLocalSub2_);
     }
 }
-// 线传感器数据处理,现假设是通过另一个节点发布的
-void FollowCable::getCablePose(const geometry_msgs::PoseStamped::ConstPtr& msg)
-{
-    cablePose_ = *msg;
-}
-// 这里的全局坐标是在map中的坐标,因为无人机以起飞点为原点，需要将目标点转换到无人机坐标系下
-geometry_msgs::PoseStamped FollowCable::uavPoseGlobal2Local1(const geometry_msgs::PoseStamped globalPose)
-{
-    // 将全局坐标转换为本地坐标
-    geometry_msgs::PoseStamped localPose;
-    localPose.pose.position.x = globalPose.pose.position.x - uavHomePoint1_.pose.position.x;
-    localPose.pose.position.y = globalPose.pose.position.y - uavHomePoint1_.pose.position.y;
-    localPose.pose.position.z = globalPose.pose.position.z;
-    localPose.pose.orientation = globalPose.pose.orientation;
-    return localPose;
-
-}
-geometry_msgs::PoseStamped FollowCable::uavPoseGlobal2Local2(const geometry_msgs::PoseStamped globalPose)
-{
-    // 将全局坐标转换为本地坐标
-    geometry_msgs::PoseStamped localPose;
-    localPose.pose.position.x = globalPose.pose.position.x - uavHomePoint2_.pose.position.x;
-    localPose.pose.position.y = globalPose.pose.position.y - uavHomePoint2_.pose.position.y;
-    localPose.pose.position.z = globalPose.pose.position.z;
-    localPose.pose.orientation = globalPose.pose.orientation;
-    return localPose;
-
-}
-// 本地坐标转换为全局坐标
-geometry_msgs::PoseStamped FollowCable::uavPoseLocal2Global1(const geometry_msgs::PoseStamped localPose)
-{
-    // 将本地坐标转换为全局坐标
-    geometry_msgs::PoseStamped globalPose;
-    globalPose.pose.position.x = localPose.pose.position.x + uavHomePoint1_.pose.position.x;
-    globalPose.pose.position.y = localPose.pose.position.y + uavHomePoint1_.pose.position.y;
-    globalPose.pose.position.z = localPose.pose.position.z;
-    globalPose.pose.orientation = localPose.pose.orientation;
-    return globalPose;
-}
-geometry_msgs::PoseStamped FollowCable::uavPoseLocal2Global2(const geometry_msgs::PoseStamped localPose)
-{
-    // 将本地坐标转换为全局坐标
-    geometry_msgs::PoseStamped globalPose;
-    globalPose.pose.position.x = localPose.pose.position.x + uavHomePoint2_.pose.position.x;
-    globalPose.pose.position.y = localPose.pose.position.y + uavHomePoint2_.pose.position.y;
-    globalPose.pose.position.z = localPose.pose.position.z;
-    globalPose.pose.orientation = localPose.pose.orientation;
-    return globalPose;
-}
 // 上线操作中索道坐标->大小飞机坐标，onlineTarg只得是通过雷达离线采点得到的全局坐标，包含x,y,z以及orientation
 void FollowCable::onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high)
 {
@@ -154,14 +97,6 @@ void FollowCable::onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& on
     uavPoint2 = uavPoint1;
     uavPoint2.pose.position.z += rope_length;
 }
-// 根据线结构传感器的测量结果，得到大小飞机需要运动的相对位置/角度，cablePose为相机坐标系下的坐标，需要先转换到小无人机坐标系下，然后再转换到大无人机坐标系下，最后再计算大小无人机运动的相对位置/角度
-void FollowCable::cablePose2UavRalPose(const geometry_msgs::PoseStamped& cablePose, geometry_msgs::PoseStamped& uavRalPose1, geometry_msgs::PoseStamped& uavRalPose2)
-{
-    // 假设cablePose数值
-    uavRalPose1 = cablePose;
-    uavRalPose2 = cablePose;
-}
-
 // 根据线结构传感器的测量结果，判断姿态调整是否到位
 bool FollowCable::isAjusted(const geometry_msgs::PoseStamped& cablePose)
 {
@@ -301,12 +236,9 @@ void FollowCable::followCablePoints(std::vector<geometry_msgs::PoseStamped> wayp
         geometry_msgs::PoseStamped waypoint = waypoints.front(); // 获取第一个目标点
         geometry_msgs::PoseStamped wayPointUav1, wayPointUav2; // 定义无人机本地坐标系下的目标点
         // 大无人机坐标
-        wayPointUav2 = uavPoseGlobal2Local2(waypoint);
+        wayPointUav2 = waypoint;
         wayPointUav2.pose.position.z += rope_length;
         setTargetPoint(wayPointUav2, 2);
-        // 小无人机坐标
-        wayPointUav1 = uavPoseGlobal2Local1(waypoint);
-        setTargetPoint(wayPointUav1, 1);
         // 等待到达目标点
         while (ros::ok())
         {
@@ -333,7 +265,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
     while(ros::ok() && stateControl_.state_ctrl_type == offboard_control::StateControl::TAKEOFF)
     { 
         // 如果大飞机到达起飞点，起飞成功
-        if(isUavArrived(takeOffPoint2_,2,targetPointError2))
+        if(isUavArrived(takeOffPoint2_,2,targetPointError1))
         {
             stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
             ROS_INFO_STREAM("Takeoff success, and arrive online point...");
@@ -354,9 +286,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             if(!isGetOnlinePoint_)
             {
                 onLineCablePoint2UavPoint(onLinePoint_, onLinePoint1_, onLinePoint2_, onLinePoint_Z);
-                // 从全局坐标转换到无人机本地坐标
-                onLinePoint1_ = uavPoseGlobal2Local1(onLinePoint1_);
-                onLinePoint2_ = uavPoseGlobal2Local2(onLinePoint2_);
                 isGetOnlinePoint_ = true;
 
             }
@@ -364,11 +293,10 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             if(!isSendOnlinePoint_)
             {
                 setTargetPoint(onLinePoint2_,2);
-                setTargetPoint(onLinePoint1_,1);
                 isSendOnlinePoint_ = true;
             }
             // 判断小飞机是否到达onLinePoint1_
-            if(isUavArrived(onLinePoint1_,1,targetPointError1))
+            if(isUavArrived(onLinePoint2_,2,targetPointError1))
             {
                 stateControl_.state_ctrl_type = offboard_control::StateControl::AJUST_ATTITUDE;
                 ROS_INFO_STREAM("Arrived on line point, and adjust attitude...");
@@ -386,16 +314,16 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 根据传感器获取大小飞机需要运动的相对位置/角度
             if(!isGetAjustPose_)
             {
-                // 已知cablePose_是线结构传感器的测量结果，包含相对于小飞机的x,y,z,orientation
-                // 根据cablePose_的位置和角度，得到大小飞机需要运动的相对位置/角度，uavRalPose1_和uavRalPose2_，均是相对位置，包含x,y,z,orientation
-                cablePose2UavRalPose(cablePose_, uavRalPose1_, uavRalPose2_);
-                // 发送大小飞机的相对pose
+                // 发送获取的大无人机坐标
+                setTargetPoint(bigUavTargetPose_,2);
+                // 只发送小无人机旋转角度，即bigUavTargetPose_的orientation
+                
                 // setTargetPoint(uavRalPose1_,1);
                 // setTargetPoint(uavRalPose2_,2);
                 isGetAjustPose_ = true;
             }
             // 通过获取线结构传感器的测量结果，判断大小飞机是否到达相对位置/角度
-            if(isAjusted(cablePose_))
+            if(isAjusted(bigUavTargetPose_))
             {
                 // 已经调整好位置，准备降落上线
                 stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;
@@ -417,9 +345,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             if(!isGetOnlinePoint_)
             {
                 onLineCablePoint2UavPoint(onLinePoint_, onLinePoint1_, onLinePoint2_, 0);
-                // 从全局坐标转换到无人机本地坐标
-                onLinePoint1_ = uavPoseGlobal2Local1(onLinePoint1_);
-                onLinePoint2_ = uavPoseGlobal2Local2(onLinePoint2_);
                 isGetOnlinePoint_ = true;
                 // 控制大飞机下降
                 setTargetPoint(onLinePoint2_,2); // 降落过程可能需要根据线结构传感器的测量结果实时调整
@@ -558,24 +483,12 @@ void FollowCable::uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstP
 {
     // 更新无人机本地位置
     uavPoseLocalSub1_ = *msg;
-    uavPoseGlobal1_= uavPoseLocal2Global1(uavPoseLocalSub1_);
-    static tf::TransformBroadcaster br;
-    tf::Transform transform;
-    transform.setOrigin(tf::Vector3(uavPoseGlobal1_.pose.position.x, uavPoseGlobal1_.pose.position.y, uavPoseGlobal1_.pose.position.z));
-    transform.setRotation(tf::Quaternion(uavPoseGlobal1_.pose.orientation.x, uavPoseGlobal1_.pose.orientation.y, uavPoseGlobal1_.pose.orientation.z, uavPoseGlobal1_.pose.orientation.w));
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "uav1"));
     // uavPoseGlobalPub1_.publish(uavPoseGlobal1_);
 }
 void FollowCable::uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     // 更新无人机本地位置
     uavPoseLocalSub2_ = *msg;
-    uavPoseGlobal2_= uavPoseLocal2Global2(uavPoseLocalSub2_);
-    static tf::TransformBroadcaster br;
-    tf::Transform transform;
-    transform.setOrigin(tf::Vector3(uavPoseGlobal2_.pose.position.x, uavPoseGlobal2_.pose.position.y, uavPoseGlobal2_.pose.position.z));
-    transform.setRotation(tf::Quaternion(uavPoseGlobal2_.pose.orientation.x, uavPoseGlobal2_.pose.orientation.y, uavPoseGlobal2_.pose.orientation.z, uavPoseGlobal2_.pose.orientation.w));
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "uav2"));
     // uavPoseGlobalPub2_.publish(uavPoseGlobal2_);
 }
 // 无人机home位置回调函数
@@ -588,6 +501,18 @@ void FollowCable::uavHomePoseCallback2(const mavros_msgs::HomePosition::ConstPtr
 {
     // 更新无人机home位置
     uavHomePoseSub2_ = *msg;
+}
+// 小无人机在大无人机坐标系下的local坐标回调函数
+void FollowCable::smallUavPoseInBigUavFrameCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+    // 更新小无人机在大无人机坐标系下的local坐标
+    smallUavPoseInBigUavFrame_ = *msg;
+}
+// 由小无人机相对坐标转换得到的大无人机目标位置回调函数
+void FollowCable::bigUavTargetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+    // 更新大无人机目标位置
+    bigUavTargetPose_ = *msg;
 }
 // 从yaml文件中读取参数
 std::vector<std::vector<geometry_msgs::PoseStamped>> FollowCable::loadWaypoints(const std::string& filename) 

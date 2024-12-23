@@ -47,6 +47,10 @@ private:
     // 订阅无人机home位置
     ros::Subscriber uavHomeSub1_;
     ros::Subscriber uavHomeSub2_;
+    // 订阅小无人机在大无人机坐标系下的local坐标
+    ros::Subscriber smallUavPoseInBigUavFrameSub_;
+    // 订阅由小无人机相对坐标转换得到的大无人机目标位置
+    ros::Subscriber bigUavTargetPoseSub_;
     // 发布无人机转换坐标后的本地位置
     ros::Publisher uavPoseGlobalPub1_;
     ros::Publisher uavPoseGlobalPub2_;
@@ -75,10 +79,7 @@ private:
     double claw_diameter, rope_length; // 爪子直径，大小无人机连接绳长度
     double onLinePoint_Z = 1.0; // 小飞机相对索道上线点的高度
     int onLineFailCnt = 0; // 上线失败计数
-    // 线结构传感器的测量结果
-    geometry_msgs::PoseStamped cablePose_;
-    // 大小飞机需要调整的相对位置，以无人机body坐标系为参考系
-    geometry_msgs::PoseStamped uavRalPose1_, uavRalPose2_;
+    geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavTargetPose_; // 小无人机在大无人机坐标系下的local坐标，大无人机目标位置
     double targetPointError1 = 0.1, targetPointError2 = 0.5; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
@@ -95,6 +96,10 @@ private:
     // home位置回调函数
     void uavHomePoseCallback1(const mavros_msgs::HomePosition::ConstPtr& msg);
     void uavHomePoseCallback2(const mavros_msgs::HomePosition::ConstPtr& msg);
+    // 小无人机在大无人机坐标系下的local坐标回调函数
+    void smallUavPoseInBigUavFrameCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    // 由小无人机相对坐标转换得到的大无人机目标位置回调函数
+    void bigUavTargetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     // 客户端服务函数
     bool isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID, double precision); // 判断是否到达目标点服务函数
     void setTargetPoint(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID); // 设置目标点服务函数
@@ -120,15 +125,6 @@ private:
     std::vector<std::vector<geometry_msgs::PoseStamped>> loadWaypoints(const std::string& filename);
     // 跟踪索道点
     void followCablePoints(std::vector<geometry_msgs::PoseStamped> waypoints);
-    // 全局坐标转换为本地坐标
-    geometry_msgs::PoseStamped uavPoseGlobal2Local1(const geometry_msgs::PoseStamped globalPose);
-    geometry_msgs::PoseStamped uavPoseGlobal2Local2(const geometry_msgs::PoseStamped globalPose);
-    // 本地坐标转换为全局坐标
-    geometry_msgs::PoseStamped uavPoseLocal2Global1(const geometry_msgs::PoseStamped localPose);
-    geometry_msgs::PoseStamped uavPoseLocal2Global2(const geometry_msgs::PoseStamped localPose);
-
-    // 跟随索道点无人机本地坐标处理
-    void wayPointsGlobal2Local(std::vector<geometry_msgs::PoseStamped> waypoints);
 
     void controlLoop(const ros::TimerEvent&);
 
