@@ -9,12 +9,10 @@ import struct
 import geometry_msgs.msg
 
 class Status(genpy.Message):
-  _md5sum = "a0c7abb5783c6834587efbd77de4a4a3"
+  _md5sum = "1da643e68400df1829ed9658c05293dc"
   _type = "offboard_control/Status"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """string state
-geometry_msgs/Pose uav1_position
-geometry_msgs/Quaternion uav1_orientation
 geometry_msgs/Pose uav2_position
 geometry_msgs/Quaternion uav2_orientation
 ================================================================================
@@ -39,8 +37,8 @@ float64 y
 float64 z
 float64 w
 """
-  __slots__ = ['state','uav1_position','uav1_orientation','uav2_position','uav2_orientation']
-  _slot_types = ['string','geometry_msgs/Pose','geometry_msgs/Quaternion','geometry_msgs/Pose','geometry_msgs/Quaternion']
+  __slots__ = ['state','uav2_position','uav2_orientation']
+  _slot_types = ['string','geometry_msgs/Pose','geometry_msgs/Quaternion']
 
   def __init__(self, *args, **kwds):
     """
@@ -50,7 +48,7 @@ float64 w
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       state,uav1_position,uav1_orientation,uav2_position,uav2_orientation
+       state,uav2_position,uav2_orientation
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -61,18 +59,12 @@ float64 w
       # message fields cannot be None, assign default values for those that are
       if self.state is None:
         self.state = ''
-      if self.uav1_position is None:
-        self.uav1_position = geometry_msgs.msg.Pose()
-      if self.uav1_orientation is None:
-        self.uav1_orientation = geometry_msgs.msg.Quaternion()
       if self.uav2_position is None:
         self.uav2_position = geometry_msgs.msg.Pose()
       if self.uav2_orientation is None:
         self.uav2_orientation = geometry_msgs.msg.Quaternion()
     else:
       self.state = ''
-      self.uav1_position = geometry_msgs.msg.Pose()
-      self.uav1_orientation = geometry_msgs.msg.Quaternion()
       self.uav2_position = geometry_msgs.msg.Pose()
       self.uav2_orientation = geometry_msgs.msg.Quaternion()
 
@@ -95,7 +87,7 @@ float64 w
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_22d().pack(_x.uav1_position.position.x, _x.uav1_position.position.y, _x.uav1_position.position.z, _x.uav1_position.orientation.x, _x.uav1_position.orientation.y, _x.uav1_position.orientation.z, _x.uav1_position.orientation.w, _x.uav1_orientation.x, _x.uav1_orientation.y, _x.uav1_orientation.z, _x.uav1_orientation.w, _x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w))
+      buff.write(_get_struct_11d().pack(_x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -107,10 +99,6 @@ float64 w
     if python3:
       codecs.lookup_error("rosmsg").msg_type = self._type
     try:
-      if self.uav1_position is None:
-        self.uav1_position = geometry_msgs.msg.Pose()
-      if self.uav1_orientation is None:
-        self.uav1_orientation = geometry_msgs.msg.Quaternion()
       if self.uav2_position is None:
         self.uav2_position = geometry_msgs.msg.Pose()
       if self.uav2_orientation is None:
@@ -127,8 +115,8 @@ float64 w
         self.state = str[start:end]
       _x = self
       start = end
-      end += 176
-      (_x.uav1_position.position.x, _x.uav1_position.position.y, _x.uav1_position.position.z, _x.uav1_position.orientation.x, _x.uav1_position.orientation.y, _x.uav1_position.orientation.z, _x.uav1_position.orientation.w, _x.uav1_orientation.x, _x.uav1_orientation.y, _x.uav1_orientation.z, _x.uav1_orientation.w, _x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w,) = _get_struct_22d().unpack(str[start:end])
+      end += 88
+      (_x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w,) = _get_struct_11d().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -148,7 +136,7 @@ float64 w
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_22d().pack(_x.uav1_position.position.x, _x.uav1_position.position.y, _x.uav1_position.position.z, _x.uav1_position.orientation.x, _x.uav1_position.orientation.y, _x.uav1_position.orientation.z, _x.uav1_position.orientation.w, _x.uav1_orientation.x, _x.uav1_orientation.y, _x.uav1_orientation.z, _x.uav1_orientation.w, _x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w))
+      buff.write(_get_struct_11d().pack(_x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -161,10 +149,6 @@ float64 w
     if python3:
       codecs.lookup_error("rosmsg").msg_type = self._type
     try:
-      if self.uav1_position is None:
-        self.uav1_position = geometry_msgs.msg.Pose()
-      if self.uav1_orientation is None:
-        self.uav1_orientation = geometry_msgs.msg.Quaternion()
       if self.uav2_position is None:
         self.uav2_position = geometry_msgs.msg.Pose()
       if self.uav2_orientation is None:
@@ -181,8 +165,8 @@ float64 w
         self.state = str[start:end]
       _x = self
       start = end
-      end += 176
-      (_x.uav1_position.position.x, _x.uav1_position.position.y, _x.uav1_position.position.z, _x.uav1_position.orientation.x, _x.uav1_position.orientation.y, _x.uav1_position.orientation.z, _x.uav1_position.orientation.w, _x.uav1_orientation.x, _x.uav1_orientation.y, _x.uav1_orientation.z, _x.uav1_orientation.w, _x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w,) = _get_struct_22d().unpack(str[start:end])
+      end += 88
+      (_x.uav2_position.position.x, _x.uav2_position.position.y, _x.uav2_position.position.z, _x.uav2_position.orientation.x, _x.uav2_position.orientation.y, _x.uav2_position.orientation.z, _x.uav2_position.orientation.w, _x.uav2_orientation.x, _x.uav2_orientation.y, _x.uav2_orientation.z, _x.uav2_orientation.w,) = _get_struct_11d().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -191,9 +175,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_22d = None
-def _get_struct_22d():
-    global _struct_22d
-    if _struct_22d is None:
-        _struct_22d = struct.Struct("<22d")
-    return _struct_22d
+_struct_11d = None
+def _get_struct_11d():
+    global _struct_11d
+    if _struct_11d is None:
+        _struct_11d = struct.Struct("<11d")
+    return _struct_11d

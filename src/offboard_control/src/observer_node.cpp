@@ -6,8 +6,6 @@
 
 void statusCallback(const offboard_control::Status::ConstPtr& msg) {
     std::cout << "Current state: " << msg->state << std::endl;
-    std::cout << "UAV1 position: " << msg->uav1_position << std::endl;
-    std::cout << "UAV1 orientation: " << msg->uav1_orientation << std::endl;
     std::cout << "UAV2 position: " << msg->uav2_position << std::endl;
     std::cout << "UAV2 orientation: " << msg->uav2_orientation << std::endl;
 }

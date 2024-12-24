@@ -20,8 +20,6 @@ class Status {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.state = null;
-      this.uav1_position = null;
-      this.uav1_orientation = null;
       this.uav2_position = null;
       this.uav2_orientation = null;
     }
@@ -31,18 +29,6 @@ class Status {
       }
       else {
         this.state = '';
-      }
-      if (initObj.hasOwnProperty('uav1_position')) {
-        this.uav1_position = initObj.uav1_position
-      }
-      else {
-        this.uav1_position = new geometry_msgs.msg.Pose();
-      }
-      if (initObj.hasOwnProperty('uav1_orientation')) {
-        this.uav1_orientation = initObj.uav1_orientation
-      }
-      else {
-        this.uav1_orientation = new geometry_msgs.msg.Quaternion();
       }
       if (initObj.hasOwnProperty('uav2_position')) {
         this.uav2_position = initObj.uav2_position
@@ -63,10 +49,6 @@ class Status {
     // Serializes a message object of type Status
     // Serialize message field [state]
     bufferOffset = _serializer.string(obj.state, buffer, bufferOffset);
-    // Serialize message field [uav1_position]
-    bufferOffset = geometry_msgs.msg.Pose.serialize(obj.uav1_position, buffer, bufferOffset);
-    // Serialize message field [uav1_orientation]
-    bufferOffset = geometry_msgs.msg.Quaternion.serialize(obj.uav1_orientation, buffer, bufferOffset);
     // Serialize message field [uav2_position]
     bufferOffset = geometry_msgs.msg.Pose.serialize(obj.uav2_position, buffer, bufferOffset);
     // Serialize message field [uav2_orientation]
@@ -80,10 +62,6 @@ class Status {
     let data = new Status(null);
     // Deserialize message field [state]
     data.state = _deserializer.string(buffer, bufferOffset);
-    // Deserialize message field [uav1_position]
-    data.uav1_position = geometry_msgs.msg.Pose.deserialize(buffer, bufferOffset);
-    // Deserialize message field [uav1_orientation]
-    data.uav1_orientation = geometry_msgs.msg.Quaternion.deserialize(buffer, bufferOffset);
     // Deserialize message field [uav2_position]
     data.uav2_position = geometry_msgs.msg.Pose.deserialize(buffer, bufferOffset);
     // Deserialize message field [uav2_orientation]
@@ -94,7 +72,7 @@ class Status {
   static getMessageSize(object) {
     let length = 0;
     length += _getByteLength(object.state);
-    return length + 180;
+    return length + 92;
   }
 
   static datatype() {
@@ -104,15 +82,13 @@ class Status {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'a0c7abb5783c6834587efbd77de4a4a3';
+    return '1da643e68400df1829ed9658c05293dc';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     string state
-    geometry_msgs/Pose uav1_position
-    geometry_msgs/Quaternion uav1_orientation
     geometry_msgs/Pose uav2_position
     geometry_msgs/Quaternion uav2_orientation
     ================================================================================
@@ -151,20 +127,6 @@ class Status {
     }
     else {
       resolved.state = ''
-    }
-
-    if (msg.uav1_position !== undefined) {
-      resolved.uav1_position = geometry_msgs.msg.Pose.Resolve(msg.uav1_position)
-    }
-    else {
-      resolved.uav1_position = new geometry_msgs.msg.Pose()
-    }
-
-    if (msg.uav1_orientation !== undefined) {
-      resolved.uav1_orientation = geometry_msgs.msg.Quaternion.Resolve(msg.uav1_orientation)
-    }
-    else {
-      resolved.uav1_orientation = new geometry_msgs.msg.Quaternion()
     }
 
     if (msg.uav2_position !== undefined) {

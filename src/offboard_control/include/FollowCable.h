@@ -61,13 +61,14 @@ private:
     // 发布状态机控制状态
     ros::Publisher status_pub_;
     // 控制状态机
-    ros::Timer controlLoop_;
+    ros::Timer controlLoop_, statusPubTimer_;
     /******************** 使用变量定义 **********************/
     // 状态机控制频率
     #define controlRate 5.0
     #define controlPeriod (1.0 / controlRate)
     // 状态机控制状态
     offboard_control::StateControl stateControl_, previousStateControl_, nextStateControl_;
+    std::string preStateControlStr_;
     // mavros订阅本地位置
     geometry_msgs::PoseStamped uavPoseLocalSub1_;
     geometry_msgs::PoseStamped uavPoseLocalSub2_;
@@ -80,6 +81,7 @@ private:
     geometry_msgs::PoseStamped takeOffPoint1_, takeOffPoint2_; // 起飞点
     geometry_msgs::PoseStamped uavHomePoint1_, uavHomePoint2_; // 无人机home点
     geometry_msgs::PoseStamped onLinePoint1_, onLinePoint2_; // 小飞机的上线目标点，大飞机的上线目标点
+    geometry_msgs::PoseStamped crossPoint_; // 越过节点的目标点，主要是大无人机高度
     std::vector<geometry_msgs::PoseStamped> cablePoints_; // 索道上的上线点
     double claw_diameter, rope_length; // 爪子直径，大小无人机连接绳长度
     double onLinePoint_Z = 1.0; // 小飞机相对索道上线点的高度
@@ -94,6 +96,7 @@ private:
     bool isSendOnlinePoint_; // 是否发送过上线点标志位
     bool isArrivedOnlinePoint_; // 是否到达上线点标志位
     bool isGetAjustPose_; // 获取大小飞机调整姿态点标志位
+    bool isGetCrossPoint_; // 获取越过节点点标志位
     // 接收到外部指令标志位
     bool isGetCommand_;
     /******************** 函数定义 **********************/
@@ -130,8 +133,9 @@ private:
     // 读取无人机初始化参数
     void loadConfigParam(const std::string& filename);
     std::vector<std::vector<geometry_msgs::PoseStamped>> loadWaypoints(const std::string& filename);
+    void readParameters(ros::NodeHandle& nh);
     // 跟踪索道点
-    void followCablePoints(std::vector<geometry_msgs::PoseStamped> waypoints);
+    void followCablePoints(std::vector<geometry_msgs::PoseStamped> &waypoints);
 
     void controlLoop(const ros::TimerEvent&);
 
@@ -140,7 +144,7 @@ private:
     // 接收外部节点指令
     void waitForCommand();
     // 发布状态信息
-    void publishStatus();
+    void publishStatus(const ros::TimerEvent&);
     // 测试坐标转换以及运动模式
     void testPoseTrans();
 };

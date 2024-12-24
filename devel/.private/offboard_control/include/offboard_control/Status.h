@@ -17,8 +17,6 @@
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/Quaternion.h>
 
 namespace offboard_control
 {
@@ -29,15 +27,11 @@ struct Status_
 
   Status_()
     : state()
-    , uav1_position()
-    , uav1_orientation()
     , uav2_position()
     , uav2_orientation()  {
     }
   Status_(const ContainerAllocator& _alloc)
     : state(_alloc)
-    , uav1_position(_alloc)
-    , uav1_orientation(_alloc)
     , uav2_position(_alloc)
     , uav2_orientation(_alloc)  {
   (void)_alloc;
@@ -47,12 +41,6 @@ struct Status_
 
    typedef std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>> _state_type;
   _state_type state;
-
-   typedef  ::geometry_msgs::Pose_<ContainerAllocator>  _uav1_position_type;
-  _uav1_position_type uav1_position;
-
-   typedef  ::geometry_msgs::Quaternion_<ContainerAllocator>  _uav1_orientation_type;
-  _uav1_orientation_type uav1_orientation;
 
    typedef  ::geometry_msgs::Pose_<ContainerAllocator>  _uav2_position_type;
   _uav2_position_type uav2_position;
@@ -90,8 +78,6 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::offboard_control::Status_<ContainerAllocator1> & lhs, const ::offboard_control::Status_<ContainerAllocator2> & rhs)
 {
   return lhs.state == rhs.state &&
-    lhs.uav1_position == rhs.uav1_position &&
-    lhs.uav1_orientation == rhs.uav1_orientation &&
     lhs.uav2_position == rhs.uav2_position &&
     lhs.uav2_orientation == rhs.uav2_orientation;
 }
@@ -150,12 +136,12 @@ struct MD5Sum< ::offboard_control::Status_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "a0c7abb5783c6834587efbd77de4a4a3";
+    return "1da643e68400df1829ed9658c05293dc";
   }
 
   static const char* value(const ::offboard_control::Status_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xa0c7abb5783c6834ULL;
-  static const uint64_t static_value2 = 0x587efbd77de4a4a3ULL;
+  static const uint64_t static_value1 = 0x1da643e68400df18ULL;
+  static const uint64_t static_value2 = 0x29ed9658c05293dcULL;
 };
 
 template<class ContainerAllocator>
@@ -175,8 +161,6 @@ struct Definition< ::offboard_control::Status_<ContainerAllocator> >
   static const char* value()
   {
     return "string state\n"
-"geometry_msgs/Pose uav1_position\n"
-"geometry_msgs/Quaternion uav1_orientation\n"
 "geometry_msgs/Pose uav2_position\n"
 "geometry_msgs/Quaternion uav2_orientation\n"
 "================================================================================\n"
@@ -219,8 +203,6 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.state);
-      stream.next(m.uav1_position);
-      stream.next(m.uav1_orientation);
       stream.next(m.uav2_position);
       stream.next(m.uav2_orientation);
     }
@@ -243,12 +225,6 @@ struct Printer< ::offboard_control::Status_<ContainerAllocator> >
   {
     s << indent << "state: ";
     Printer<std::basic_string<char, std::char_traits<char>, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<char>>>::stream(s, indent + "  ", v.state);
-    s << indent << "uav1_position: ";
-    s << std::endl;
-    Printer< ::geometry_msgs::Pose_<ContainerAllocator> >::stream(s, indent + "  ", v.uav1_position);
-    s << indent << "uav1_orientation: ";
-    s << std::endl;
-    Printer< ::geometry_msgs::Quaternion_<ContainerAllocator> >::stream(s, indent + "  ", v.uav1_orientation);
     s << indent << "uav2_position: ";
     s << std::endl;
     Printer< ::geometry_msgs::Pose_<ContainerAllocator> >::stream(s, indent + "  ", v.uav2_position);

@@ -77,7 +77,8 @@
             <arg name="tgt_component" value="1"/>
         </include>
     </group>
-
+    <!-- Include offboard.launch -->
+    <include file="$(find offboard_control)/launch/offboard.launch"/>
 </launch>
 <!-- to add more UAVs (up to 10):
 Increase the id

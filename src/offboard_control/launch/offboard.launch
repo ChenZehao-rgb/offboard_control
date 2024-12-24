@@ -5,4 +5,7 @@
     <node pkg="offboard_control" type="online_traj_generator_node" name="OnlineTrajGen" output="screen"/>
     <!-- 启动 uav_coordinate_trans 节点 -->
     <node pkg="offboard_control" type="uav_coordinate_trans_node" name="uav_coordinate_trans" output="screen"/>
+    <!-- 加载参数文件 -->
+    <rosparam file="$(find offboard_control)/config/waypoints.yaml" command="load"/>
+    <rosparam file="$(find offboard_control)/config/config.yaml" command="load"/>
 </launch>
