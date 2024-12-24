@@ -108,6 +108,7 @@ private:
         yaw += delta_yaw;
         tf2::Quaternion q;
         q.setRPY(roll, pitch, yaw);
+        q.normalize();
         bigUavTargetPose_.pose.orientation.x = q.x();
         bigUavTargetPose_.pose.orientation.y = q.y();
         bigUavTargetPose_.pose.orientation.z = q.z();

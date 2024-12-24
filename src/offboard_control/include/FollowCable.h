@@ -17,6 +17,7 @@
 #include <std_msgs/String.h> // 确保包含了正确的头文件
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include <map>
 
 #include "offboard_control/SetTargetPoint.h"
 #include "offboard_control/SetOffboardCtlType.h"
@@ -24,6 +25,7 @@
 #include "offboard_control/isUavArrived.h"
 #include "offboard_control/StateControl.h"
 #include "offboard_control/SetUavTakeoffReady.h"
+#include <offboard_control/Status.h>
 
 class FollowCable{
 public:
@@ -39,6 +41,8 @@ private:
     ros::ServiceClient setPidGainsClient_; //设置pid参数客户端
     ros::ServiceClient isUavArrivedClient_; //判断是否到达目标点客户端
     ros::ServiceClient setUavTakeoffReadyClient_; //设置offboard和解锁客户端
+    ros::ServiceClient setUavReturnClient1_;
+    ros::ServiceClient setUavReturnClient2_;
     // 键盘输入
     ros::Subscriber keyboardSub_;
     // 订阅无人机本地位置
@@ -55,7 +59,7 @@ private:
     ros::Publisher uavPoseGlobalPub1_;
     ros::Publisher uavPoseGlobalPub2_;
     // 发布状态机控制状态
-    ros::Publisher stateControlPub_;
+    ros::Publisher status_pub_;
     // 控制状态机
     ros::Timer controlLoop_;
     /******************** 使用变量定义 **********************/
@@ -63,7 +67,7 @@ private:
     #define controlRate 5.0
     #define controlPeriod (1.0 / controlRate)
     // 状态机控制状态
-    offboard_control::StateControl stateControl_;
+    offboard_control::StateControl stateControl_, previousStateControl_, nextStateControl_;
     // mavros订阅本地位置
     geometry_msgs::PoseStamped uavPoseLocalSub1_;
     geometry_msgs::PoseStamped uavPoseLocalSub2_;
@@ -75,7 +79,8 @@ private:
     // 无人机相关参数
     geometry_msgs::PoseStamped takeOffPoint1_, takeOffPoint2_; // 起飞点
     geometry_msgs::PoseStamped uavHomePoint1_, uavHomePoint2_; // 无人机home点
-    geometry_msgs::PoseStamped onLinePoint_, onLinePoint1_, onLinePoint2_; // 索道上的上线点，小飞机的目标点，大飞机的目标点
+    geometry_msgs::PoseStamped onLinePoint1_, onLinePoint2_; // 小飞机的上线目标点，大飞机的上线目标点
+    std::vector<geometry_msgs::PoseStamped> cablePoints_; // 索道上的上线点
     double claw_diameter, rope_length; // 爪子直径，大小无人机连接绳长度
     double onLinePoint_Z = 1.0; // 小飞机相对索道上线点的高度
     int onLineFailCnt = 0; // 上线失败计数
@@ -89,6 +94,8 @@ private:
     bool isSendOnlinePoint_; // 是否发送过上线点标志位
     bool isArrivedOnlinePoint_; // 是否到达上线点标志位
     bool isGetAjustPose_; // 获取大小飞机调整姿态点标志位
+    // 接收到外部指令标志位
+    bool isGetCommand_;
     /******************** 函数定义 **********************/
     // 本地位置回调函数
     void uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
@@ -130,7 +137,10 @@ private:
 
     void setPidGains(int axis, double kp, double ki, double kd);
     void keyboardCallback(const std_msgs::String::ConstPtr& msg);
-    
+    // 接收外部节点指令
+    void waitForCommand();
+    // 发布状态信息
+    void publishStatus();
     // 测试坐标转换以及运动模式
     void testPoseTrans();
 };

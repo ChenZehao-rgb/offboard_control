@@ -105,6 +105,8 @@ private:
     // 获取平滑到点
     bool getTargetPointRawLocal1();
     bool getTargetPointRawLocal2();
+    // 小无人机原始姿态控制
+    mavros_msgs::AttitudeTarget smallUavTargetAttRaw(geometry_msgs::Quaternion orientation);
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
     // 位置环pid控制

@@ -196,7 +196,22 @@ bool OffboardCtl::getTargetPointRawLocal2()
     uavTargetPointRaw2_ = srv.response.setPointRaw;
     return true;
 }
-
+// 小无人机原始姿态控制
+mavros_msgs::AttitudeTarget OffboardCtl::smallUavTargetAttRaw(geometry_msgs::Quaternion orientation)
+{
+    mavros_msgs::AttitudeTarget smallUavTargetAttRaw;
+    smallUavTargetAttRaw.header.stamp = ros::Time::now();
+    smallUavTargetAttRaw.orientation = orientation;
+    smallUavTargetAttRaw.body_rate.x = 0;
+    smallUavTargetAttRaw.body_rate.y = 0;
+    smallUavTargetAttRaw.body_rate.z = 0;
+    smallUavTargetAttRaw.thrust = 0.5;
+    smallUavTargetAttRaw.type_mask = mavros_msgs::AttitudeTarget::IGNORE_ROLL_RATE |
+                                    mavros_msgs::AttitudeTarget::IGNORE_PITCH_RATE |
+                                    mavros_msgs::AttitudeTarget::IGNORE_YAW_RATE |
+                                    mavros_msgs::AttitudeTarget::IGNORE_THRUST;
+    return smallUavTargetAttRaw;
+}
 // 设置控制模式服务函数
 bool OffboardCtl::setOffboardCtlType(offboard_control::SetOffboardCtlType::Request& req, offboard_control::SetOffboardCtlType::Response& res)
 {
@@ -400,15 +415,8 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
             setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
 
-            //获取平滑过渡点
-            getTargetPointRawLocal1();
-            uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
-            uavTargetPointRaw1_.coordinate_frame =
-            mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
-            uavTargetPointRaw1_.type_mask =
-            mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
-            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布平滑过渡点
-
+            // 小无人机姿态控制
+            setpointRawAttPub1_.publish(smallUavTargetAttRaw(uavTargetPoint2_.pose.orientation)); //发布小无人机姿态控制量
             //打印信息
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_ACTUAL");
             break;

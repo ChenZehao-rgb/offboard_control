@@ -5,5 +5,7 @@
    "OFFBOARDCTLTYPE"
    "<STATECONTROL>"
    "STATECONTROL"
+   "<STATUS>"
+   "STATUS"
   ))
 

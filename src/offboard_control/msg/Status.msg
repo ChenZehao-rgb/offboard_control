@@ -1,0 +1,5 @@
+string state
+geometry_msgs/Pose uav1_position
+geometry_msgs/Quaternion uav1_orientation
+geometry_msgs/Pose uav2_position
+geometry_msgs/Quaternion uav2_orientation

@@ -1,0 +1,7 @@
+<launch>
+    <!-- 启动 rqt_gui -->
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" output="screen">
+        <!-- 加载保存的配置文件 -->
+        <param name="perspective_file" value="$(find offboard_control)/config/start.perspective" />
+    </node>
+</launch>

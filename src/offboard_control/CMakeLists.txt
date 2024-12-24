@@ -56,6 +56,7 @@ add_message_files(
   FILES
   OffboardCtlType.msg
   StateControl.msg
+  Status.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -140,9 +141,6 @@ add_library(online_traj_generator
   src/traj_generator/online_traj_generator.cpp
 )
 
-# Add cmake target dependencies of the library
-add_dependencies(online_traj_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -157,6 +155,7 @@ add_executable(follow_cable_node src/FollowCable.cpp)
 add_executable(keyboard_control_node src/KeyboardControl.cpp)
 add_executable(online_traj_generator_node src/traj_generator/online_traj_generator.cpp)
 add_executable(uav_coordinate_trans_node src/uav_coordinate_trans.cpp)
+add_executable(observer_node src/observer_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -167,7 +166,8 @@ add_executable(uav_coordinate_trans_node src/uav_coordinate_trans.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
+add_dependencies(online_traj_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(observer_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
@@ -190,6 +190,9 @@ target_link_libraries(online_traj_generator_node
   online_traj_generator
 )
 target_link_libraries(uav_coordinate_trans_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(observer_node
   ${catkin_LIBRARIES}
 )
 

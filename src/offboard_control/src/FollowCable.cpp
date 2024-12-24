@@ -6,7 +6,7 @@
 #define GOTO_SETPOINT_CLOSED_LOOP 1
 #define GOTO_SETPOINT_SMOOTH 2
 #define GOTO_SETPOINT_RELATIVE 3
-FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_(false), isSendOnlinePoint_(false)
+FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_(false), isSendOnlinePoint_(false), isGetCommand_(false)
 {
     // 设置目标点客户端
     setPointClient_ = nh_.serviceClient<offboard_control::SetTargetPoint>("/offboard_control/set_target_point");
@@ -20,6 +20,9 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     isUavArrivedClient_ = nh_.serviceClient<offboard_control::isUavArrived>("/offboard_control/is_arrived");
     // 设置offboard和解锁客户端
     setUavTakeoffReadyClient_ = nh_.serviceClient<offboard_control::SetUavTakeoffReady>("/offboard_control/set_uav_takeoff_ready");
+    // 无人机返航点服务
+    setUavReturnClient1_ = nh_.serviceClient<mavros_msgs::SetMode>("/uav1/mavros/set_mode");
+    setUavReturnClient2_ = nh_.serviceClient<mavros_msgs::SetMode>("/uav2/mavros/set_mode");
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
@@ -32,7 +35,7 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 由小无人机相对坐标转换得到的大无人机目标位置订阅
     bigUavTargetPoseSub_ = nh_.subscribe("/transform/big_uav_target_pose", 10, &FollowCable::bigUavTargetPoseCallback, this);
     // 发布状态机控制状态
-    stateControlPub_ = nh_.advertise<offboard_control::StateControl>("/follow_state/state", 10);
+    status_pub_ = nh_.advertise<offboard_control::Status>("/status_topic", 10);
     // 控制状态机
     controlLoop_ = nh_.createTimer(ros::Duration(controlPeriod), &FollowCable::controlLoop, this);
     // 初始化状态
@@ -42,11 +45,13 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 读取索道点
     all_waypoints_ = loadWaypoints("/home/chen/offboard_control/src/offboard_control/config/waypoints.yaml");
     // 等待其他节点启动
-    ros::Duration(10).sleep();
+    ros::Duration(5).sleep();
     setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
     // 发送大无人机目标位置
     setUavTakeoffReady(2);
     setTargetPoint(takeOffPoint2_,2);
+    // 等待大飞机起飞
+    ros::Duration(5).sleep();
     // 发送小无人机解锁指令，offboardCtl会自动获取大无人机下方1m位置作为小无人机的起飞位置
     setUavTakeoffReady(1);
     // 延时5s,等待无人机起飞
@@ -100,9 +105,11 @@ void FollowCable::onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& on
 // 根据线结构传感器的测量结果，判断姿态调整是否到位
 bool FollowCable::isAjusted(const geometry_msgs::PoseStamped& cablePose)
 {
+    // 延时等待3s
+    ros::Duration(3).sleep();
     // 计算角度差
     double yaw_diff = tf::getYaw(cablePose.pose.orientation) - tf::getYaw(uavPoseLocalSub1_.pose.orientation);
-    if (fabs(yaw_diff) < 0.1)
+    if (fabs(yaw_diff) < 5)
     {
         return true;
     }
@@ -258,6 +265,46 @@ void FollowCable::followCablePoints(std::vector<geometry_msgs::PoseStamped> wayp
         }
     }
 }
+void FollowCable::publishStatus()
+{
+    // 发送当前运行状态
+    offboard_control::Status status_msg;
+    status_msg.state = std::to_string(stateControl_.state_ctrl_type);
+    status_msg.uav2_position = uavPoseLocalSub2_.pose;
+    status_msg.uav2_orientation = uavPoseLocalSub2_.pose.orientation;
+    status_pub_.publish(status_msg);
+}
+void FollowCable::waitForCommand() {
+    // 定义一个映射，将字符串命令映射到整数值
+    std::map<std::string, int> command_map = {
+        {"1", 1}, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6}, {"7", 7}
+    };
+    // 当ROS节点处于运行状态且尚未接收到命令时，进入循环
+    while(ros::ok() && !isGetCommand_)
+    {
+        // 从话题"/command_topic"中等待接收消息，超时时间为1秒
+        std_msgs::String::ConstPtr command_msg = ros::topic::waitForMessage<std_msgs::String>("/command_topic", ros::Duration(1.0));
+        // 如果接收到消息
+        if (command_msg) {
+            // 在命令映射中查找接收到的命令
+            auto it = command_map.find(command_msg->data);
+            // 如果找到匹配的命令
+            if (it != command_map.end()) {
+                // 更新状态控制类型为对应的整数值
+                stateControl_.state_ctrl_type = it->second;
+                // 标记已接收到命令
+                isGetCommand_ = true;
+                // 退出函数
+                return;
+            } else {
+                // 如果命令无效，输出错误信息
+                ROS_ERROR_STREAM("Invalid command: " << command_msg->data);
+            }
+        }
+        // 休眠1秒
+        ros::Rate(1).sleep();
+    }
+}
 // 状态机
 void FollowCable::controlLoop(const ros::TimerEvent&)
 {
@@ -274,6 +321,14 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         ROS_INFO_STREAM("Waiting for takeoff..., uavpose2: "<<uavPoseLocalSub2_);
         ros::Rate(1).sleep();
     }
+    // 发布当前状态及大无人机位置
+    publishStatus();
+    // 当状态切换时，等待命令
+    if(previousStateControl_.state_ctrl_type != stateControl_.state_ctrl_type)
+    {
+        ROS_INFO_STREAM(previousStateControl_.state_ctrl_type << "is down, waiting for command...");
+        waitForCommand();
+    }
     // 运动控制状态机逻辑
     switch (stateControl_.state_ctrl_type)
     {
@@ -285,7 +340,8 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 获取上线坐标
             if(!isGetOnlinePoint_)
             {
-                onLineCablePoint2UavPoint(onLinePoint_, onLinePoint1_, onLinePoint2_, onLinePoint_Z);
+                // 越过节点或者初始的上线点
+                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, onLinePoint2_, onLinePoint_Z);
                 isGetOnlinePoint_ = true;
 
             }
@@ -298,12 +354,14 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 判断小飞机是否到达onLinePoint1_
             if(isUavArrived(onLinePoint2_,2,targetPointError1))
             {
+                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                 stateControl_.state_ctrl_type = offboard_control::StateControl::AJUST_ATTITUDE;
                 ROS_INFO_STREAM("Arrived on line point, and adjust attitude...");
                 // 重置标志位
                 isGetOnlinePoint_ = false;
                 isSendOnlinePoint_ = false;
                 isArrivedOnlinePoint_ = false;
+                isGetCommand_ = false;
             }
             break;
         }
@@ -317,7 +375,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 // 发送获取的大无人机坐标
                 setTargetPoint(bigUavTargetPose_,2);
                 // 只发送小无人机旋转角度，即bigUavTargetPose_的orientation
-                
                 // setTargetPoint(uavRalPose1_,1);
                 // setTargetPoint(uavRalPose2_,2);
                 isGetAjustPose_ = true;
@@ -326,9 +383,12 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             if(isAjusted(bigUavTargetPose_))
             {
                 // 已经调整好位置，准备降落上线
+                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                 stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;
                 ROS_INFO_STREAM("Ajust attitude success, and prepare to land on line...");
                 // setOffboardCtlType(GOTO_SETPOINT_STEP);
+                // 重置标志位
+                isGetCommand_ = false;
             }
             else
             {
@@ -341,22 +401,26 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         case offboard_control::StateControl::ON_LINE:
         {
             ROS_INFO("On line...");
-            // 获取上线坐标
+            // 和之前的x,y一样，只是z值目标点降低
             if(!isGetOnlinePoint_)
             {
-                onLineCablePoint2UavPoint(onLinePoint_, onLinePoint1_, onLinePoint2_, 0);
+                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, onLinePoint2_, 0);
                 isGetOnlinePoint_ = true;
                 // 控制大飞机下降
                 setTargetPoint(onLinePoint2_,2); // 降落过程可能需要根据线结构传感器的测量结果实时调整
-                setTargetPoint(onLinePoint1_,1); // 小飞机目标位置是正好能抓住索道的位置
             }
             // 判断小飞机是否到达，判断范围根据线结构传感器的测量范围来定
-            if(isUavArrived(onLinePoint1_,1,0.1))
+            if(isUavArrived(onLinePoint2_,2,0.1))
             {
                 // 控制爪子抓住索道
                 if(graspCable())
                 {
+                    previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                     stateControl_.state_ctrl_type = offboard_control::StateControl::FOLLOW_CABLE;
+                    // 重置标志位
+                    isGetCommand_ = false;
+                    // 删除已经上线的点
+                    cablePoints_.erase(cablePoints_.begin());
                     ROS_INFO_STREAM("Grasp cable success, and follow cable...");
                 }
                 else
@@ -366,6 +430,9 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                     // 返回上线点上方，重新调整姿态后再次尝试上线
                     if(onLineFailCnt++ < 2) //上线失败次数小于2，即至多2次上线失败
                     {
+                        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+                        // 重置标志位
+                        isGetCommand_ = false;
                         stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
                         // 修改上线点距索道的距离，比第一次低一些
                         onLinePoint_Z -= 0.5;
@@ -373,6 +440,9 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                     }
                     else
                     {
+                        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+                        // 重置标志位
+                        isGetCommand_ = false;
                         // 任务失败，返航
                         stateControl_.state_ctrl_type = offboard_control::StateControl::LAND;
                         ROS_ERROR_STREAM("Task failed, and return to home...");
@@ -397,11 +467,17 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             }
             if (all_waypoints_.empty())
             {
+                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+                // 重置标志位
+                isGetCommand_ = false;
                 // 任务完成，返航
                 stateControl_.state_ctrl_type = offboard_control::StateControl::LAND;
             }
             else
             {
+                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+                // 重置标志位
+                isGetCommand_ = false;
                 stateControl_.state_ctrl_type = offboard_control::StateControl::CROSS_NODE;
             }
             break;
@@ -410,12 +486,50 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         {
             // 跨越节点
             ROS_INFO("Crossing node...");
+            // 先上升到当前位置的上方2m
+            if(!isGetOnlinePoint_)
+            {
+                onLineCablePoint2UavPoint(uavPoseLocalSub2_, onLinePoint1_, onLinePoint2_, 2.0);
+                isGetOnlinePoint_ = true;
+                // 控制大飞机上升
+                setTargetPoint(onLinePoint2_,2); // 降落过程可能需要根据线结构传感器的测量结果实时调整
+            }
+            // 判断大无人机是否到达
+            if(isUavArrived(onLinePoint2_,2,targetPointError1))
+            {
+                // 获取下一节点的上线坐标
+                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, onLinePoint2_, 2);
+                // 发送大飞机上线点
+                setTargetPoint(onLinePoint2_,2);
+
+            }
+            // 判断大无人机是否到达
+            if(isUavArrived(onLinePoint2_,2,targetPointError1))
+            {
+                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+                stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
+                ROS_INFO_STREAM("Crossed node, and arrive on line point...");
+                // 重置标志位
+                isGetOnlinePoint_ = false;
+                isSendOnlinePoint_ = false;
+                isArrivedOnlinePoint_ = false;
+                isGetCommand_ = false;
+            }
             break;
         }
         case offboard_control::StateControl::LAND:
         {
             // 降落
-            ROS_INFO("Landing...");
+            mavros_msgs::SetMode land_set_mode;
+            land_set_mode.request.custom_mode = "AUTO.RTL";
+            if (setUavReturnClient1_.call(land_set_mode) && setUavReturnClient2_.call(land_set_mode))
+            {
+                ROS_INFO("Return to home...");
+            }
+            else
+            {
+                ROS_ERROR("Failed to return to home...");
+            }
             break;
         }
         default:
@@ -560,14 +674,14 @@ void FollowCable::loadConfigParam(const std::string& filename)
     takeOffPoint2_.pose.orientation.z = uav2["orientation_z"].as<double>();
     takeOffPoint2_.pose.orientation.w = uav2["orientation_w"].as<double>();
     // 读取索道上的上线点
-    auto onLine = config["online_points"]["cable_point"];
-    onLinePoint_.pose.position.x = onLine["position_x"].as<double>();
-    onLinePoint_.pose.position.y = onLine["position_y"].as<double>();
-    onLinePoint_.pose.position.z = onLine["position_z"].as<double>();
-    onLinePoint_.pose.orientation.x = onLine["orientation_x"].as<double>();
-    onLinePoint_.pose.orientation.y = onLine["orientation_y"].as<double>();
-    onLinePoint_.pose.orientation.z = onLine["orientation_z"].as<double>();
-    onLinePoint_.pose.orientation.w = onLine["orientation_w"].as<double>();
+    // auto onLine = config["online_points"]["cable_point"];
+    // onLinePoint_.pose.position.x = onLine["position_x"].as<double>();
+    // onLinePoint_.pose.position.y = onLine["position_y"].as<double>();
+    // onLinePoint_.pose.position.z = onLine["position_z"].as<double>();
+    // onLinePoint_.pose.orientation.x = onLine["orientation_x"].as<double>();
+    // onLinePoint_.pose.orientation.y = onLine["orientation_y"].as<double>();
+    // onLinePoint_.pose.orientation.z = onLine["orientation_z"].as<double>();
+    // onLinePoint_.pose.orientation.w = onLine["orientation_w"].as<double>();
     // 读取小飞机携带爪子尺寸
     auto claw = config["size"]["claw"];
     claw_diameter = claw["diameter"].as<double>();
@@ -595,7 +709,7 @@ void FollowCable::loadConfigParam(const std::string& filename)
 
     // 打印读取到的参数
     ROS_INFO_STREAM("Takeoff point of uav1: " << takeOffPoint1_ << ", uav2: " << takeOffPoint2_);
-    ROS_INFO_STREAM("Online point of cable: " << onLinePoint_);
+    // ROS_INFO_STREAM("Online point of cable: " << onLinePoint_);
     ROS_INFO_STREAM("Claw diameter: " << claw_diameter << ", rope length: " << rope_length);
     ROS_INFO_STREAM("Home point of uav1: " << uavHomePoint1_ << ", uav2: " << uavHomePoint2_);
 }
