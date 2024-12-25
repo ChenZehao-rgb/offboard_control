@@ -26,6 +26,7 @@
 #include "offboard_control/StateControl.h"
 #include "offboard_control/SetUavTakeoffReady.h"
 #include <offboard_control/Status.h>
+#include <offboard_control/Measure.h>
 
 class FollowCable{
 public:
@@ -90,7 +91,7 @@ private:
     int onLineFailCnt = 0; // 上线失败计数
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavTargetPose_; // 小无人机在大无人机坐标系下的local坐标，大无人机目标位置
     double targetPointError1 = 0.1, targetPointError2 = 0.3; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
-    geometry_msgs::Point sensorCablePose_; // 传感器测量的索道位置
+    offboard_control::Measure sensorDate_; // 传感器测量的索道位置
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
     /******************** 状态机运行中的标志位 **********************/
@@ -122,7 +123,7 @@ private:
     // 根据线结构传感器的测量结果，判断姿态调整是否到位
     bool isAjusted(const geometry_msgs::PoseStamped& cablePose);
     // 获取线传感器数据
-    void getCablePose(const geometry_msgs::Point::ConstPtr& msg);
+    void getCablePose(const offboard_control::Measure::ConstPtr& msg);
     // 上线操作中索道坐标->大小飞机坐标
     void onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high);
     // 根据线结构传感器的测量结果，得到大小飞机需要运动的相对位置/角度
@@ -150,6 +151,22 @@ private:
     void publishStatus(const ros::TimerEvent&);
     // 测试坐标转换以及运动模式
     void testPoseTrans();
+    // 上线过程状态机定义
+    enum State
+    {
+        DESCEND_TO_HALF_Z,
+        CHECK_SENSOR,
+        ADJUST_Y_POSITION,
+        DESCEND_TO_0_2_Z,
+        FINAL_ADJUSTMENT,
+        DESCEND_TO_0_1_Z,
+        GRASP_CABLE,
+        DESCEND_TO_0_3_Z,
+        RETURN
+    };
+
+    State onLinestate = DESCEND_TO_HALF_Z;
+    geometry_msgs::PoseStamped adjustTargetPoint(double z);
 };
 
 #endif // FOLLOWCABLE_H

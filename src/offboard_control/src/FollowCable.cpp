@@ -309,6 +309,104 @@ void FollowCable::waitForCommand() {
         ros::Rate(10).sleep();
     }
 }
+// 下降过程中根据传感器数据动态调整目标点 目标是循环这个函数，直到测量到的z到一个阈值，其中y不超过一个阈值, 
+// y = bigUavTargetPose_.pose.position.y - uavPoseLocalSub2_.pose.position.y
+geometry_msgs::PoseStamped FollowCable::adjustTargetPoint(double z)
+{
+    geometry_msgs::PoseStamped targetPoint;
+    onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPoint, 0.5 * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
+
+    switch (onLinestate)
+    {
+    case DESCEND_TO_HALF_Z:
+        setTargetPoint(targetPoint, 2);
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            onLinestate = CHECK_SENSOR;
+        }
+        break;
+
+    case CHECK_SENSOR:
+        if (sensorDate_.is_valid)
+        {
+            onLinestate = ADJUST_Y_POSITION;
+        }
+        else
+        {
+            targetPoint.pose.position.z -= 0.2 * onLinePoint_Z;
+            setTargetPoint(targetPoint, 2);
+            onLinestate = DESCEND_TO_0_3_Z;
+        }
+        break;
+
+    case ADJUST_Y_POSITION:
+        targetPoint.pose.position.y = bigUavTargetPose_.pose.position.y;
+        setTargetPoint(targetPoint, 2);
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            onLinestate = DESCEND_TO_0_2_Z;
+        }
+        break;
+
+    case DESCEND_TO_0_2_Z:
+        targetPoint.pose.position.z += 0.2 * onLinePoint_Z + rope_length;
+        setTargetPoint(targetPoint, 2);
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            onLinestate = FINAL_ADJUSTMENT;
+        }
+        break;
+
+    case FINAL_ADJUSTMENT:
+        targetPoint.pose.position.y = bigUavTargetPose_.pose.position.y;
+        setTargetPoint(targetPoint, 2);
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            onLinestate = DESCEND_TO_0_1_Z;
+        }
+        break;
+
+    case DESCEND_TO_0_1_Z:
+        targetPoint.pose.position.z += 0.1 * onLinePoint_Z + rope_length;
+        setTargetPoint(targetPoint, 2);
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            onLinestate = GRASP_CABLE;
+        }
+        break;
+
+    case GRASP_CABLE:
+        graspCable();
+        onLinestate = DESCEND_TO_HALF_Z; // 重置状态机
+        break;
+
+    case DESCEND_TO_0_3_Z:
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            if (sensorDate_.is_valid)
+            {
+                onLinestate = ADJUST_Y_POSITION;
+            }
+            else
+            {
+                targetPoint.pose.position.z -= 0.1 * onLinePoint_Z;
+                setTargetPoint(targetPoint, 2);
+                onLinestate = RETURN;
+            }
+        }
+        break;
+
+    case RETURN:
+        if (isUavArrived(targetPoint, 2, targetPointError1))
+        {
+            // 返回逻辑
+            onLinestate = DESCEND_TO_HALF_Z; // 重置状态机
+        }
+        break;
+    }
+
+    return targetPoint;
+}
 // 状态机
 void FollowCable::controlLoop(const ros::TimerEvent&)
 {
@@ -404,7 +502,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 和之前的x,y一样，只是z值目标点降低
             if(!isGetOnlinePoint_)
             {
-                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, onLinePoint2_, 0);
+                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, onLinePoint2_, 0.5*onLinePoint_Z);
                 isGetOnlinePoint_ = true;
                 // 控制大飞机下降
                 setTargetPoint(onLinePoint2_,2); // 降落过程可能需要根据线结构传感器的测量结果实时调整
@@ -632,10 +730,10 @@ void FollowCable::bigUavTargetPoseCallback(const geometry_msgs::PoseStamped::Con
     bigUavTargetPose_ = *msg;
 }
 // 传感器数据回调函数
-void FollowCable::getCablePose(const geometry_msgs::Point::ConstPtr& msg)
+void FollowCable::getCablePose(const offboard_control::Measure::ConstPtr& msg)
 {
     // 更新传感器数据
-    sensorCablePose_ = *msg;
+    sensorDate_ = *msg;
 }
 // 读取参数
 void FollowCable::readParameters(ros::NodeHandle& nh) {

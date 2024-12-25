@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
 #include <boost/asio.hpp>
+#include "offboard_control/Measure.h"
 
 using namespace boost::asio;
 
@@ -12,7 +13,7 @@ public:
         : serial(io, "/dev/ttyUSB0") // 替换为实际的串口设备
     {
         serial.set_option(serial_port_base::baud_rate(9600));
-        pointPub = nh.advertise<geometry_msgs::Point>("/transform/sensor_data", 10);
+        pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
     }
 
     void spin()
@@ -55,7 +56,7 @@ private:
         // 反序列化接收到的指令
         ooCommandStruct recv_cmd;
         deserializeCommand(recv_buffer, recv_cmd);
-
+        offboard_control::Measure measure;
         // 检查是否为测量成功应答
         if (recv_cmd.uc55 == 0x55 && recv_cmd.ucAA == 0xAA && recv_cmd.ucCmd == 5 && recv_cmd.ucError == 0 && recv_cmd.lenData == 8)
         {
@@ -64,15 +65,16 @@ private:
             ROS_INFO("Measurement success: x = %f, z = %f", x, z);
 
             // 发布x, y信息
-            geometry_msgs::Point point;
-            point.x = x;
-            point.z = z;
-            pointPub.publish(point);
+            measure.is_valid = true;
+            measure.x = x;
+            measure.z = z;
         }
         else
         {
+            measure.is_valid = false;
             ROS_WARN("Received unexpected response from sensor");
         }
+        pointPub.publish(measure);
     }
 };
 

@@ -57,6 +57,7 @@ add_message_files(
   OffboardCtlType.msg
   StateControl.msg
   Status.msg
+  Measure.msg
 )
 
 ## Generate services in the 'srv' folder

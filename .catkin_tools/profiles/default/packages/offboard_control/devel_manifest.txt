@@ -3,6 +3,7 @@ offboard_control
 /home/chen/offboard_control/devel/.private/offboard_control/lib/liboffboard_control.so /home/chen/offboard_control/devel/lib/liboffboard_control.so
 /home/chen/offboard_control/devel/.private/offboard_control/lib/libonline_traj_generator.so /home/chen/offboard_control/devel/lib/libonline_traj_generator.so
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/__init__.py /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/__init__.py
+/home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_Measure.py /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/msg/_Measure.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_Status.py /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/msg/_Status.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/msg/_OffboardCtlType.py
 /home/chen/offboard_control/devel/.private/offboard_control/lib/python3/dist-packages/offboard_control/msg/__init__.py /home/chen/offboard_control/devel/lib/python3/dist-packages/offboard_control/msg/__init__.py
@@ -43,7 +44,9 @@ offboard_control
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/Status.h /home/chen/offboard_control/devel/include/offboard_control/Status.h
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/isUavArrived.h /home/chen/offboard_control/devel/include/offboard_control/isUavArrived.h
 /home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/SetOffboardCtlTypeResponse.h /home/chen/offboard_control/devel/include/offboard_control/SetOffboardCtlTypeResponse.h
+/home/chen/offboard_control/devel/.private/offboard_control/include/offboard_control/Measure.h /home/chen/offboard_control/devel/include/offboard_control/Measure.h
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/manifest.l /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/manifest.l
+/home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/Measure.l /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/msg/Measure.l
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/Status.l /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/msg/Status.l
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/OffboardCtlType.l /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/msg/OffboardCtlType.l
 /home/chen/offboard_control/devel/.private/offboard_control/share/roseus/ros/offboard_control/msg/StateControl.l /home/chen/offboard_control/devel/share/roseus/ros/offboard_control/msg/StateControl.l
@@ -57,6 +60,7 @@ offboard_control
 /home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/StateControl.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/msg/StateControl.js
 /home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/Status.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/msg/Status.js
 /home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/_index.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/msg/_index.js
+/home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/Measure.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/msg/Measure.js
 /home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/msg/OffboardCtlType.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/msg/OffboardCtlType.js
 /home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetPidGains.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/SetPidGains.js
 /home/chen/offboard_control/devel/.private/offboard_control/share/gennodejs/ros/offboard_control/srv/SetUavTakeoffReady.js /home/chen/offboard_control/devel/share/gennodejs/ros/offboard_control/srv/SetUavTakeoffReady.js
@@ -69,11 +73,13 @@ offboard_control
 /home/chen/offboard_control/devel/.private/offboard_control/share/offboard_control/cmake/offboard_control-msg-extras.cmake /home/chen/offboard_control/devel/share/offboard_control/cmake/offboard_control-msg-extras.cmake
 /home/chen/offboard_control/devel/.private/offboard_control/share/offboard_control/cmake/offboard_controlConfig.cmake /home/chen/offboard_control/devel/share/offboard_control/cmake/offboard_controlConfig.cmake
 /home/chen/offboard_control/devel/.private/offboard_control/share/offboard_control/cmake/offboard_controlConfig-version.cmake /home/chen/offboard_control/devel/share/offboard_control/cmake/offboard_controlConfig-version.cmake
+/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/Measure.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/Measure.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/OffboardCtlType.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/OffboardCtlType.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/Status.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/Status.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/_package_OffboardCtlType.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/_package_OffboardCtlType.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/_package_StateControl.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/_package_StateControl.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/offboard_control-msg.asd /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/offboard_control-msg.asd
+/home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/_package_Measure.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/_package_Measure.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/_package.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/_package.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/StateControl.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/StateControl.lisp
 /home/chen/offboard_control/devel/.private/offboard_control/share/common-lisp/ros/offboard_control/msg/_package_Status.lisp /home/chen/offboard_control/devel/share/common-lisp/ros/offboard_control/msg/_package_Status.lisp
