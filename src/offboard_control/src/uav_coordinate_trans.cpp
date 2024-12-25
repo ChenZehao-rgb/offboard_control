@@ -19,6 +19,8 @@ public:
         // 订阅无人机地理位置
         uavGeoPoseSub1 = nh.subscribe<sensor_msgs::NavSatFix>("uav1/mavros/global_position/global", 10, &UavCoordinateTrans::geoPoseCallback1, this);
         uavGeoPoseSub2 = nh.subscribe<sensor_msgs::NavSatFix>("uav2/mavros/global_position/global", 10, &UavCoordinateTrans::geoPoseCallback2, this);
+        // 订阅传感器数据
+        sensorDateSub = nh.subscribe<geometry_msgs::Point>("/transform/sensor_data", 10, &UavCoordinateTrans::sensorDataCallback, this);
         // 发布大无人机目标位置
         bigUavTargetPosePub = nh.advertise<geometry_msgs::PoseStamped>("/transform/big_uav_target_pose", 10);
         // 发布小无人机在大无人机坐标系下的local坐标
@@ -39,7 +41,7 @@ public:
 
 private:
     // 订阅和发布
-    ros::Subscriber uavPoseSub1, uavPoseSub2, uavGeoPoseSub1, uavGeoPoseSub2;
+    ros::Subscriber uavPoseSub1, uavPoseSub2, uavGeoPoseSub1, uavGeoPoseSub2, sensorDateSub;
     ros::Publisher bigUavTargetPosePub, smallUavPoseInBigUavFramePub;
 
     // 小无人机local坐标
@@ -52,6 +54,8 @@ private:
     sensor_msgs::NavSatFix smallUavGeoPose_;
     // 小无人机在大无人机坐标系下的local坐标
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_;
+    // 传感器数据
+    geometry_msgs::Point sensorData_;
     // 小无人机坐标系下偏移量
     double delta_x = 0.1, delta_y = 0.1, delta_yaw = 10 * M_PI / 180;
     // 大无人机需要调整到的位置
@@ -75,6 +79,10 @@ private:
     void geoPoseCallback2(const sensor_msgs::NavSatFix::ConstPtr& msg)
     {
         bigUavGeoPose_ = *msg;
+    }
+    void sensorDataCallback(const geometry_msgs::Point::ConstPtr& msg)
+    {
+        sensorData_ = *msg;
     }
 
     void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll, double &pitch, double &yaw)

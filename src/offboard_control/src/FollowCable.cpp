@@ -34,6 +34,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     smallUavPoseInBigUavFrameSub_ = nh_.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &FollowCable::smallUavPoseInBigUavFrameCallback, this);
     // 由小无人机相对坐标转换得到的大无人机目标位置订阅
     bigUavTargetPoseSub_ = nh_.subscribe("/transform/big_uav_target_pose", 10, &FollowCable::bigUavTargetPoseCallback, this);
+    // 传感器数据订阅
+    sensorDateSub_ = nh_.subscribe("/transform/sensor_data", 10, &FollowCable::getCablePose, this);
     // 发布状态机控制状态
     status_pub_ = nh_.advertise<offboard_control::Status>("/status_topic", 10);
     // 控制状态机
@@ -381,7 +383,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 isGetAjustPose_ = true;
             }
             // 通过获取线结构传感器的测量结果，判断大小飞机是否到达相对位置/角度
-            if(isAjusted(bigUavTargetPose_))
+            if(isUavArrived(bigUavTargetPose_, 2, targetPointError2))
             {
                 // 已经调整好位置，准备降落上线
                 previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
@@ -628,6 +630,12 @@ void FollowCable::bigUavTargetPoseCallback(const geometry_msgs::PoseStamped::Con
 {
     // 更新大无人机目标位置
     bigUavTargetPose_ = *msg;
+}
+// 传感器数据回调函数
+void FollowCable::getCablePose(const geometry_msgs::Point::ConstPtr& msg)
+{
+    // 更新传感器数据
+    sensorCablePose_ = *msg;
 }
 // 读取参数
 void FollowCable::readParameters(ros::NodeHandle& nh) {

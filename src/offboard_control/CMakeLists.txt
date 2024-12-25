@@ -156,6 +156,7 @@ add_executable(keyboard_control_node src/KeyboardControl.cpp)
 add_executable(online_traj_generator_node src/traj_generator/online_traj_generator.cpp)
 add_executable(uav_coordinate_trans_node src/uav_coordinate_trans.cpp)
 add_executable(observer_node src/observer_node.cpp)
+add_executable(camera_commander_node src/cameraCommand.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -193,6 +194,9 @@ target_link_libraries(uav_coordinate_trans_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(observer_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(camera_commander_node
   ${catkin_LIBRARIES}
 )
 

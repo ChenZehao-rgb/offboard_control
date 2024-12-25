@@ -17,6 +17,7 @@ offboard_control
 /home/chen/offboard_control/devel/.private/offboard_control/lib/pkgconfig/offboard_control.pc /home/chen/offboard_control/devel/lib/pkgconfig/offboard_control.pc
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/keyboard_control_node /home/chen/offboard_control/devel/lib/offboard_control/keyboard_control_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/online_traj_generator_node /home/chen/offboard_control/devel/lib/offboard_control/online_traj_generator_node
+/home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/camera_commander_node /home/chen/offboard_control/devel/lib/offboard_control/camera_commander_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/follow_cable_node /home/chen/offboard_control/devel/lib/offboard_control/follow_cable_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/uav_coordinate_trans_node /home/chen/offboard_control/devel/lib/offboard_control/uav_coordinate_trans_node
 /home/chen/offboard_control/devel/.private/offboard_control/lib/offboard_control/offboard_control_node /home/chen/offboard_control/devel/lib/offboard_control/offboard_control_node

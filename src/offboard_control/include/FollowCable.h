@@ -55,6 +55,8 @@ private:
     ros::Subscriber smallUavPoseInBigUavFrameSub_;
     // 订阅由小无人机相对坐标转换得到的大无人机目标位置
     ros::Subscriber bigUavTargetPoseSub_;
+    // 订阅传感器数据
+    ros::Subscriber sensorDateSub_;
     // 发布无人机转换坐标后的本地位置
     ros::Publisher uavPoseGlobalPub1_;
     ros::Publisher uavPoseGlobalPub2_;
@@ -87,7 +89,8 @@ private:
     double onLinePoint_Z = 1.0; // 小飞机相对索道上线点的高度
     int onLineFailCnt = 0; // 上线失败计数
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavTargetPose_; // 小无人机在大无人机坐标系下的local坐标，大无人机目标位置
-    double targetPointError1 = 0.1, targetPointError2 = 0.5; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
+    double targetPointError1 = 0.1, targetPointError2 = 0.3; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
+    geometry_msgs::Point sensorCablePose_; // 传感器测量的索道位置
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
     /******************** 状态机运行中的标志位 **********************/
@@ -119,7 +122,7 @@ private:
     // 根据线结构传感器的测量结果，判断姿态调整是否到位
     bool isAjusted(const geometry_msgs::PoseStamped& cablePose);
     // 获取线传感器数据
-    void getCablePose(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    void getCablePose(const geometry_msgs::Point::ConstPtr& msg);
     // 上线操作中索道坐标->大小飞机坐标
     void onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high);
     // 根据线结构传感器的测量结果，得到大小飞机需要运动的相对位置/角度
