@@ -2,7 +2,7 @@
 #include <std_msgs/String.h>
 #include "OffboardCtl.h"
 
-#define controlRate 20.0
+#define controlRate 30.0
 #define controlPeriod (1.0 / controlRate)
 //几种控制模式定义
 #define GOTO_SETPOINT_STEP 0
@@ -43,6 +43,9 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // 发布无人机原始姿态
     setpointRawAttPub1_ = nh_.advertise<mavros_msgs::AttitudeTarget>("uav1/mavros/setpoint_raw/attitude", 10);
     setpointRawAttPub2_ = nh_.advertise<mavros_msgs::AttitudeTarget>("uav2/mavros/setpoint_raw/attitude", 10);
+    // 发布无人机本地速度
+    setpointVelLocalPub1_ = nh_.advertise<geometry_msgs::TwistStamped>("uav1/mavros/setpoint_velocity/cmd_vel", 10);
+    setpointVelLocalPub2_ = nh_.advertise<geometry_msgs::TwistStamped>("uav2/mavros/setpoint_velocity/cmd_vel", 10);
 
     /* 服务函数两无人机共用，使用大无人机uav2的句柄 */
     // 设置目标位置服务
@@ -75,9 +78,9 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // offbCtlType_= GOTO_SETPOINT_SMOOTH;
 
     // 初始化pid控制器
-    pidX_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
-    pidY_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
-    pidZ_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
+    pidX_.initPid(1.5, 0.0, 0.1, 0.0, 0.0, 0);
+    pidY_.initPid(1.5, 0.0, 0.1, 0.0, 0.0, 0);
+    pidZ_.initPid(1.5, 0.0, 0.0, 0.0, 0.0, 0);
 }
 OffboardCtl::~OffboardCtl()
 {
@@ -229,20 +232,21 @@ bool OffboardCtl::setOffboardCtlType(offboard_control::SetOffboardCtlType::Reque
 // pid参数设置服务函数
 bool OffboardCtl::setPidGains(offboard_control::SetPidGains::Request& req, offboard_control::SetPidGains::Response& res)
 {
-    switch (req.pid_axis)
-    {
-        case 0:
-            pidX_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
-            break;
-        case 1:
-            pidY_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
-            break;
-        case 2:
-            pidZ_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
-            break;
-        default:
-            break;
-    }
+    // switch (req.pid_axis)
+    // {
+    //     case 0:
+    //         pidX_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
+    //         break;
+    //     case 1:
+    //         pidY_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
+    //         break;
+    //     case 2:
+    //         pidZ_.setGains(req.kp, req.ki, req.kd, req.i_max, req.i_min);
+    //         break;
+    //     default:
+    //         break;
+    // }
+    vz_max_ = req.vz_max;
     res.success = true;
     // 打印pid参数
     ROS_INFO_STREAM("setPidGains: " << req);
@@ -330,7 +334,24 @@ void OffboardCtl::uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceS
     // 打印无人机本地加速度
     // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
 }
-
+// 根据无人机位置->速度
+geometry_msgs::TwistStamped OffboardCtl::uavPoseToTwist(const geometry_msgs::PoseStamped& uavTargetPoint, geometry_msgs::PoseStamped& uavPoseLocal, double vz_min, double vz_max)
+{
+    // 无人机速度信息
+    geometry_msgs::TwistStamped uavTwistLocal;
+    // 计算位置误差
+    double error_x = uavTargetPoint.pose.position.x - uavPoseLocal.pose.position.x;
+    double error_y = uavTargetPoint.pose.position.y - uavPoseLocal.pose.position.y;
+    double error_z = uavTargetPoint.pose.position.z - uavPoseLocal.pose.position.z;
+    // 计算速度
+    uavTwistLocal.twist.linear.x = error_x / controlPeriod;
+    uavTwistLocal.twist.linear.y = error_y / controlPeriod;
+    uavTwistLocal.twist.linear.z = error_z / controlPeriod;
+    // 速度限幅
+    uavTwistLocal.twist.linear.z = uavTwistLocal.twist.linear.z > vz_max ? vz_max : uavTwistLocal.twist.linear.z;
+    uavTwistLocal.twist.linear.z = uavTwistLocal.twist.linear.z < vz_min ? vz_min : uavTwistLocal.twist.linear.z;
+    return uavTwistLocal;
+}
 // 小无人机在大无人机坐标系下的目标位置->小无人机在自己local坐标系下的目标位置
 geometry_msgs::PoseStamped OffboardCtl::uav1PoseInUav2FrameToUav1Frame(const geometry_msgs::PoseStamped& smallUavPoseInBigUavFrame)
 {
@@ -357,22 +378,22 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         
     }
     // 当切换控制模式时，先保持当前位置3s，然后再切换
-    if(preOffbCtlType != offbCtlType_)
-    {
-        int i = 0;
-        while(i < 60)
-        {
-            //打印信息
-            ROS_INFO_STREAM("Waiting for state switch...");
-            //运行频率20hz
-            ros::Rate(20).sleep();
-            // setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
-            setpointLocalPub2_.publish(uavPoseLocal2_);
-            setpointLocalPub1_.publish(uavPoseLocal1_);
-            i++;
-        }
-        preOffbCtlType = offbCtlType_;
-    }
+    // if(preOffbCtlType != offbCtlType_)
+    // {
+    //     int i = 0;
+    //     while(i < 60)
+    //     {
+    //         //打印信息
+    //         ROS_INFO_STREAM("Waiting for state switch...");
+    //         //运行频率20hz
+    //         ros::Rate(20).sleep();
+    //         // setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
+    //         setpointLocalPub2_.publish(uavTargetPoint2_);
+    //         setpointLocalPub1_.publish(uavTargetPoint1_);
+    //         i++;
+    //     }
+    //     preOffbCtlType = offbCtlType_;
+    // }
     // 状态机开始运行
     switch (offbCtlType_)
     {
@@ -391,9 +412,11 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         // 在原定点控制外环加位置闭环
         case GOTO_SETPOINT_CLOSED_LOOP:
         {
-            uavTargetPointRaw2_=positionCtl(uavTargetPoint2_, uavPoseLocal2_, -0.1, 0.1); //位置环pid控制
+            uavTargetPointRaw2_=positionCtl(uavTargetPoint2_, uavPoseLocal2_, -vz_max_, vz_max_); //位置环pid控制
             setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布目标位置
 
+            uavTargetPoint1_ = uavTargetPoint2_;
+            uavTargetPoint1_.pose.position.z -= 1.0;
             uavTargetPointRaw1_ = uavTargetPointRaw2_;
             setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布目标位置
             //打印信息

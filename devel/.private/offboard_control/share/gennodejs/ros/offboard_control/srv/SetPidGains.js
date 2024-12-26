@@ -27,6 +27,8 @@ class SetPidGainsRequest {
       this.kd = null;
       this.i_max = null;
       this.i_min = null;
+      this.vz_min = null;
+      this.vz_max = null;
     }
     else {
       if (initObj.hasOwnProperty('pid_axis')) {
@@ -65,6 +67,18 @@ class SetPidGainsRequest {
       else {
         this.i_min = 0.0;
       }
+      if (initObj.hasOwnProperty('vz_min')) {
+        this.vz_min = initObj.vz_min
+      }
+      else {
+        this.vz_min = 0.0;
+      }
+      if (initObj.hasOwnProperty('vz_max')) {
+        this.vz_max = initObj.vz_max
+      }
+      else {
+        this.vz_max = 0.0;
+      }
     }
   }
 
@@ -82,6 +96,10 @@ class SetPidGainsRequest {
     bufferOffset = _serializer.float64(obj.i_max, buffer, bufferOffset);
     // Serialize message field [i_min]
     bufferOffset = _serializer.float64(obj.i_min, buffer, bufferOffset);
+    // Serialize message field [vz_min]
+    bufferOffset = _serializer.float64(obj.vz_min, buffer, bufferOffset);
+    // Serialize message field [vz_max]
+    bufferOffset = _serializer.float64(obj.vz_max, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -101,11 +119,15 @@ class SetPidGainsRequest {
     data.i_max = _deserializer.float64(buffer, bufferOffset);
     // Deserialize message field [i_min]
     data.i_min = _deserializer.float64(buffer, bufferOffset);
+    // Deserialize message field [vz_min]
+    data.vz_min = _deserializer.float64(buffer, bufferOffset);
+    // Deserialize message field [vz_max]
+    data.vz_max = _deserializer.float64(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 44;
+    return 60;
   }
 
   static datatype() {
@@ -115,7 +137,7 @@ class SetPidGainsRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'eaeeb6b42b420e9ea4d5e6ebab58fdef';
+    return '87e160b42ecf66d2bbfac1a23360455c';
   }
 
   static messageDefinition() {
@@ -127,6 +149,8 @@ class SetPidGainsRequest {
     float64 kd
     float64 i_max
     float64 i_min
+    float64 vz_min
+    float64 vz_max
     
     `;
   }
@@ -177,6 +201,20 @@ class SetPidGainsRequest {
     }
     else {
       resolved.i_min = 0.0
+    }
+
+    if (msg.vz_min !== undefined) {
+      resolved.vz_min = msg.vz_min;
+    }
+    else {
+      resolved.vz_min = 0.0
+    }
+
+    if (msg.vz_max !== undefined) {
+      resolved.vz_max = msg.vz_max;
+    }
+    else {
+      resolved.vz_max = 0.0
     }
 
     return resolved;
@@ -257,6 +295,6 @@ class SetPidGainsResponse {
 module.exports = {
   Request: SetPidGainsRequest,
   Response: SetPidGainsResponse,
-  md5sum() { return 'd57e186547bf189d8db08127479743cd'; },
+  md5sum() { return '1855f912182466f5ec4438809773bb3c'; },
   datatype() { return 'offboard_control/SetPidGains'; }
 };

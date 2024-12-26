@@ -49,8 +49,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 读取参数
     readParameters(nh_);
     // 等待其他节点启动
-    ros::Duration(5).sleep();
     setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
+    ros::Duration(5).sleep();
     // 发送大无人机目标位置
     setUavTakeoffReady(2);
     setTargetPoint(takeOffPoint2_,2);
@@ -247,6 +247,20 @@ void FollowCable::setOffboardCtlType(uint8_t ctlType)
         ROS_ERROR_STREAM("Set control type failed");
     }
 }
+// 设置pid参数
+void FollowCable::setPidGains(double vz_max)
+{
+    offboard_control::SetPidGains setPidGains;
+    setPidGains.request.vz_max = vz_max;
+    if(setPidGainsClient_.call(setPidGains) && setPidGains.response.success)
+    {
+        ROS_INFO_STREAM("Set pid gains success, vz_max: " << vz_max);
+    }
+    else
+    {
+        ROS_ERROR_STREAM("Set pid gains failed");
+    }
+}
 // 指定无人机到达一系列目标点
 void FollowCable::followCablePoints(std::vector<geometry_msgs::PoseStamped> &waypoints)
 {
@@ -342,6 +356,7 @@ bool FollowCable::adjustTargetPoint()
     {
         case DESCEND_TO_HALF_Z:
             {
+                setPidGains(0.2); // 设置速度限幅
                 onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.5 * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
                 target_z = 0.5 * onLinePoint_Z;
                 setTargetPoint(targetPointInOnLineState_, 2);
@@ -392,11 +407,19 @@ bool FollowCable::adjustTargetPoint()
 
         case DESCEND_TO_0_2_Z:
             {
+                // setPidGains(0.1);
                 onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.2 * onLinePoint_Z);
                 setTargetPoint(targetPointInOnLineState_, 2);
                 ROS_INFO_STREAM("Descend to 0.2Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                 if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
+                    // 等待10s
+                    for(int i = 0; i < 10; i++)
+                    {
+                        ros::spinOnce();
+                        ros::Rate(1).sleep();
+                        ROS_INFO_STREAM("Descend to 0.2Z, wait for 10s: " << i << "s ...");
+                    }
                     ROS_INFO_STREAM("Arrived 0.2Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                     onLinestate = FINAL_ADJUSTMENT;
                 }
@@ -418,11 +441,19 @@ bool FollowCable::adjustTargetPoint()
 
         case DESCEND_TO_0_1_Z:
             {
+                // setPidGains(0.05);
                 onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.1 * onLinePoint_Z);
                 setTargetPoint(targetPointInOnLineState_, 2);
                 ROS_INFO_STREAM("Descend to 0.1Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                 if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
+                    // 等待10s
+                    for(int i = 0; i < 10; i++)
+                    {
+                        ros::spinOnce();
+                        ros::Rate(1).sleep();
+                        ROS_INFO_STREAM("Descend to 0.1Z, wait for 10s: " << i << "s ...");
+                    }
                     ROS_INFO_STREAM("Arrived 0.1Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                     return true;
                 }
@@ -465,12 +496,12 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         ros::Rate(1).sleep();
     }
     // 当状态切换时，等待命令
-    if(previousStateControl_.state_ctrl_type != stateControl_.state_ctrl_type)
-    {
-        ROS_INFO_STREAM( preStateControlStr_ << " is down, waiting for command...");
-        waitForCommand();
-        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
-    }
+    // if(previousStateControl_.state_ctrl_type != stateControl_.state_ctrl_type)
+    // {
+    //     ROS_INFO_STREAM( preStateControlStr_ << " is down, waiting for command...");
+    //     waitForCommand();
+    //     previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+    // }
     // 运动控制状态机逻辑
     switch (stateControl_.state_ctrl_type)
     {
@@ -562,6 +593,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         }
         case offboard_control::StateControl::FOLLOW_CABLE:
         {
+            // while(1);
             if(!isSendStateChange_)
             {
                 setOffboardCtlType(GOTO_SETPOINT_SMOOTH);

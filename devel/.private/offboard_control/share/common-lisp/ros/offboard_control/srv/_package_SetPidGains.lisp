@@ -11,6 +11,10 @@
           I_MAX
           I_MIN-VAL
           I_MIN
+          VZ_MIN-VAL
+          VZ_MIN
+          VZ_MAX-VAL
+          VZ_MAX
           SUCCESS-VAL
           SUCCESS
 ))

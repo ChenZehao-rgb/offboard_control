@@ -36,6 +36,16 @@
     :reader i_min
     :initarg :i_min
     :type cl:float
+    :initform 0.0)
+   (vz_min
+    :reader vz_min
+    :initarg :vz_min
+    :type cl:float
+    :initform 0.0)
+   (vz_max
+    :reader vz_max
+    :initarg :vz_max
+    :type cl:float
     :initform 0.0))
 )
 
@@ -76,6 +86,16 @@
 (cl:defmethod i_min-val ((m <SetPidGains-request>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader offboard_control-srv:i_min-val is deprecated.  Use offboard_control-srv:i_min instead.")
   (i_min m))
+
+(cl:ensure-generic-function 'vz_min-val :lambda-list '(m))
+(cl:defmethod vz_min-val ((m <SetPidGains-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader offboard_control-srv:vz_min-val is deprecated.  Use offboard_control-srv:vz_min instead.")
+  (vz_min m))
+
+(cl:ensure-generic-function 'vz_max-val :lambda-list '(m))
+(cl:defmethod vz_max-val ((m <SetPidGains-request>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader offboard_control-srv:vz_max-val is deprecated.  Use offboard_control-srv:vz_max instead.")
+  (vz_max m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <SetPidGains-request>) ostream)
   "Serializes a message object of type '<SetPidGains-request>"
   (cl:let* ((signed (cl:slot-value msg 'pid_axis)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
@@ -121,6 +141,24 @@
     (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
   (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'i_min))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 32) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 40) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'vz_min))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 32) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 40) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'vz_max))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -188,6 +226,26 @@
       (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
     (cl:setf (cl:slot-value msg 'i_min) (roslisp-utils:decode-double-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 32) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'vz_min) (roslisp-utils:decode-double-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 32) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'vz_max) (roslisp-utils:decode-double-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<SetPidGains-request>)))
@@ -198,19 +256,21 @@
   "offboard_control/SetPidGainsRequest")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<SetPidGains-request>)))
   "Returns md5sum for a message object of type '<SetPidGains-request>"
-  "d57e186547bf189d8db08127479743cd")
+  "1855f912182466f5ec4438809773bb3c")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'SetPidGains-request)))
   "Returns md5sum for a message object of type 'SetPidGains-request"
-  "d57e186547bf189d8db08127479743cd")
+  "1855f912182466f5ec4438809773bb3c")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<SetPidGains-request>)))
   "Returns full string definition for message of type '<SetPidGains-request>"
-  (cl:format cl:nil "int32 pid_axis~%float64 kp~%float64 ki~%float64 kd~%float64 i_max~%float64 i_min~%~%~%"))
+  (cl:format cl:nil "int32 pid_axis~%float64 kp~%float64 ki~%float64 kd~%float64 i_max~%float64 i_min~%float64 vz_min~%float64 vz_max~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'SetPidGains-request)))
   "Returns full string definition for message of type 'SetPidGains-request"
-  (cl:format cl:nil "int32 pid_axis~%float64 kp~%float64 ki~%float64 kd~%float64 i_max~%float64 i_min~%~%~%"))
+  (cl:format cl:nil "int32 pid_axis~%float64 kp~%float64 ki~%float64 kd~%float64 i_max~%float64 i_min~%float64 vz_min~%float64 vz_max~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <SetPidGains-request>))
   (cl:+ 0
      4
+     8
+     8
      8
      8
      8
@@ -226,6 +286,8 @@
     (cl:cons ':kd (kd msg))
     (cl:cons ':i_max (i_max msg))
     (cl:cons ':i_min (i_min msg))
+    (cl:cons ':vz_min (vz_min msg))
+    (cl:cons ':vz_max (vz_max msg))
 ))
 ;//! \htmlinclude SetPidGains-response.msg.html
 
@@ -266,10 +328,10 @@
   "offboard_control/SetPidGainsResponse")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<SetPidGains-response>)))
   "Returns md5sum for a message object of type '<SetPidGains-response>"
-  "d57e186547bf189d8db08127479743cd")
+  "1855f912182466f5ec4438809773bb3c")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'SetPidGains-response)))
   "Returns md5sum for a message object of type 'SetPidGains-response"
-  "d57e186547bf189d8db08127479743cd")
+  "1855f912182466f5ec4438809773bb3c")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<SetPidGains-response>)))
   "Returns full string definition for message of type '<SetPidGains-response>"
   (cl:format cl:nil "bool success~%~%~%"))

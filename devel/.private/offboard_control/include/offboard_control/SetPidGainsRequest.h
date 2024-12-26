@@ -29,7 +29,9 @@ struct SetPidGainsRequest_
     , ki(0.0)
     , kd(0.0)
     , i_max(0.0)
-    , i_min(0.0)  {
+    , i_min(0.0)
+    , vz_min(0.0)
+    , vz_max(0.0)  {
     }
   SetPidGainsRequest_(const ContainerAllocator& _alloc)
     : pid_axis(0)
@@ -37,7 +39,9 @@ struct SetPidGainsRequest_
     , ki(0.0)
     , kd(0.0)
     , i_max(0.0)
-    , i_min(0.0)  {
+    , i_min(0.0)
+    , vz_min(0.0)
+    , vz_max(0.0)  {
   (void)_alloc;
     }
 
@@ -60,6 +64,12 @@ struct SetPidGainsRequest_
 
    typedef double _i_min_type;
   _i_min_type i_min;
+
+   typedef double _vz_min_type;
+  _vz_min_type vz_min;
+
+   typedef double _vz_max_type;
+  _vz_max_type vz_max;
 
 
 
@@ -95,7 +105,9 @@ bool operator==(const ::offboard_control::SetPidGainsRequest_<ContainerAllocator
     lhs.ki == rhs.ki &&
     lhs.kd == rhs.kd &&
     lhs.i_max == rhs.i_max &&
-    lhs.i_min == rhs.i_min;
+    lhs.i_min == rhs.i_min &&
+    lhs.vz_min == rhs.vz_min &&
+    lhs.vz_max == rhs.vz_max;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -152,12 +164,12 @@ struct MD5Sum< ::offboard_control::SetPidGainsRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "eaeeb6b42b420e9ea4d5e6ebab58fdef";
+    return "87e160b42ecf66d2bbfac1a23360455c";
   }
 
   static const char* value(const ::offboard_control::SetPidGainsRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xeaeeb6b42b420e9eULL;
-  static const uint64_t static_value2 = 0xa4d5e6ebab58fdefULL;
+  static const uint64_t static_value1 = 0x87e160b42ecf66d2ULL;
+  static const uint64_t static_value2 = 0xbbfac1a23360455cULL;
 };
 
 template<class ContainerAllocator>
@@ -182,6 +194,8 @@ struct Definition< ::offboard_control::SetPidGainsRequest_<ContainerAllocator> >
 "float64 kd\n"
 "float64 i_max\n"
 "float64 i_min\n"
+"float64 vz_min\n"
+"float64 vz_max\n"
 ;
   }
 
@@ -206,6 +220,8 @@ namespace serialization
       stream.next(m.kd);
       stream.next(m.i_max);
       stream.next(m.i_min);
+      stream.next(m.vz_min);
+      stream.next(m.vz_max);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -236,6 +252,10 @@ struct Printer< ::offboard_control::SetPidGainsRequest_<ContainerAllocator> >
     Printer<double>::stream(s, indent + "  ", v.i_max);
     s << indent << "i_min: ";
     Printer<double>::stream(s, indent + "  ", v.i_min);
+    s << indent << "vz_min: ";
+    Printer<double>::stream(s, indent + "  ", v.vz_min);
+    s << indent << "vz_max: ";
+    Printer<double>::stream(s, indent + "  ", v.vz_max);
   }
 };
 

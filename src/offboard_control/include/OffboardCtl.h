@@ -34,7 +34,7 @@ private:
     ros::Publisher setpointLocalPub1_; //发布无人机本地位置
     ros::Publisher setpointRawLocalPub1_; //发布无人机本地原始位置
     ros::Publisher setpointRawAttPub1_; //发布无人机原始姿态
-
+    ros::Publisher setpointVelLocalPub1_; //发布无人机本地速度
     ros::ServiceClient armingClient1_; //解锁客户端
     ros::ServiceClient setModeClient1_; //设置模式客户端
 
@@ -44,7 +44,8 @@ private:
     ros::Publisher setpointLocalPub2_; //发布无人机本地位置
     ros::Publisher setpointRawLocalPub2_; //发布无人机本地原始位置
     ros::Publisher setpointRawAttPub2_; //发布无人机原始姿态
-
+    ros::Publisher setpointVelLocalPub2_; //发布无人机本地速度
+    
     // 订阅小无人机在大无人机坐标系下的local坐标
     ros::Subscriber smallUavPoseInBigUavFrameSub_;
 
@@ -109,8 +110,12 @@ private:
     mavros_msgs::AttitudeTarget smallUavTargetAttRaw(geometry_msgs::Quaternion orientation);
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
+    // pid限幅
+    double vz_max_;
+
     // 位置环pid控制
     mavros_msgs::PositionTarget positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal, double vz_min, double vz_max);
+    geometry_msgs::TwistStamped uavPoseToTwist(const geometry_msgs::PoseStamped& uavTargetPoint, geometry_msgs::PoseStamped& uavPoseLocal, double vz_min, double vz_max);
 };
 
 #endif // OFFBOARD_CTL_H

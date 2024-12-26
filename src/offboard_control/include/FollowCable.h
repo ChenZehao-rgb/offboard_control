@@ -148,7 +148,7 @@ private:
 
     void controlLoop(const ros::TimerEvent&);
 
-    void setPidGains(int axis, double kp, double ki, double kd);
+    void setPidGains(double vz_max);
     void keyboardCallback(const std_msgs::String::ConstPtr& msg);
     // 接收外部节点指令
     void waitForCommand();
