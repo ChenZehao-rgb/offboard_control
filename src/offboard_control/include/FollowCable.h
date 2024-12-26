@@ -166,7 +166,8 @@ private:
     };
 
     State onLinestate = DESCEND_TO_HALF_Z;
-    geometry_msgs::PoseStamped adjustTargetPoint(double z);
+    bool adjustTargetPoint();
+    double judgeSensorZ(double sensor_z, double target_z);
 };
 
 #endif // FOLLOWCABLE_H

@@ -110,7 +110,7 @@ private:
     // pid控制参数
     control_toolbox::Pid pidX_, pidY_, pidZ_, pidYaw_;
     // 位置环pid控制
-    mavros_msgs::PositionTarget positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal);
+    mavros_msgs::PositionTarget positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal, double vz_min, double vz_max);
 };
 
 #endif // OFFBOARD_CTL_H

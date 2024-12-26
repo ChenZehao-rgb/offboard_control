@@ -22,9 +22,14 @@ public:
         while (ros::ok())
         {
             sendCommand();
-            receiveResponse();
+            // receiveResponse(); 
             ros::spinOnce();
             rate.sleep();
+            offboard_control::Measure measure;
+            measure.is_valid = true;
+            measure.x = 0.1;
+            measure.z = 0.5;
+            pointPub.publish(measure);
         }
     }
 

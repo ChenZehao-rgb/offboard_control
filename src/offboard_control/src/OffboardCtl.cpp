@@ -85,7 +85,7 @@ OffboardCtl::~OffboardCtl()
 }
 
 // 位置环pid控制 ,返回位置环控制量
-mavros_msgs::PositionTarget OffboardCtl::positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal)
+mavros_msgs::PositionTarget OffboardCtl::positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal, double vz_min, double vz_max)
 {
     // 获取目标位置和当前位置
     double target_x = targetPoint.pose.position.x;
@@ -102,6 +102,9 @@ mavros_msgs::PositionTarget OffboardCtl::positionCtl(geometry_msgs::PoseStamped 
     double control_vx = pidX_.computeCommand(error_x, ros::Duration(controlPeriod));
     double control_vy = pidY_.computeCommand(error_y, ros::Duration(controlPeriod));
     double control_vz = pidZ_.computeCommand(error_z, ros::Duration(controlPeriod));
+    // 输出限幅
+    control_vz = control_vz > vz_max ? vz_max : control_vz;
+    control_vz = control_vz < vz_min ? vz_min : control_vz;
     // 发布位置环控制量
     mavros_msgs::PositionTarget positionTarget;
     positionTarget.header.stamp = ros::Time::now();
@@ -370,7 +373,11 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         // 在原定点控制外环加位置闭环
         case GOTO_SETPOINT_CLOSED_LOOP:
         {
-            positionCtl(uavTargetPoint1_, uavPoseLocal1_); //位置环pid控制
+            uavTargetPointRaw2_=positionCtl(uavTargetPoint2_, uavPoseLocal2_, -0.1, 0.1); //位置环pid控制
+            setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布目标位置
+
+            uavTargetPointRaw1_ = uavTargetPointRaw2_;
+            setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布目标位置
             //打印信息
             // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << targetPoint_);
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << uavPoseLocal1_);
