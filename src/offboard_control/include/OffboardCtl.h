@@ -88,7 +88,7 @@ private:
     // 是否获取初始化的小无人机在大无人机坐标系下的local坐标
     bool isGetSmallUavPoseInBigUavFrameInit_;
     geometry_msgs::PoseStamped uavTargetPoint1_,uavTargetPoint2_; //位置服务函数中设置的目标位置
-    int offbCtlType_; //控制模式服务函数中设置的控制模式
+    int offbCtlType_, preOffbCtlType; //控制模式服务函数中设置的控制模式
     
     //位置设置服务函数
     bool setTargetPoint(offboard_control::SetTargetPoint::Request& req, offboard_control::SetTargetPoint::Response& res);

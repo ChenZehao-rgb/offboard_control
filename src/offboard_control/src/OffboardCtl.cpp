@@ -77,7 +77,7 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // 初始化pid控制器
     pidX_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
     pidY_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
-    pidZ_.initPid(0.8, 0.0, 0.1, 0.0, 0.0, 0);
+    pidZ_.initPid(0.5, 0.0, 0.1, 0.0, 0.0, 0);
 }
 OffboardCtl::~OffboardCtl()
 {
@@ -218,6 +218,7 @@ mavros_msgs::AttitudeTarget OffboardCtl::smallUavTargetAttRaw(geometry_msgs::Qua
 // 设置控制模式服务函数
 bool OffboardCtl::setOffboardCtlType(offboard_control::SetOffboardCtlType::Request& req, offboard_control::SetOffboardCtlType::Response& res)
 {
+    preOffbCtlType = offbCtlType_;
     offbCtlType_ = req.offbCtlType;
     res.success = true;
     // 打印控制模式
@@ -354,6 +355,23 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
         // setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
         setpointLocalPub2_.publish(uavPoseLocal2_);
         
+    }
+    // 当切换控制模式时，先保持当前位置3s，然后再切换
+    if(preOffbCtlType != offbCtlType_)
+    {
+        int i = 0;
+        while(i < 60)
+        {
+            //打印信息
+            ROS_INFO_STREAM("Waiting for state switch...");
+            //运行频率20hz
+            ros::Rate(20).sleep();
+            // setpointLocalPub1_.publish(uavPoseLocal1_); // 持续发布无人机当前位置，即静止状态的位置，防止arm失败
+            setpointLocalPub2_.publish(uavPoseLocal2_);
+            setpointLocalPub1_.publish(uavPoseLocal1_);
+            i++;
+        }
+        preOffbCtlType = offbCtlType_;
     }
     // 状态机开始运行
     switch (offbCtlType_)

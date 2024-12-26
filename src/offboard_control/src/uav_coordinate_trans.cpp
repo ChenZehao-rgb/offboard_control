@@ -58,7 +58,7 @@ private:
     // 传感器数据
     offboard_control::Measure sensorData_;
     // 小无人机坐标系下偏移量
-    double delta_x = 0.1, delta_y = 0.1, delta_yaw = 10 * M_PI / 180;
+    double delta_x = 0, delta_y = 0, delta_yaw = 0;
     // 大无人机需要调整到的位置
     geometry_msgs::PoseStamped bigUavTargetPose_;
 

@@ -26,6 +26,7 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
+    uavPoseSub1_ = nh_.subscribe("uav1/mavros/local_position/pose", 10, &FollowCable::uavPoseLocalCallback1, this);
     uavPoseSub2_ = nh_.subscribe("uav2/mavros/local_position/pose", 10, &FollowCable::uavPoseLocalCallback2, this);
     // 无人机home位置订阅
     uavHomeSub1_ = nh_.subscribe("uav1/mavros/home_position/home", 10, &FollowCable::uavHomePoseCallback1, this);
@@ -104,6 +105,13 @@ void FollowCable::onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& on
     // 大飞机坐标为小飞机坐标的上方，距离由两者间连接绳的长度而定
     uavPoint2 = uavPoint1;
     uavPoint2.pose.position.z += rope_length;
+}
+// 只根据索道坐标调整高度
+void FollowCable::onLineCableHight2UavHight(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high)
+{
+    // 小飞机坐标为索道坐标的上方，距离由携带爪子大小而定
+    uavPoint1.pose.position.z = onLineCablePoint.pose.position.z + ral_high; 
+    uavPoint2.pose.position.z = uavPoint1.pose.position.z + rope_length;
 }
 // 根据线结构传感器的测量结果，判断姿态调整是否到位
 bool FollowCable::isAjusted(const geometry_msgs::PoseStamped& cablePose)
@@ -328,18 +336,18 @@ double FollowCable::judgeSensorZ(double sensor_z, double target_z)
 // y = bigUavTargetPose_.pose.position.y - uavPoseLocalSub2_.pose.position.y
 bool FollowCable::adjustTargetPoint()
 {
-    geometry_msgs::PoseStamped targetPoint;
     double sensor_z, target_z, actual_z; // 传感器测量的z值，小无人机高于索道的目标z值, 根据传感器和目标z值判断的实际z值
+    sensorDate_.is_valid = true; // 传感器数据有效
     switch (onLinestate)
     {
         case DESCEND_TO_HALF_Z:
             {
-                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPoint, 0.5 * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
+                onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.5 * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
                 target_z = 0.5 * onLinePoint_Z;
-                setTargetPoint(targetPoint, 2);
+                setTargetPoint(targetPointInOnLineState_, 2);
                 ROS_INFO_STREAM("Descend to 0.5Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
 
-                if (isUavArrived(targetPoint, 2, targetPointError1))
+                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     // 等待小无人机静止，即判断速度是否小于一个阈值
                     onLinestate = CHECK_SENSOR;
@@ -362,18 +370,19 @@ bool FollowCable::adjustTargetPoint()
                 else
                 {
                     // 
-                    targetPoint.pose.position.z -= 0.2 * onLinePoint_Z;
-                    setTargetPoint(targetPoint, 2);
+                    onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.3 * onLinePoint_Z);
+                    setTargetPoint(targetPointInOnLineState_, 2);
+                    ROS_INFO_STREAM("Sensor data is invalid, descend to 0.3Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                     onLinestate = DESCEND_TO_0_3_Z;
                 }
                 break;
             }
         case ADJUST_Y_POSITION:
             {
-                targetPoint.pose.position.y = bigUavTargetPose_.pose.position.y;
-                setTargetPoint(targetPoint, 2);
-                ROS_INFO_STREAM("Adjust y position..., adjust y: " << targetPoint.pose.position.y - uavPoseLocalSub2_.pose.position.y);
-                if (isUavArrived(targetPoint, 2, targetPointError1))
+                targetPointInOnLineState_.pose.position.y += 0;
+                setTargetPoint(targetPointInOnLineState_, 2);
+                ROS_INFO_STREAM("Adjust y position..., adjust y: " << targetPointInOnLineState_.pose.position.y - uavPoseLocalSub2_.pose.position.y);
+                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     ROS_INFO_STREAM("Adjust y position success...");
                     onLinestate = DESCEND_TO_0_2_Z;
@@ -383,10 +392,10 @@ bool FollowCable::adjustTargetPoint()
 
         case DESCEND_TO_0_2_Z:
             {
-                targetPoint.pose.position.z -= 0.3 * onLinePoint_Z;
-                setTargetPoint(targetPoint, 2);
+                onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.2 * onLinePoint_Z);
+                setTargetPoint(targetPointInOnLineState_, 2);
                 ROS_INFO_STREAM("Descend to 0.2Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
-                if (isUavArrived(targetPoint, 2, targetPointError1))
+                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     ROS_INFO_STREAM("Arrived 0.2Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                     onLinestate = FINAL_ADJUSTMENT;
@@ -396,10 +405,10 @@ bool FollowCable::adjustTargetPoint()
 
         case FINAL_ADJUSTMENT:
             {
-                targetPoint.pose.position.y = bigUavTargetPose_.pose.position.y;
-                setTargetPoint(targetPoint, 2);
-                ROS_INFO_STREAM("Adjust y position..., adjust y: " << targetPoint.pose.position.y - uavPoseLocalSub2_.pose.position.y);
-                if (isUavArrived(targetPoint, 2, targetPointError1))
+                targetPointInOnLineState_.pose.position.y += 0;
+                setTargetPoint(targetPointInOnLineState_, 2);
+                ROS_INFO_STREAM("Adjust y position..., adjust y: " << targetPointInOnLineState_.pose.position.y - uavPoseLocalSub2_.pose.position.y);
+                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     ROS_INFO_STREAM("Adjust y position success...");
                     onLinestate = DESCEND_TO_0_1_Z;
@@ -409,10 +418,10 @@ bool FollowCable::adjustTargetPoint()
 
         case DESCEND_TO_0_1_Z:
             {
-                targetPoint.pose.position.z -= 0.1 * onLinePoint_Z;
-                setTargetPoint(targetPoint, 2);
+                onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.1 * onLinePoint_Z);
+                setTargetPoint(targetPointInOnLineState_, 2);
                 ROS_INFO_STREAM("Descend to 0.1Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
-                if (isUavArrived(targetPoint, 2, targetPointError1))
+                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     ROS_INFO_STREAM("Arrived 0.1Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                     return true;
@@ -422,7 +431,7 @@ bool FollowCable::adjustTargetPoint()
 
         case DESCEND_TO_0_3_Z:
             {
-                if (isUavArrived(targetPoint, 2, targetPointError1))
+                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     if (sensorDate_.is_valid)
                     {
@@ -460,6 +469,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
     {
         ROS_INFO_STREAM( preStateControlStr_ << " is down, waiting for command...");
         waitForCommand();
+        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
     }
     // 运动控制状态机逻辑
     switch (stateControl_.state_ctrl_type)
@@ -485,10 +495,9 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 判断小飞机是否到达onLinePoint1_
             if(isUavArrived(onLinePoint2_,2,targetPointError1))
             {
-                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                 preStateControlStr_ = "Arrive on line point";
                 stateControl_.state_ctrl_type = offboard_control::StateControl::ON_LINE;
-                ROS_INFO_STREAM("Arrived on line point, and adjust attitude...");
+                ROS_INFO_STREAM("Arrived on line point, and on line...");
                 // 重置标志位
                 isGetOnlinePoint_ = false;
                 isSendOnlinePoint_ = false;
@@ -502,19 +511,24 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         {
             ROS_INFO("On line...");
             // 判断小飞机是否到达，判断范围根据线结构传感器的测量范围来定
-            setOffboardCtlType(GOTO_SETPOINT_CLOSED_LOOP);
+            // 设置为速度控制状态，使用位置差得到期望速度
+            if(!isSendStateChange_)
+            {
+                setOffboardCtlType(GOTO_SETPOINT_CLOSED_LOOP);
+                isSendStateChange_ = true;
+            }
             ROS_INFO_STREAM("Onlineing, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
             if(adjustTargetPoint())
             {
                 // 控制爪子抓住索道
                 if(graspCable())
                 {
-                    previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                     preStateControlStr_ = "On line";
                     stateControl_.state_ctrl_type = offboard_control::StateControl::FOLLOW_CABLE;
                     // 重置标志位
                     isGetCommand_ = false;
                     isGetOnlinePoint_ = false;
+                    isSendStateChange_ = false;
                     // 删除已经上线的点
                     cablePoints_.erase(cablePoints_.begin());
                     ROS_INFO_STREAM("Grasp cable success, and follow cable...");
@@ -526,10 +540,9 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                     // 返回上线点上方，重新调整姿态后再次尝试上线
                     if(onLineFailCnt++ < 2) //上线失败次数小于2，即至多2次上线失败
                     {
-                        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                         // 重置标志位
                         isGetCommand_ = false;
-
+                        isSendStateChange_ = false;
                         stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
                         // 修改上线点距索道的距离，比第一次低一些
                         onLinePoint_Z -= 0.5;
@@ -537,7 +550,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                     }
                     else
                     {
-                        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                         // 重置标志位
                         isGetCommand_ = false;
                         // 任务失败，返航
@@ -550,7 +562,11 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         }
         case offboard_control::StateControl::FOLLOW_CABLE:
         {
-            setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
+            if(!isSendStateChange_)
+            {
+                setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
+                isSendStateChange_ = true;
+            }
             ROS_INFO("Following cable...");
             // 跟随索道，沿离线采集的点运动
             // 这里面加个保险措施，出问题了，先松爪、退出offboard转人工或者直接返航
@@ -565,7 +581,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             }
             if (all_waypoints_.empty())
             {
-                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                 // 重置标志位
                 isGetCommand_ = false;
                 // 释放索道
@@ -575,7 +590,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             }
             else
             {
-                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                 // 重置标志位
                 isGetCommand_ = false;
                 preStateControlStr_ = "Follow cable";
@@ -613,7 +627,6 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 判断大无人机是否到达
             if(isUavArrived(onLinePoint2_,2,targetPointError1))
             {
-                previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
                 preStateControlStr_ = "Cross node";
                 stateControl_.state_ctrl_type = offboard_control::StateControl::ARRIVE_ONLINE_POINT;
                 ROS_INFO_STREAM("Crossed node, and arrive on line point...");

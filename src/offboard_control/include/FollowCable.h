@@ -94,6 +94,8 @@ private:
     offboard_control::Measure sensorDate_; // 传感器测量的索道位置
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
+    // 上线状态机中的目标点
+    geometry_msgs::PoseStamped targetPointInOnLineState_;
     /******************** 状态机运行中的标志位 **********************/
     // 上线操作中的标志位
     bool isGetOnlinePoint_; // 获取上线点标志位
@@ -103,6 +105,8 @@ private:
     bool isGetCrossPoint_; // 获取越过节点点标志位
     // 接收到外部指令标志位
     bool isGetCommand_;
+    // 是否发送状态切换
+    bool isSendStateChange_;
     /******************** 函数定义 **********************/
     // 本地位置回调函数
     void uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
@@ -126,6 +130,7 @@ private:
     void getCablePose(const offboard_control::Measure::ConstPtr& msg);
     // 上线操作中索道坐标->大小飞机坐标
     void onLineCablePoint2UavPoint(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high);
+    void onLineCableHight2UavHight(const geometry_msgs::PoseStamped& onLineCablePoint, geometry_msgs::PoseStamped& uavPoint1, geometry_msgs::PoseStamped& uavPoint2, double ral_high);
     // 根据线结构传感器的测量结果，得到大小飞机需要运动的相对位置/角度
     void cablePose2UavRalPose(const geometry_msgs::PoseStamped& cablePose, geometry_msgs::PoseStamped& uavRalPose1, geometry_msgs::PoseStamped& uavRalPose2);
     // 爪子控制
