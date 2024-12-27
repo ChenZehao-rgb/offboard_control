@@ -1,0 +1,24 @@
+<launch>
+  <node name ="bag_record" pkg="rosbag" type="record" output="screen" 
+        args ="
+           /uav1/mavros/local_position/pose
+           /uav1/mavros/local_position/velocity_local
+           /uav1/mavros/setpoint_position/local 
+           /uav1/mavros/setpoint_raw/local
+           /uav1/mavros/imu/data
+           /uav1/mavros/local_position/accel
+
+           /uav2/mavros/local_position/pose
+           /uav2/mavros/local_position/velocity_local
+           /uav2/mavros/setpoint_position/local 
+           /uav2/mavros/setpoint_raw/local
+           /uav2/mavros/imu/data
+           /uav2/mavros/local_position/accel
+
+           /online_traj_generator/ruckig_state
+           /online_traj_generator/ruckig_command
+           /online_traj_generator/ruckig_targ
+
+         -o $(find offboard_control)/bag">
+  </node>
+</launch>

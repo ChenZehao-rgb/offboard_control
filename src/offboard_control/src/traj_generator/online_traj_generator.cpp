@@ -11,11 +11,11 @@ void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll,
 OnlineTrajGenerator::OnlineTrajGenerator(const ros::NodeHandle &nh)
   : TrajGenerator(), nh_{nh} {
     ruckigStatePub_ = nh_.advertise<sensor_msgs::JointState>(
-                      "online_traj_generator/ruckig_state", 10);
+                      "/online_traj_generator/ruckig_state", 10);
     ruckigCommandPub_ = nh_.advertise<sensor_msgs::JointState>(
-                        "online_traj_generator/ruckig_command", 10);
+                        "/online_traj_generator/ruckig_command", 10);
     ruckigTargPub_ = nh_.advertise<sensor_msgs::JointState>(
-                        "online_traj_generator/ruckig_targ", 10);
+                        "/online_traj_generator/ruckig_targ", 10);
   };
 
   OnlineTrajGenerator::~OnlineTrajGenerator(){};

@@ -149,10 +149,10 @@ bool FollowCable::graspCable()
 {
     // 控制指令
 
-    //等待20s
+    //等待10s
     ROS_INFO_STREAM("Grasp cable...");
-    // 循环20次
-    for(int i = 0; i < 20; i++)
+    // 循环10次
+    for(int i = 0; i < 10; i++)
     {
         ros::spinOnce();
         ros::Rate(1).sleep();
@@ -166,9 +166,15 @@ bool FollowCable::releaseCable()
 {
     // 控制指令
 
-    //等待20s
+    //等待10s
     ROS_INFO_STREAM("Release cable...");
-    ros::Duration(20).sleep();
+    // 循环10次
+    for(int i = 0; i < 10; i++)
+    {
+        ros::spinOnce();
+        ros::Rate(1).sleep();
+        ROS_INFO_STREAM("Releasing : " << i << "s ...");
+    }
     // 判断是否松开索道
     return (1<0); // 某个值小于阈值
 }
@@ -496,12 +502,12 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         ros::Rate(1).sleep();
     }
     // 当状态切换时，等待命令
-    // if(previousStateControl_.state_ctrl_type != stateControl_.state_ctrl_type)
-    // {
-    //     ROS_INFO_STREAM( preStateControlStr_ << " is down, waiting for command...");
-    //     waitForCommand();
-    //     previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
-    // }
+    if(previousStateControl_.state_ctrl_type != stateControl_.state_ctrl_type)
+    {
+        ROS_INFO_STREAM( preStateControlStr_ << " is down, waiting for command...");
+        waitForCommand();
+        previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
+    }
     // 运动控制状态机逻辑
     switch (stateControl_.state_ctrl_type)
     {
@@ -534,6 +540,8 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 isSendOnlinePoint_ = false;
                 isArrivedOnlinePoint_ = false;
                 isGetCommand_ = false;
+                // 初始化上线操作状态机状态
+                onLinestate = DESCEND_TO_HALF_Z;
             }
             break;
         }
@@ -561,7 +569,10 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                     isGetOnlinePoint_ = false;
                     isSendStateChange_ = false;
                     // 删除已经上线的点
+                    ROS_INFO_STREAM("cablePoints_.size(): " << cablePoints_.size() << ", cablePoints_.front(): " << cablePoints_.front());
                     cablePoints_.erase(cablePoints_.begin());
+                    ROS_INFO_STREAM("cablePoints_.size(): " << cablePoints_.size() << ", cablePoints_.front(): " << cablePoints_.front());
+                    
                     ROS_INFO_STREAM("Grasp cable success, and follow cable...");
                 }
                 else

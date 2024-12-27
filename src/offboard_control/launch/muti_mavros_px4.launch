@@ -79,6 +79,8 @@
     </group>
     <!-- Include offboard.launch -->
     <include file="$(find offboard_control)/launch/offboard.launch"/>
+    <!-- Include rosbag_record.launch -->
+    <include file="$(find offboard_control)/launch/rosbag_record.launch"/>
 </launch>
 <!-- to add more UAVs (up to 10):
 Increase the id
