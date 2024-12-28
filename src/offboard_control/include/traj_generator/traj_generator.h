@@ -5,8 +5,10 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
+
 #include <ruckig/ruckig.hpp>
 #include <vector>
+
 #include "std_msgs/Bool.h"
 #include "std_msgs/Int32.h"
 
@@ -77,8 +79,29 @@ public:
 
         for (std::size_t id = 0; id < STATE_NUM; id++){
             ruckigInput_.target_position[id] = targ_.position[id];
-            ruckigInput_.target_velocity[id] = 0.0;
-            ruckigInput_.target_acceleration[id] = 0.0;
+            ruckigInput_.target_velocity[id] = targ_.velocity[id];
+            ruckigInput_.target_acceleration[id] = targ_.effort[id];
+        }
+
+        // if need update bound
+        if (isBoundUpdate_) {
+        for (int i = 0; i < 3; i++) {
+            velocityLimits_.push_back(velBound_[i]);
+            accLimits_.push_back(accBound_[i]);
+        }
+        velocityLimits_.push_back(double(YAW_VEL_LIMIT));
+        accLimits_.push_back(double(YAW_ACC_LIMIT));
+        for (std::size_t id = 0; id < STATE_NUM; id++) {
+            // update acclimits only
+            ruckigInput_.max_velocity[id] = VEL_LIMIT[id];
+            ruckigInput_.max_acceleration[id] = accLimits_[id];
+            ruckigInput_.max_jerk[id] = JERK_LIMIT[id];
+            ROS_INFO_STREAM("accLimits_[" << id << "]" << accLimits_[id]);
+        }
+
+        velocityLimits_.clear();
+        accLimits_.clear();
+        isBoundUpdate_ = false;
         }
 
         ruckig::Result res = ruckigOtg_.update(ruckigInput_, ruckigOutput_);
@@ -137,8 +160,14 @@ public:
     // targ
     sensor_msgs::JointState targ_;
 
+    sensor_msgs::JointState stateBound_;
     std::vector<double> velocityLimits_;
     std::vector<double> accLimits_;
+    Eigen::Vector3d velBound_;
+    Eigen::Vector3d accBound_;
+
+  // bound update flag
+  bool isBoundUpdate_;
 
 protected:
     ruckig::Ruckig<STATE_NUM> ruckigOtg_{Ts};

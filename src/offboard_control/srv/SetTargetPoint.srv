@@ -1,5 +1,4 @@
 geometry_msgs/PoseStamped targetPoint
-mavros_msgs/PositionTarget targetPointRaw
 uint8 uavID
 ---
 bool success

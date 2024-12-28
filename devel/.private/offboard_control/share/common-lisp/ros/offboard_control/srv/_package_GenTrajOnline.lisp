@@ -5,6 +5,8 @@
           POSE
           TWIST-VAL
           TWIST
+          ACC-VAL
+          ACC
           ISUPDATESTATE-VAL
           ISUPDATESTATE
           SETPOINTRAW-VAL

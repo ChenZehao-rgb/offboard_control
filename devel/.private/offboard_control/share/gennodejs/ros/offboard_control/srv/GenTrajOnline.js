@@ -12,10 +12,10 @@ const _arrayDeserializer = _deserializer.Array;
 const _finder = _ros_msg_utils.Find;
 const _getByteLength = _ros_msg_utils.getByteLength;
 let geometry_msgs = _finder('geometry_msgs');
+let mavros_msgs = _finder('mavros_msgs');
 
 //-----------------------------------------------------------
 
-let mavros_msgs = _finder('mavros_msgs');
 
 //-----------------------------------------------------------
 
@@ -26,6 +26,7 @@ class GenTrajOnlineRequest {
       this.targPoint = null;
       this.pose = null;
       this.twist = null;
+      this.acc = null;
       this.isUpdateState = null;
     }
     else {
@@ -33,7 +34,7 @@ class GenTrajOnlineRequest {
         this.targPoint = initObj.targPoint
       }
       else {
-        this.targPoint = new geometry_msgs.msg.PoseStamped();
+        this.targPoint = new mavros_msgs.msg.PositionTarget();
       }
       if (initObj.hasOwnProperty('pose')) {
         this.pose = initObj.pose
@@ -47,6 +48,12 @@ class GenTrajOnlineRequest {
       else {
         this.twist = new geometry_msgs.msg.TwistStamped();
       }
+      if (initObj.hasOwnProperty('acc')) {
+        this.acc = initObj.acc
+      }
+      else {
+        this.acc = new geometry_msgs.msg.AccelWithCovarianceStamped();
+      }
       if (initObj.hasOwnProperty('isUpdateState')) {
         this.isUpdateState = initObj.isUpdateState
       }
@@ -59,11 +66,13 @@ class GenTrajOnlineRequest {
   static serialize(obj, buffer, bufferOffset) {
     // Serializes a message object of type GenTrajOnlineRequest
     // Serialize message field [targPoint]
-    bufferOffset = geometry_msgs.msg.PoseStamped.serialize(obj.targPoint, buffer, bufferOffset);
+    bufferOffset = mavros_msgs.msg.PositionTarget.serialize(obj.targPoint, buffer, bufferOffset);
     // Serialize message field [pose]
     bufferOffset = geometry_msgs.msg.PoseStamped.serialize(obj.pose, buffer, bufferOffset);
     // Serialize message field [twist]
     bufferOffset = geometry_msgs.msg.TwistStamped.serialize(obj.twist, buffer, bufferOffset);
+    // Serialize message field [acc]
+    bufferOffset = geometry_msgs.msg.AccelWithCovarianceStamped.serialize(obj.acc, buffer, bufferOffset);
     // Serialize message field [isUpdateState]
     bufferOffset = _serializer.bool(obj.isUpdateState, buffer, bufferOffset);
     return bufferOffset;
@@ -74,11 +83,13 @@ class GenTrajOnlineRequest {
     let len;
     let data = new GenTrajOnlineRequest(null);
     // Deserialize message field [targPoint]
-    data.targPoint = geometry_msgs.msg.PoseStamped.deserialize(buffer, bufferOffset);
+    data.targPoint = mavros_msgs.msg.PositionTarget.deserialize(buffer, bufferOffset);
     // Deserialize message field [pose]
     data.pose = geometry_msgs.msg.PoseStamped.deserialize(buffer, bufferOffset);
     // Deserialize message field [twist]
     data.twist = geometry_msgs.msg.TwistStamped.deserialize(buffer, bufferOffset);
+    // Deserialize message field [acc]
+    data.acc = geometry_msgs.msg.AccelWithCovarianceStamped.deserialize(buffer, bufferOffset);
     // Deserialize message field [isUpdateState]
     data.isUpdateState = _deserializer.bool(buffer, bufferOffset);
     return data;
@@ -86,9 +97,10 @@ class GenTrajOnlineRequest {
 
   static getMessageSize(object) {
     let length = 0;
-    length += geometry_msgs.msg.PoseStamped.getMessageSize(object.targPoint);
+    length += mavros_msgs.msg.PositionTarget.getMessageSize(object.targPoint);
     length += geometry_msgs.msg.PoseStamped.getMessageSize(object.pose);
     length += geometry_msgs.msg.TwistStamped.getMessageSize(object.twist);
+    length += geometry_msgs.msg.AccelWithCovarianceStamped.getMessageSize(object.acc);
     return length + 1;
   }
 
@@ -99,22 +111,52 @@ class GenTrajOnlineRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'c7be0038aa37973ee7d8786bd8a24adf';
+    return '69caf5ed1b7124486d92a1d48a43b7ae';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
-    geometry_msgs/PoseStamped targPoint
+    mavros_msgs/PositionTarget targPoint
     geometry_msgs/PoseStamped pose
     geometry_msgs/TwistStamped twist
+    geometry_msgs/AccelWithCovarianceStamped acc
     bool isUpdateState
     
     ================================================================================
-    MSG: geometry_msgs/PoseStamped
-    # A Pose with reference coordinate frame and timestamp
-    Header header
-    Pose pose
+    MSG: mavros_msgs/PositionTarget
+    # Message for SET_POSITION_TARGET_LOCAL_NED
+    #
+    # Some complex system requires all feautures that mavlink
+    # message provide. See issue #402.
+    
+    std_msgs/Header header
+    
+    uint8 coordinate_frame
+    uint8 FRAME_LOCAL_NED = 1
+    uint8 FRAME_LOCAL_OFFSET_NED = 7
+    uint8 FRAME_BODY_NED = 8
+    uint8 FRAME_BODY_OFFSET_NED = 9
+    
+    uint16 type_mask
+    uint16 IGNORE_PX = 1	# Position ignore flags
+    uint16 IGNORE_PY = 2
+    uint16 IGNORE_PZ = 4
+    uint16 IGNORE_VX = 8	# Velocity vector ignore flags
+    uint16 IGNORE_VY = 16
+    uint16 IGNORE_VZ = 32
+    uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
+    uint16 IGNORE_AFY = 128
+    uint16 IGNORE_AFZ = 256
+    uint16 FORCE = 512	# Force in af vector flag
+    uint16 IGNORE_YAW = 1024
+    uint16 IGNORE_YAW_RATE = 2048
+    
+    geometry_msgs/Point position
+    geometry_msgs/Vector3 velocity
+    geometry_msgs/Vector3 acceleration_or_force
+    float32 yaw
+    float32 yaw_rate
     
     ================================================================================
     MSG: std_msgs/Header
@@ -133,17 +175,35 @@ class GenTrajOnlineRequest {
     string frame_id
     
     ================================================================================
-    MSG: geometry_msgs/Pose
-    # A representation of pose in free space, composed of position and orientation. 
-    Point position
-    Quaternion orientation
-    
-    ================================================================================
     MSG: geometry_msgs/Point
     # This contains the position of a point in free space
     float64 x
     float64 y
     float64 z
+    
+    ================================================================================
+    MSG: geometry_msgs/Vector3
+    # This represents a vector in free space. 
+    # It is only meant to represent a direction. Therefore, it does not
+    # make sense to apply a translation to it (e.g., when applying a 
+    # generic rigid transformation to a Vector3, tf2 will only apply the
+    # rotation). If you want your data to be translatable too, use the
+    # geometry_msgs/Point message instead.
+    
+    float64 x
+    float64 y
+    float64 z
+    ================================================================================
+    MSG: geometry_msgs/PoseStamped
+    # A Pose with reference coordinate frame and timestamp
+    Header header
+    Pose pose
+    
+    ================================================================================
+    MSG: geometry_msgs/Pose
+    # A representation of pose in free space, composed of position and orientation. 
+    Point position
+    Quaternion orientation
     
     ================================================================================
     MSG: geometry_msgs/Quaternion
@@ -167,17 +227,29 @@ class GenTrajOnlineRequest {
     Vector3  angular
     
     ================================================================================
-    MSG: geometry_msgs/Vector3
-    # This represents a vector in free space. 
-    # It is only meant to represent a direction. Therefore, it does not
-    # make sense to apply a translation to it (e.g., when applying a 
-    # generic rigid transformation to a Vector3, tf2 will only apply the
-    # rotation). If you want your data to be translatable too, use the
-    # geometry_msgs/Point message instead.
+    MSG: geometry_msgs/AccelWithCovarianceStamped
+    # This represents an estimated accel with reference coordinate frame and timestamp.
+    Header header
+    AccelWithCovariance accel
     
-    float64 x
-    float64 y
-    float64 z
+    ================================================================================
+    MSG: geometry_msgs/AccelWithCovariance
+    # This expresses acceleration in free space with uncertainty.
+    
+    Accel accel
+    
+    # Row-major representation of the 6x6 covariance matrix
+    # The orientation parameters use a fixed-axis representation.
+    # In order, the parameters are:
+    # (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    float64[36] covariance
+    
+    ================================================================================
+    MSG: geometry_msgs/Accel
+    # This expresses acceleration in free space broken into its linear and angular parts.
+    Vector3  linear
+    Vector3  angular
+    
     `;
   }
 
@@ -188,10 +260,10 @@ class GenTrajOnlineRequest {
     }
     const resolved = new GenTrajOnlineRequest(null);
     if (msg.targPoint !== undefined) {
-      resolved.targPoint = geometry_msgs.msg.PoseStamped.Resolve(msg.targPoint)
+      resolved.targPoint = mavros_msgs.msg.PositionTarget.Resolve(msg.targPoint)
     }
     else {
-      resolved.targPoint = new geometry_msgs.msg.PoseStamped()
+      resolved.targPoint = new mavros_msgs.msg.PositionTarget()
     }
 
     if (msg.pose !== undefined) {
@@ -206,6 +278,13 @@ class GenTrajOnlineRequest {
     }
     else {
       resolved.twist = new geometry_msgs.msg.TwistStamped()
+    }
+
+    if (msg.acc !== undefined) {
+      resolved.acc = geometry_msgs.msg.AccelWithCovarianceStamped.Resolve(msg.acc)
+    }
+    else {
+      resolved.acc = new geometry_msgs.msg.AccelWithCovarianceStamped()
     }
 
     if (msg.isUpdateState !== undefined) {
@@ -384,6 +463,6 @@ class GenTrajOnlineResponse {
 module.exports = {
   Request: GenTrajOnlineRequest,
   Response: GenTrajOnlineResponse,
-  md5sum() { return '1c8daf56fea4f669979846d8a40908f8'; },
+  md5sum() { return '4d549d1dedf81e3210ca57165d54ba1c'; },
   datatype() { return 'offboard_control/GenTrajOnline'; }
 };

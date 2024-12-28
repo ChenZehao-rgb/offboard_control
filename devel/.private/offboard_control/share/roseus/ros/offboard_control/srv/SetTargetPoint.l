@@ -16,26 +16,22 @@
 
 (if (not (find-package "GEOMETRY_MSGS"))
   (ros::roseus-add-msgs "geometry_msgs"))
-(if (not (find-package "MAVROS_MSGS"))
-  (ros::roseus-add-msgs "mavros_msgs"))
 
 
 
 
 (defclass offboard_control::SetTargetPointRequest
   :super ros::object
-  :slots (_targetPoint _targetPointRaw _uavID ))
+  :slots (_targetPoint _uavID ))
 
 (defmethod offboard_control::SetTargetPointRequest
   (:init
    (&key
     ((:targetPoint __targetPoint) (instance geometry_msgs::PoseStamped :init))
-    ((:targetPointRaw __targetPointRaw) (instance mavros_msgs::PositionTarget :init))
     ((:uavID __uavID) 0)
     )
    (send-super :init)
    (setq _targetPoint __targetPoint)
-   (setq _targetPointRaw __targetPointRaw)
    (setq _uavID (round __uavID))
    self)
   (:targetPoint
@@ -45,13 +41,6 @@
      (progn
        (if __targetPoint (setq _targetPoint (car __targetPoint)))
        _targetPoint)))
-  (:targetPointRaw
-   (&rest __targetPointRaw)
-   (if (keywordp (car __targetPointRaw))
-       (send* _targetPointRaw __targetPointRaw)
-     (progn
-       (if __targetPointRaw (setq _targetPointRaw (car __targetPointRaw)))
-       _targetPointRaw)))
   (:uavID
    (&optional __uavID)
    (if __uavID (setq _uavID __uavID)) _uavID)
@@ -60,8 +49,6 @@
    (+
     ;; geometry_msgs/PoseStamped _targetPoint
     (send _targetPoint :serialization-length)
-    ;; mavros_msgs/PositionTarget _targetPointRaw
-    (send _targetPointRaw :serialization-length)
     ;; uint8 _uavID
     1
     ))
@@ -71,8 +58,6 @@
               (make-string-output-stream (send self :serialization-length)))))
      ;; geometry_msgs/PoseStamped _targetPoint
        (send _targetPoint :serialize s)
-     ;; mavros_msgs/PositionTarget _targetPointRaw
-       (send _targetPointRaw :serialize s)
      ;; uint8 _uavID
        (write-byte _uavID s)
      ;;
@@ -81,8 +66,6 @@
    (buf &optional (ptr- 0))
    ;; geometry_msgs/PoseStamped _targetPoint
      (send _targetPoint :deserialize buf ptr-) (incf ptr- (send _targetPoint :serialization-length))
-   ;; mavros_msgs/PositionTarget _targetPointRaw
-     (send _targetPointRaw :deserialize buf ptr-) (incf ptr- (send _targetPointRaw :serialization-length))
    ;; uint8 _uavID
      (setq _uavID (sys::peek buf ptr- :char)) (incf ptr- 1)
    ;;
@@ -130,7 +113,7 @@
   :super ros::object
   :slots ())
 
-(setf (get offboard_control::SetTargetPoint :md5sum-) "fcd605373e89b0a0850fa783080be9b9")
+(setf (get offboard_control::SetTargetPoint :md5sum-) "9a658aee9c9634e4e1d337a3edbe9137")
 (setf (get offboard_control::SetTargetPoint :datatype-) "offboard_control/SetTargetPoint")
 (setf (get offboard_control::SetTargetPoint :request) offboard_control::SetTargetPointRequest)
 (setf (get offboard_control::SetTargetPoint :response) offboard_control::SetTargetPointResponse)
@@ -138,11 +121,10 @@
 (defmethod offboard_control::SetTargetPointRequest
   (:response () (instance offboard_control::SetTargetPointResponse :init)))
 
-(setf (get offboard_control::SetTargetPointRequest :md5sum-) "fcd605373e89b0a0850fa783080be9b9")
+(setf (get offboard_control::SetTargetPointRequest :md5sum-) "9a658aee9c9634e4e1d337a3edbe9137")
 (setf (get offboard_control::SetTargetPointRequest :datatype-) "offboard_control/SetTargetPointRequest")
 (setf (get offboard_control::SetTargetPointRequest :definition-)
       "geometry_msgs/PoseStamped targetPoint
-mavros_msgs/PositionTarget targetPointRaw
 uint8 uavID
 
 ================================================================================
@@ -188,62 +170,14 @@ float64 x
 float64 y
 float64 z
 float64 w
-
-================================================================================
-MSG: mavros_msgs/PositionTarget
-# Message for SET_POSITION_TARGET_LOCAL_NED
-#
-# Some complex system requires all feautures that mavlink
-# message provide. See issue #402.
-
-std_msgs/Header header
-
-uint8 coordinate_frame
-uint8 FRAME_LOCAL_NED = 1
-uint8 FRAME_LOCAL_OFFSET_NED = 7
-uint8 FRAME_BODY_NED = 8
-uint8 FRAME_BODY_OFFSET_NED = 9
-
-uint16 type_mask
-uint16 IGNORE_PX = 1	# Position ignore flags
-uint16 IGNORE_PY = 2
-uint16 IGNORE_PZ = 4
-uint16 IGNORE_VX = 8	# Velocity vector ignore flags
-uint16 IGNORE_VY = 16
-uint16 IGNORE_VZ = 32
-uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
-uint16 IGNORE_AFY = 128
-uint16 IGNORE_AFZ = 256
-uint16 FORCE = 512	# Force in af vector flag
-uint16 IGNORE_YAW = 1024
-uint16 IGNORE_YAW_RATE = 2048
-
-geometry_msgs/Point position
-geometry_msgs/Vector3 velocity
-geometry_msgs/Vector3 acceleration_or_force
-float32 yaw
-float32 yaw_rate
-
-================================================================================
-MSG: geometry_msgs/Vector3
-# This represents a vector in free space. 
-# It is only meant to represent a direction. Therefore, it does not
-# make sense to apply a translation to it (e.g., when applying a 
-# generic rigid transformation to a Vector3, tf2 will only apply the
-# rotation). If you want your data to be translatable too, use the
-# geometry_msgs/Point message instead.
-
-float64 x
-float64 y
 ---
 bool success
 ")
 
-(setf (get offboard_control::SetTargetPointResponse :md5sum-) "fcd605373e89b0a0850fa783080be9b9")
+(setf (get offboard_control::SetTargetPointResponse :md5sum-) "9a658aee9c9634e4e1d337a3edbe9137")
 (setf (get offboard_control::SetTargetPointResponse :datatype-) "offboard_control/SetTargetPointResponse")
 (setf (get offboard_control::SetTargetPointResponse :definition-)
       "geometry_msgs/PoseStamped targetPoint
-mavros_msgs/PositionTarget targetPointRaw
 uint8 uavID
 
 ================================================================================
@@ -289,59 +223,12 @@ float64 x
 float64 y
 float64 z
 float64 w
-
-================================================================================
-MSG: mavros_msgs/PositionTarget
-# Message for SET_POSITION_TARGET_LOCAL_NED
-#
-# Some complex system requires all feautures that mavlink
-# message provide. See issue #402.
-
-std_msgs/Header header
-
-uint8 coordinate_frame
-uint8 FRAME_LOCAL_NED = 1
-uint8 FRAME_LOCAL_OFFSET_NED = 7
-uint8 FRAME_BODY_NED = 8
-uint8 FRAME_BODY_OFFSET_NED = 9
-
-uint16 type_mask
-uint16 IGNORE_PX = 1	# Position ignore flags
-uint16 IGNORE_PY = 2
-uint16 IGNORE_PZ = 4
-uint16 IGNORE_VX = 8	# Velocity vector ignore flags
-uint16 IGNORE_VY = 16
-uint16 IGNORE_VZ = 32
-uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
-uint16 IGNORE_AFY = 128
-uint16 IGNORE_AFZ = 256
-uint16 FORCE = 512	# Force in af vector flag
-uint16 IGNORE_YAW = 1024
-uint16 IGNORE_YAW_RATE = 2048
-
-geometry_msgs/Point position
-geometry_msgs/Vector3 velocity
-geometry_msgs/Vector3 acceleration_or_force
-float32 yaw
-float32 yaw_rate
-
-================================================================================
-MSG: geometry_msgs/Vector3
-# This represents a vector in free space. 
-# It is only meant to represent a direction. Therefore, it does not
-# make sense to apply a translation to it (e.g., when applying a 
-# generic rigid transformation to a Vector3, tf2 will only apply the
-# rotation). If you want your data to be translatable too, use the
-# geometry_msgs/Point message instead.
-
-float64 x
-float64 y
 ---
 bool success
 ")
 
 
 
-(provide :offboard_control/SetTargetPoint "fcd605373e89b0a0850fa783080be9b9")
+(provide :offboard_control/SetTargetPoint "9a658aee9c9634e4e1d337a3edbe9137")
 
 

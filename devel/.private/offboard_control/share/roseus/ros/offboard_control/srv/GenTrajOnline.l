@@ -16,6 +16,8 @@
 
 (if (not (find-package "GEOMETRY_MSGS"))
   (ros::roseus-add-msgs "geometry_msgs"))
+(if (not (find-package "MAVROS_MSGS"))
+  (ros::roseus-add-msgs "mavros_msgs"))
 
 
 (if (not (find-package "MAVROS_MSGS"))
@@ -24,20 +26,22 @@
 
 (defclass offboard_control::GenTrajOnlineRequest
   :super ros::object
-  :slots (_targPoint _pose _twist _isUpdateState ))
+  :slots (_targPoint _pose _twist _acc _isUpdateState ))
 
 (defmethod offboard_control::GenTrajOnlineRequest
   (:init
    (&key
-    ((:targPoint __targPoint) (instance geometry_msgs::PoseStamped :init))
+    ((:targPoint __targPoint) (instance mavros_msgs::PositionTarget :init))
     ((:pose __pose) (instance geometry_msgs::PoseStamped :init))
     ((:twist __twist) (instance geometry_msgs::TwistStamped :init))
+    ((:acc __acc) (instance geometry_msgs::AccelWithCovarianceStamped :init))
     ((:isUpdateState __isUpdateState) nil)
     )
    (send-super :init)
    (setq _targPoint __targPoint)
    (setq _pose __pose)
    (setq _twist __twist)
+   (setq _acc __acc)
    (setq _isUpdateState __isUpdateState)
    self)
   (:targPoint
@@ -61,18 +65,27 @@
      (progn
        (if __twist (setq _twist (car __twist)))
        _twist)))
+  (:acc
+   (&rest __acc)
+   (if (keywordp (car __acc))
+       (send* _acc __acc)
+     (progn
+       (if __acc (setq _acc (car __acc)))
+       _acc)))
   (:isUpdateState
    (&optional (__isUpdateState :null))
    (if (not (eq __isUpdateState :null)) (setq _isUpdateState __isUpdateState)) _isUpdateState)
   (:serialization-length
    ()
    (+
-    ;; geometry_msgs/PoseStamped _targPoint
+    ;; mavros_msgs/PositionTarget _targPoint
     (send _targPoint :serialization-length)
     ;; geometry_msgs/PoseStamped _pose
     (send _pose :serialization-length)
     ;; geometry_msgs/TwistStamped _twist
     (send _twist :serialization-length)
+    ;; geometry_msgs/AccelWithCovarianceStamped _acc
+    (send _acc :serialization-length)
     ;; bool _isUpdateState
     1
     ))
@@ -80,24 +93,28 @@
    (&optional strm)
    (let ((s (if strm strm
               (make-string-output-stream (send self :serialization-length)))))
-     ;; geometry_msgs/PoseStamped _targPoint
+     ;; mavros_msgs/PositionTarget _targPoint
        (send _targPoint :serialize s)
      ;; geometry_msgs/PoseStamped _pose
        (send _pose :serialize s)
      ;; geometry_msgs/TwistStamped _twist
        (send _twist :serialize s)
+     ;; geometry_msgs/AccelWithCovarianceStamped _acc
+       (send _acc :serialize s)
      ;; bool _isUpdateState
        (if _isUpdateState (write-byte -1 s) (write-byte 0 s))
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
    (buf &optional (ptr- 0))
-   ;; geometry_msgs/PoseStamped _targPoint
+   ;; mavros_msgs/PositionTarget _targPoint
      (send _targPoint :deserialize buf ptr-) (incf ptr- (send _targPoint :serialization-length))
    ;; geometry_msgs/PoseStamped _pose
      (send _pose :deserialize buf ptr-) (incf ptr- (send _pose :serialization-length))
    ;; geometry_msgs/TwistStamped _twist
      (send _twist :deserialize buf ptr-) (incf ptr- (send _twist :serialization-length))
+   ;; geometry_msgs/AccelWithCovarianceStamped _acc
+     (send _acc :deserialize buf ptr-) (incf ptr- (send _acc :serialization-length))
    ;; bool _isUpdateState
      (setq _isUpdateState (not (= 0 (sys::peek buf ptr- :char)))) (incf ptr- 1)
    ;;
@@ -160,7 +177,7 @@
   :super ros::object
   :slots ())
 
-(setf (get offboard_control::GenTrajOnline :md5sum-) "1c8daf56fea4f669979846d8a40908f8")
+(setf (get offboard_control::GenTrajOnline :md5sum-) "4d549d1dedf81e3210ca57165d54ba1c")
 (setf (get offboard_control::GenTrajOnline :datatype-) "offboard_control/GenTrajOnline")
 (setf (get offboard_control::GenTrajOnline :request) offboard_control::GenTrajOnlineRequest)
 (setf (get offboard_control::GenTrajOnline :response) offboard_control::GenTrajOnlineResponse)
@@ -168,19 +185,49 @@
 (defmethod offboard_control::GenTrajOnlineRequest
   (:response () (instance offboard_control::GenTrajOnlineResponse :init)))
 
-(setf (get offboard_control::GenTrajOnlineRequest :md5sum-) "1c8daf56fea4f669979846d8a40908f8")
+(setf (get offboard_control::GenTrajOnlineRequest :md5sum-) "4d549d1dedf81e3210ca57165d54ba1c")
 (setf (get offboard_control::GenTrajOnlineRequest :datatype-) "offboard_control/GenTrajOnlineRequest")
 (setf (get offboard_control::GenTrajOnlineRequest :definition-)
-      "geometry_msgs/PoseStamped targPoint
+      "mavros_msgs/PositionTarget targPoint
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist
+geometry_msgs/AccelWithCovarianceStamped acc
 bool isUpdateState
 
 ================================================================================
-MSG: geometry_msgs/PoseStamped
-# A Pose with reference coordinate frame and timestamp
-Header header
-Pose pose
+MSG: mavros_msgs/PositionTarget
+# Message for SET_POSITION_TARGET_LOCAL_NED
+#
+# Some complex system requires all feautures that mavlink
+# message provide. See issue #402.
+
+std_msgs/Header header
+
+uint8 coordinate_frame
+uint8 FRAME_LOCAL_NED = 1
+uint8 FRAME_LOCAL_OFFSET_NED = 7
+uint8 FRAME_BODY_NED = 8
+uint8 FRAME_BODY_OFFSET_NED = 9
+
+uint16 type_mask
+uint16 IGNORE_PX = 1	# Position ignore flags
+uint16 IGNORE_PY = 2
+uint16 IGNORE_PZ = 4
+uint16 IGNORE_VX = 8	# Velocity vector ignore flags
+uint16 IGNORE_VY = 16
+uint16 IGNORE_VZ = 32
+uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
+uint16 IGNORE_AFY = 128
+uint16 IGNORE_AFZ = 256
+uint16 FORCE = 512	# Force in af vector flag
+uint16 IGNORE_YAW = 1024
+uint16 IGNORE_YAW_RATE = 2048
+
+geometry_msgs/Point position
+geometry_msgs/Vector3 velocity
+geometry_msgs/Vector3 acceleration_or_force
+float32 yaw
+float32 yaw_rate
 
 ================================================================================
 MSG: std_msgs/Header
@@ -199,17 +246,35 @@ time stamp
 string frame_id
 
 ================================================================================
-MSG: geometry_msgs/Pose
-# A representation of pose in free space, composed of position and orientation. 
-Point position
-Quaternion orientation
-
-================================================================================
 MSG: geometry_msgs/Point
 # This contains the position of a point in free space
 float64 x
 float64 y
 float64 z
+
+================================================================================
+MSG: geometry_msgs/Vector3
+# This represents a vector in free space. 
+# It is only meant to represent a direction. Therefore, it does not
+# make sense to apply a translation to it (e.g., when applying a 
+# generic rigid transformation to a Vector3, tf2 will only apply the
+# rotation). If you want your data to be translatable too, use the
+# geometry_msgs/Point message instead.
+
+float64 x
+float64 y
+float64 z
+================================================================================
+MSG: geometry_msgs/PoseStamped
+# A Pose with reference coordinate frame and timestamp
+Header header
+Pose pose
+
+================================================================================
+MSG: geometry_msgs/Pose
+# A representation of pose in free space, composed of position and orientation. 
+Point position
+Quaternion orientation
 
 ================================================================================
 MSG: geometry_msgs/Quaternion
@@ -233,16 +298,28 @@ Vector3  linear
 Vector3  angular
 
 ================================================================================
-MSG: geometry_msgs/Vector3
-# This represents a vector in free space. 
-# It is only meant to represent a direction. Therefore, it does not
-# make sense to apply a translation to it (e.g., when applying a 
-# generic rigid transformation to a Vector3, tf2 will only apply the
-# rotation). If you want your data to be translatable too, use the
-# geometry_msgs/Point message instead.
+MSG: geometry_msgs/AccelWithCovarianceStamped
+# This represents an estimated accel with reference coordinate frame and timestamp.
+Header header
+AccelWithCovariance accel
 
-float64 x
-float64 y
+================================================================================
+MSG: geometry_msgs/AccelWithCovariance
+# This expresses acceleration in free space with uncertainty.
+
+Accel accel
+
+# Row-major representation of the 6x6 covariance matrix
+# The orientation parameters use a fixed-axis representation.
+# In order, the parameters are:
+# (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+float64[36] covariance
+
+================================================================================
+MSG: geometry_msgs/Accel
+# This expresses acceleration in free space broken into its linear and angular parts.
+Vector3  linear
+Vector3  angular
 ---
 mavros_msgs/PositionTarget setPointRaw
 bool success
@@ -318,19 +395,49 @@ float64 x
 float64 y
 ")
 
-(setf (get offboard_control::GenTrajOnlineResponse :md5sum-) "1c8daf56fea4f669979846d8a40908f8")
+(setf (get offboard_control::GenTrajOnlineResponse :md5sum-) "4d549d1dedf81e3210ca57165d54ba1c")
 (setf (get offboard_control::GenTrajOnlineResponse :datatype-) "offboard_control/GenTrajOnlineResponse")
 (setf (get offboard_control::GenTrajOnlineResponse :definition-)
-      "geometry_msgs/PoseStamped targPoint
+      "mavros_msgs/PositionTarget targPoint
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist
+geometry_msgs/AccelWithCovarianceStamped acc
 bool isUpdateState
 
 ================================================================================
-MSG: geometry_msgs/PoseStamped
-# A Pose with reference coordinate frame and timestamp
-Header header
-Pose pose
+MSG: mavros_msgs/PositionTarget
+# Message for SET_POSITION_TARGET_LOCAL_NED
+#
+# Some complex system requires all feautures that mavlink
+# message provide. See issue #402.
+
+std_msgs/Header header
+
+uint8 coordinate_frame
+uint8 FRAME_LOCAL_NED = 1
+uint8 FRAME_LOCAL_OFFSET_NED = 7
+uint8 FRAME_BODY_NED = 8
+uint8 FRAME_BODY_OFFSET_NED = 9
+
+uint16 type_mask
+uint16 IGNORE_PX = 1	# Position ignore flags
+uint16 IGNORE_PY = 2
+uint16 IGNORE_PZ = 4
+uint16 IGNORE_VX = 8	# Velocity vector ignore flags
+uint16 IGNORE_VY = 16
+uint16 IGNORE_VZ = 32
+uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
+uint16 IGNORE_AFY = 128
+uint16 IGNORE_AFZ = 256
+uint16 FORCE = 512	# Force in af vector flag
+uint16 IGNORE_YAW = 1024
+uint16 IGNORE_YAW_RATE = 2048
+
+geometry_msgs/Point position
+geometry_msgs/Vector3 velocity
+geometry_msgs/Vector3 acceleration_or_force
+float32 yaw
+float32 yaw_rate
 
 ================================================================================
 MSG: std_msgs/Header
@@ -349,17 +456,35 @@ time stamp
 string frame_id
 
 ================================================================================
-MSG: geometry_msgs/Pose
-# A representation of pose in free space, composed of position and orientation. 
-Point position
-Quaternion orientation
-
-================================================================================
 MSG: geometry_msgs/Point
 # This contains the position of a point in free space
 float64 x
 float64 y
 float64 z
+
+================================================================================
+MSG: geometry_msgs/Vector3
+# This represents a vector in free space. 
+# It is only meant to represent a direction. Therefore, it does not
+# make sense to apply a translation to it (e.g., when applying a 
+# generic rigid transformation to a Vector3, tf2 will only apply the
+# rotation). If you want your data to be translatable too, use the
+# geometry_msgs/Point message instead.
+
+float64 x
+float64 y
+float64 z
+================================================================================
+MSG: geometry_msgs/PoseStamped
+# A Pose with reference coordinate frame and timestamp
+Header header
+Pose pose
+
+================================================================================
+MSG: geometry_msgs/Pose
+# A representation of pose in free space, composed of position and orientation. 
+Point position
+Quaternion orientation
 
 ================================================================================
 MSG: geometry_msgs/Quaternion
@@ -383,16 +508,28 @@ Vector3  linear
 Vector3  angular
 
 ================================================================================
-MSG: geometry_msgs/Vector3
-# This represents a vector in free space. 
-# It is only meant to represent a direction. Therefore, it does not
-# make sense to apply a translation to it (e.g., when applying a 
-# generic rigid transformation to a Vector3, tf2 will only apply the
-# rotation). If you want your data to be translatable too, use the
-# geometry_msgs/Point message instead.
+MSG: geometry_msgs/AccelWithCovarianceStamped
+# This represents an estimated accel with reference coordinate frame and timestamp.
+Header header
+AccelWithCovariance accel
 
-float64 x
-float64 y
+================================================================================
+MSG: geometry_msgs/AccelWithCovariance
+# This expresses acceleration in free space with uncertainty.
+
+Accel accel
+
+# Row-major representation of the 6x6 covariance matrix
+# The orientation parameters use a fixed-axis representation.
+# In order, the parameters are:
+# (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+float64[36] covariance
+
+================================================================================
+MSG: geometry_msgs/Accel
+# This expresses acceleration in free space broken into its linear and angular parts.
+Vector3  linear
+Vector3  angular
 ---
 mavros_msgs/PositionTarget setPointRaw
 bool success
@@ -470,6 +607,6 @@ float64 y
 
 
 
-(provide :offboard_control/GenTrajOnline "1c8daf56fea4f669979846d8a40908f8")
+(provide :offboard_control/GenTrajOnline "4d549d1dedf81e3210ca57165d54ba1c")
 
 

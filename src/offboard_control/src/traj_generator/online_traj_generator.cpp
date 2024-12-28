@@ -10,6 +10,9 @@ void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll,
 
 OnlineTrajGenerator::OnlineTrajGenerator(const ros::NodeHandle &nh)
   : TrajGenerator(), nh_{nh} {
+    boundUpdateSer_ =
+      nh_.advertiseService("/online_traj_generator/update_bound_online",
+                           &OnlineTrajGenerator::updateBoundOnline, this);
     ruckigStatePub_ = nh_.advertise<sensor_msgs::JointState>(
                       "/online_traj_generator/ruckig_state", 10);
     ruckigCommandPub_ = nh_.advertise<sensor_msgs::JointState>(
@@ -27,15 +30,30 @@ OnlineTrajGenerator::OnlineTrajGenerator(const ros::NodeHandle &nh)
     double roll, pitch, yaw;
     quat2RPY(uavPoseLocal_.pose.orientation, roll, pitch, yaw);
     state_.position[3] = yaw;
+
+    state_.velocity[0] = 0.0;
+    state_.velocity[1] = 0.0;
+    state_.velocity[2] = 0.0;
+
+    state_.effort[0] = 0.0;
+    state_.effort[1] = 0.0;
+    state_.effort[2] = 0.0;
   }
 
 void OnlineTrajGenerator::updateTrajGeneratorTarg(){
-  targ_.position[0] = targPointLocal_.pose.position.x;
-  targ_.position[1] = targPointLocal_.pose.position.y;
-  targ_.position[2] = targPointLocal_.pose.position.z;
-  double roll, pitch, yaw;
-  quat2RPY(targPointLocal_.pose.orientation, roll, pitch, yaw);
-  targ_.position[3] = yaw;
+  targ_.position[0] = targPointLocal_.position.x;
+  targ_.position[1] = targPointLocal_.position.y;
+  targ_.position[2] = targPointLocal_.position.z;
+
+  targ_.position[3] = targPointLocal_.yaw;
+
+  targ_.velocity[0] = targPointLocal_.velocity.x;
+  targ_.velocity[1] = targPointLocal_.velocity.y;
+  targ_.velocity[2] = targPointLocal_.velocity.z;
+
+  targ_.effort[0] = targPointLocal_.acceleration_or_force.x;
+  targ_.effort[1] = targPointLocal_.acceleration_or_force.y;
+  targ_.effort[2] = targPointLocal_.acceleration_or_force.z;
 }
 
 void OnlineTrajGenerator::updateSetPointRaw(){
@@ -71,6 +89,7 @@ bool OnlineTrajGenerator::genTrajOnline(
   targPointLocal_ = req.targPoint;
   uavPoseLocal_ = req.pose;
   uavTwistLocal_ = req.twist;
+  uavAccelLocal_ = req.acc;
 
   if (req.isUpdateState) {
     updateTrajGeneratorState();
@@ -84,6 +103,16 @@ bool OnlineTrajGenerator::genTrajOnline(
     }
   }
 
+  // if (!isFirstUpdate_) {
+  //   updateTrajGeneratorState();
+  //   isFirstUpdate_ = true;
+  // } else {
+  //   for (std::size_t id = 0; id < STATE_NUM; id++) {
+  //     state_.position[id] = command_.position[id];
+  //     state_.velocity[id] = command_.velocity[id];
+  //     state_.effort[id] = command_.effort[id];
+  //   }
+  // }
   updateTrajGeneratorTarg();
 
   if (!trajGenerate()) {
@@ -99,6 +128,22 @@ bool OnlineTrajGenerator::genTrajOnline(
   res.setPointRaw = setPointRawLocal_;
   res.success = true;
 
+  return true;
+}
+
+bool OnlineTrajGenerator::updateBoundOnline(
+    offboard_control::UpdateBoundOnline::Request &req,
+    offboard_control::UpdateBoundOnline::Response &res) {
+  geometry_msgs::Vector3 velBound;
+  geometry_msgs::Vector3 accBound;
+  velBound = req.velBound;
+  accBound = req.accBound;
+
+  tf::vectorMsgToEigen(velBound, velBound_);
+  tf::vectorMsgToEigen(accBound, accBound_);
+
+  isBoundUpdate_ = true;
+  res.success = true;
   return true;
 }
 

@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::offboard_control::GenTrajOnline > {
   static const char* value()
   {
-    return "1c8daf56fea4f669979846d8a40908f8";
+    return "4d549d1dedf81e3210ca57165d54ba1c";
   }
 
   static const char* value(const ::offboard_control::GenTrajOnline&) { return value(); }

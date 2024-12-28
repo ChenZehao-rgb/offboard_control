@@ -7,22 +7,53 @@ import genpy
 import struct
 
 import geometry_msgs.msg
+import mavros_msgs.msg
 import std_msgs.msg
 
 class GenTrajOnlineRequest(genpy.Message):
-  _md5sum = "c7be0038aa37973ee7d8786bd8a24adf"
+  _md5sum = "69caf5ed1b7124486d92a1d48a43b7ae"
   _type = "offboard_control/GenTrajOnlineRequest"
   _has_header = False  # flag to mark the presence of a Header object
-  _full_text = """geometry_msgs/PoseStamped targPoint
+  _full_text = """mavros_msgs/PositionTarget targPoint
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist
+geometry_msgs/AccelWithCovarianceStamped acc
 bool isUpdateState
 
 ================================================================================
-MSG: geometry_msgs/PoseStamped
-# A Pose with reference coordinate frame and timestamp
-Header header
-Pose pose
+MSG: mavros_msgs/PositionTarget
+# Message for SET_POSITION_TARGET_LOCAL_NED
+#
+# Some complex system requires all feautures that mavlink
+# message provide. See issue #402.
+
+std_msgs/Header header
+
+uint8 coordinate_frame
+uint8 FRAME_LOCAL_NED = 1
+uint8 FRAME_LOCAL_OFFSET_NED = 7
+uint8 FRAME_BODY_NED = 8
+uint8 FRAME_BODY_OFFSET_NED = 9
+
+uint16 type_mask
+uint16 IGNORE_PX = 1	# Position ignore flags
+uint16 IGNORE_PY = 2
+uint16 IGNORE_PZ = 4
+uint16 IGNORE_VX = 8	# Velocity vector ignore flags
+uint16 IGNORE_VY = 16
+uint16 IGNORE_VZ = 32
+uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
+uint16 IGNORE_AFY = 128
+uint16 IGNORE_AFZ = 256
+uint16 FORCE = 512	# Force in af vector flag
+uint16 IGNORE_YAW = 1024
+uint16 IGNORE_YAW_RATE = 2048
+
+geometry_msgs/Point position
+geometry_msgs/Vector3 velocity
+geometry_msgs/Vector3 acceleration_or_force
+float32 yaw
+float32 yaw_rate
 
 ================================================================================
 MSG: std_msgs/Header
@@ -41,17 +72,35 @@ time stamp
 string frame_id
 
 ================================================================================
-MSG: geometry_msgs/Pose
-# A representation of pose in free space, composed of position and orientation. 
-Point position
-Quaternion orientation
-
-================================================================================
 MSG: geometry_msgs/Point
 # This contains the position of a point in free space
 float64 x
 float64 y
 float64 z
+
+================================================================================
+MSG: geometry_msgs/Vector3
+# This represents a vector in free space. 
+# It is only meant to represent a direction. Therefore, it does not
+# make sense to apply a translation to it (e.g., when applying a 
+# generic rigid transformation to a Vector3, tf2 will only apply the
+# rotation). If you want your data to be translatable too, use the
+# geometry_msgs/Point message instead.
+
+float64 x
+float64 y
+float64 z
+================================================================================
+MSG: geometry_msgs/PoseStamped
+# A Pose with reference coordinate frame and timestamp
+Header header
+Pose pose
+
+================================================================================
+MSG: geometry_msgs/Pose
+# A representation of pose in free space, composed of position and orientation. 
+Point position
+Quaternion orientation
 
 ================================================================================
 MSG: geometry_msgs/Quaternion
@@ -75,19 +124,31 @@ Vector3  linear
 Vector3  angular
 
 ================================================================================
-MSG: geometry_msgs/Vector3
-# This represents a vector in free space. 
-# It is only meant to represent a direction. Therefore, it does not
-# make sense to apply a translation to it (e.g., when applying a 
-# generic rigid transformation to a Vector3, tf2 will only apply the
-# rotation). If you want your data to be translatable too, use the
-# geometry_msgs/Point message instead.
+MSG: geometry_msgs/AccelWithCovarianceStamped
+# This represents an estimated accel with reference coordinate frame and timestamp.
+Header header
+AccelWithCovariance accel
 
-float64 x
-float64 y
-float64 z"""
-  __slots__ = ['targPoint','pose','twist','isUpdateState']
-  _slot_types = ['geometry_msgs/PoseStamped','geometry_msgs/PoseStamped','geometry_msgs/TwistStamped','bool']
+================================================================================
+MSG: geometry_msgs/AccelWithCovariance
+# This expresses acceleration in free space with uncertainty.
+
+Accel accel
+
+# Row-major representation of the 6x6 covariance matrix
+# The orientation parameters use a fixed-axis representation.
+# In order, the parameters are:
+# (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+float64[36] covariance
+
+================================================================================
+MSG: geometry_msgs/Accel
+# This expresses acceleration in free space broken into its linear and angular parts.
+Vector3  linear
+Vector3  angular
+"""
+  __slots__ = ['targPoint','pose','twist','acc','isUpdateState']
+  _slot_types = ['mavros_msgs/PositionTarget','geometry_msgs/PoseStamped','geometry_msgs/TwistStamped','geometry_msgs/AccelWithCovarianceStamped','bool']
 
   def __init__(self, *args, **kwds):
     """
@@ -97,7 +158,7 @@ float64 z"""
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       targPoint,pose,twist,isUpdateState
+       targPoint,pose,twist,acc,isUpdateState
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -107,17 +168,20 @@ float64 z"""
       super(GenTrajOnlineRequest, self).__init__(*args, **kwds)
       # message fields cannot be None, assign default values for those that are
       if self.targPoint is None:
-        self.targPoint = geometry_msgs.msg.PoseStamped()
+        self.targPoint = mavros_msgs.msg.PositionTarget()
       if self.pose is None:
         self.pose = geometry_msgs.msg.PoseStamped()
       if self.twist is None:
         self.twist = geometry_msgs.msg.TwistStamped()
+      if self.acc is None:
+        self.acc = geometry_msgs.msg.AccelWithCovarianceStamped()
       if self.isUpdateState is None:
         self.isUpdateState = False
     else:
-      self.targPoint = geometry_msgs.msg.PoseStamped()
+      self.targPoint = mavros_msgs.msg.PositionTarget()
       self.pose = geometry_msgs.msg.PoseStamped()
       self.twist = geometry_msgs.msg.TwistStamped()
+      self.acc = geometry_msgs.msg.AccelWithCovarianceStamped()
       self.isUpdateState = False
 
   def _get_types(self):
@@ -141,7 +205,7 @@ float64 z"""
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7d3I().pack(_x.targPoint.pose.position.x, _x.targPoint.pose.position.y, _x.targPoint.pose.position.z, _x.targPoint.pose.orientation.x, _x.targPoint.pose.orientation.y, _x.targPoint.pose.orientation.z, _x.targPoint.pose.orientation.w, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs))
+      buff.write(_get_struct_BH9d2f3I().pack(_x.targPoint.coordinate_frame, _x.targPoint.type_mask, _x.targPoint.position.x, _x.targPoint.position.y, _x.targPoint.position.z, _x.targPoint.velocity.x, _x.targPoint.velocity.y, _x.targPoint.velocity.z, _x.targPoint.acceleration_or_force.x, _x.targPoint.acceleration_or_force.y, _x.targPoint.acceleration_or_force.z, _x.targPoint.yaw, _x.targPoint.yaw_rate, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs))
       _x = self.pose.header.frame_id
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -157,7 +221,18 @@ float64 z"""
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_6dB().pack(_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.isUpdateState))
+      buff.write(_get_struct_6d3I().pack(_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.acc.header.seq, _x.acc.header.stamp.secs, _x.acc.header.stamp.nsecs))
+      _x = self.acc.header.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
+      _x = self
+      buff.write(_get_struct_6d().pack(_x.acc.accel.accel.linear.x, _x.acc.accel.accel.linear.y, _x.acc.accel.accel.linear.z, _x.acc.accel.accel.angular.x, _x.acc.accel.accel.angular.y, _x.acc.accel.accel.angular.z))
+      buff.write(_get_struct_36d().pack(*self.acc.accel.covariance))
+      _x = self.isUpdateState
+      buff.write(_get_struct_B().pack(_x))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -170,11 +245,13 @@ float64 z"""
       codecs.lookup_error("rosmsg").msg_type = self._type
     try:
       if self.targPoint is None:
-        self.targPoint = geometry_msgs.msg.PoseStamped()
+        self.targPoint = mavros_msgs.msg.PositionTarget()
       if self.pose is None:
         self.pose = geometry_msgs.msg.PoseStamped()
       if self.twist is None:
         self.twist = geometry_msgs.msg.TwistStamped()
+      if self.acc is None:
+        self.acc = geometry_msgs.msg.AccelWithCovarianceStamped()
       end = 0
       _x = self
       start = end
@@ -191,8 +268,8 @@ float64 z"""
         self.targPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 68
-      (_x.targPoint.pose.position.x, _x.targPoint.pose.position.y, _x.targPoint.pose.position.z, _x.targPoint.pose.orientation.x, _x.targPoint.pose.orientation.y, _x.targPoint.pose.orientation.z, _x.targPoint.pose.orientation.w, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs,) = _get_struct_7d3I().unpack(str[start:end])
+      end += 95
+      (_x.targPoint.coordinate_frame, _x.targPoint.type_mask, _x.targPoint.position.x, _x.targPoint.position.y, _x.targPoint.position.z, _x.targPoint.velocity.x, _x.targPoint.velocity.y, _x.targPoint.velocity.z, _x.targPoint.acceleration_or_force.x, _x.targPoint.acceleration_or_force.y, _x.targPoint.acceleration_or_force.z, _x.targPoint.yaw, _x.targPoint.yaw_rate, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs,) = _get_struct_BH9d2f3I().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -217,8 +294,27 @@ float64 z"""
         self.twist.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 49
-      (_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.isUpdateState,) = _get_struct_6dB().unpack(str[start:end])
+      end += 60
+      (_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.acc.header.seq, _x.acc.header.stamp.secs, _x.acc.header.stamp.nsecs,) = _get_struct_6d3I().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.acc.header.frame_id = str[start:end].decode('utf-8', 'rosmsg')
+      else:
+        self.acc.header.frame_id = str[start:end]
+      _x = self
+      start = end
+      end += 48
+      (_x.acc.accel.accel.linear.x, _x.acc.accel.accel.linear.y, _x.acc.accel.accel.linear.z, _x.acc.accel.accel.angular.x, _x.acc.accel.accel.angular.y, _x.acc.accel.accel.angular.z,) = _get_struct_6d().unpack(str[start:end])
+      start = end
+      end += 288
+      self.acc.accel.covariance = _get_struct_36d().unpack(str[start:end])
+      start = end
+      end += 1
+      (self.isUpdateState,) = _get_struct_B().unpack(str[start:end])
       self.isUpdateState = bool(self.isUpdateState)
       return self
     except struct.error as e:
@@ -241,7 +337,7 @@ float64 z"""
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7d3I().pack(_x.targPoint.pose.position.x, _x.targPoint.pose.position.y, _x.targPoint.pose.position.z, _x.targPoint.pose.orientation.x, _x.targPoint.pose.orientation.y, _x.targPoint.pose.orientation.z, _x.targPoint.pose.orientation.w, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs))
+      buff.write(_get_struct_BH9d2f3I().pack(_x.targPoint.coordinate_frame, _x.targPoint.type_mask, _x.targPoint.position.x, _x.targPoint.position.y, _x.targPoint.position.z, _x.targPoint.velocity.x, _x.targPoint.velocity.y, _x.targPoint.velocity.z, _x.targPoint.acceleration_or_force.x, _x.targPoint.acceleration_or_force.y, _x.targPoint.acceleration_or_force.z, _x.targPoint.yaw, _x.targPoint.yaw_rate, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs))
       _x = self.pose.header.frame_id
       length = len(_x)
       if python3 or type(_x) == unicode:
@@ -257,7 +353,18 @@ float64 z"""
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_6dB().pack(_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.isUpdateState))
+      buff.write(_get_struct_6d3I().pack(_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.acc.header.seq, _x.acc.header.stamp.secs, _x.acc.header.stamp.nsecs))
+      _x = self.acc.header.frame_id
+      length = len(_x)
+      if python3 or type(_x) == unicode:
+        _x = _x.encode('utf-8')
+        length = len(_x)
+      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
+      _x = self
+      buff.write(_get_struct_6d().pack(_x.acc.accel.accel.linear.x, _x.acc.accel.accel.linear.y, _x.acc.accel.accel.linear.z, _x.acc.accel.accel.angular.x, _x.acc.accel.accel.angular.y, _x.acc.accel.accel.angular.z))
+      buff.write(self.acc.accel.covariance.tostring())
+      _x = self.isUpdateState
+      buff.write(_get_struct_B().pack(_x))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -271,11 +378,13 @@ float64 z"""
       codecs.lookup_error("rosmsg").msg_type = self._type
     try:
       if self.targPoint is None:
-        self.targPoint = geometry_msgs.msg.PoseStamped()
+        self.targPoint = mavros_msgs.msg.PositionTarget()
       if self.pose is None:
         self.pose = geometry_msgs.msg.PoseStamped()
       if self.twist is None:
         self.twist = geometry_msgs.msg.TwistStamped()
+      if self.acc is None:
+        self.acc = geometry_msgs.msg.AccelWithCovarianceStamped()
       end = 0
       _x = self
       start = end
@@ -292,8 +401,8 @@ float64 z"""
         self.targPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 68
-      (_x.targPoint.pose.position.x, _x.targPoint.pose.position.y, _x.targPoint.pose.position.z, _x.targPoint.pose.orientation.x, _x.targPoint.pose.orientation.y, _x.targPoint.pose.orientation.z, _x.targPoint.pose.orientation.w, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs,) = _get_struct_7d3I().unpack(str[start:end])
+      end += 95
+      (_x.targPoint.coordinate_frame, _x.targPoint.type_mask, _x.targPoint.position.x, _x.targPoint.position.y, _x.targPoint.position.z, _x.targPoint.velocity.x, _x.targPoint.velocity.y, _x.targPoint.velocity.z, _x.targPoint.acceleration_or_force.x, _x.targPoint.acceleration_or_force.y, _x.targPoint.acceleration_or_force.z, _x.targPoint.yaw, _x.targPoint.yaw_rate, _x.pose.header.seq, _x.pose.header.stamp.secs, _x.pose.header.stamp.nsecs,) = _get_struct_BH9d2f3I().unpack(str[start:end])
       start = end
       end += 4
       (length,) = _struct_I.unpack(str[start:end])
@@ -318,8 +427,27 @@ float64 z"""
         self.twist.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 49
-      (_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.isUpdateState,) = _get_struct_6dB().unpack(str[start:end])
+      end += 60
+      (_x.twist.twist.linear.x, _x.twist.twist.linear.y, _x.twist.twist.linear.z, _x.twist.twist.angular.x, _x.twist.twist.angular.y, _x.twist.twist.angular.z, _x.acc.header.seq, _x.acc.header.stamp.secs, _x.acc.header.stamp.nsecs,) = _get_struct_6d3I().unpack(str[start:end])
+      start = end
+      end += 4
+      (length,) = _struct_I.unpack(str[start:end])
+      start = end
+      end += length
+      if python3:
+        self.acc.header.frame_id = str[start:end].decode('utf-8', 'rosmsg')
+      else:
+        self.acc.header.frame_id = str[start:end]
+      _x = self
+      start = end
+      end += 48
+      (_x.acc.accel.accel.linear.x, _x.acc.accel.accel.linear.y, _x.acc.accel.accel.linear.z, _x.acc.accel.accel.angular.x, _x.acc.accel.accel.angular.y, _x.acc.accel.accel.angular.z,) = _get_struct_6d().unpack(str[start:end])
+      start = end
+      end += 288
+      self.acc.accel.covariance = numpy.frombuffer(str[start:end], dtype=numpy.float64, count=36)
+      start = end
+      end += 1
+      (self.isUpdateState,) = _get_struct_B().unpack(str[start:end])
       self.isUpdateState = bool(self.isUpdateState)
       return self
     except struct.error as e:
@@ -329,24 +457,48 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
+_struct_36d = None
+def _get_struct_36d():
+    global _struct_36d
+    if _struct_36d is None:
+        _struct_36d = struct.Struct("<36d")
+    return _struct_36d
 _struct_3I = None
 def _get_struct_3I():
     global _struct_3I
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
-_struct_6dB = None
-def _get_struct_6dB():
-    global _struct_6dB
-    if _struct_6dB is None:
-        _struct_6dB = struct.Struct("<6dB")
-    return _struct_6dB
+_struct_6d = None
+def _get_struct_6d():
+    global _struct_6d
+    if _struct_6d is None:
+        _struct_6d = struct.Struct("<6d")
+    return _struct_6d
+_struct_6d3I = None
+def _get_struct_6d3I():
+    global _struct_6d3I
+    if _struct_6d3I is None:
+        _struct_6d3I = struct.Struct("<6d3I")
+    return _struct_6d3I
 _struct_7d3I = None
 def _get_struct_7d3I():
     global _struct_7d3I
     if _struct_7d3I is None:
         _struct_7d3I = struct.Struct("<7d3I")
     return _struct_7d3I
+_struct_B = None
+def _get_struct_B():
+    global _struct_B
+    if _struct_B is None:
+        _struct_B = struct.Struct("<B")
+    return _struct_B
+_struct_BH9d2f3I = None
+def _get_struct_BH9d2f3I():
+    global _struct_BH9d2f3I
+    if _struct_BH9d2f3I is None:
+        _struct_BH9d2f3I = struct.Struct("<BH9d2f3I")
+    return _struct_BH9d2f3I
 # This Python file uses the following encoding: utf-8
 """autogenerated by genpy from offboard_control/GenTrajOnlineResponse.msg. Do not edit."""
 import codecs
@@ -595,6 +747,6 @@ def _get_struct_BH9d2fB():
     return _struct_BH9d2fB
 class GenTrajOnline(object):
   _type          = 'offboard_control/GenTrajOnline'
-  _md5sum = '1c8daf56fea4f669979846d8a40908f8'
+  _md5sum = '4d549d1dedf81e3210ca57165d54ba1c'
   _request_class  = GenTrajOnlineRequest
   _response_class = GenTrajOnlineResponse

@@ -1,6 +1,7 @@
-geometry_msgs/PoseStamped targPoint
+mavros_msgs/PositionTarget targPoint
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist
+geometry_msgs/AccelWithCovarianceStamped acc
 bool isUpdateState
 ---
 mavros_msgs/PositionTarget setPointRaw

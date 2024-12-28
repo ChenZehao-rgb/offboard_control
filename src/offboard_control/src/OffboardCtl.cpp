@@ -33,7 +33,8 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // 订阅无人机本地加速度
     uavAccLocalSub1_ = nh_.subscribe("uav1/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback1, this);
     uavAccLocalSub2_ = nh_.subscribe("uav2/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback2, this);
-
+    // 订阅imu数据
+    imuSub_ = nh_.subscribe("uav2/mavros/imu/data", 10, &OffboardCtl::imuDataCallback, this);
     // 发布无人机本地位置
     setpointLocalPub1_ = nh_.advertise<geometry_msgs::PoseStamped>("uav1/mavros/setpoint_position/local", 10);
     setpointLocalPub2_ = nh_.advertise<geometry_msgs::PoseStamped>("uav2/mavros/setpoint_position/local", 10);
@@ -157,7 +158,14 @@ bool OffboardCtl::setTargetPoint(offboard_control::SetTargetPoint::Request& req,
 bool OffboardCtl::getTargetPointRawLocal1()
 {
     offboard_control::GenTrajOnline srv;
-    srv.request.targPoint = uavTargetPoint1_;
+    mavros_msgs::PositionTarget setPointRaw;
+    setPointRaw.position.x = uavTargetPoint1_.pose.position.x;
+    setPointRaw.position.y = uavTargetPoint1_.pose.position.y;
+    setPointRaw.position.z = uavTargetPoint1_.pose.position.z;
+    double roll, pitch, yaw;
+    quat2RPY(uavTargetPoint1_.pose.orientation, roll, pitch, yaw);
+    setPointRaw.yaw = yaw;
+    srv.request.targPoint = setPointRaw;
     srv.request.pose = uavPoseLocal1_;
     srv.request.twist = uavTwistLocal1_;
     if(isUpdateTargetPoint_)
@@ -181,9 +189,16 @@ bool OffboardCtl::getTargetPointRawLocal1()
 bool OffboardCtl::getTargetPointRawLocal2()
 {
     offboard_control::GenTrajOnline srv;
-    srv.request.targPoint = uavTargetPoint2_;
+    mavros_msgs::PositionTarget setPointRaw;
+    setPointRaw.position.x = uavTargetPoint2_.pose.position.x;
+    setPointRaw.position.y = uavTargetPoint2_.pose.position.y;
+    setPointRaw.position.z = uavTargetPoint2_.pose.position.z;
+    double roll, pitch, yaw;
+    quat2RPY(uavTargetPoint2_.pose.orientation, roll, pitch, yaw);
+    srv.request.targPoint = setPointRaw;
     srv.request.pose = uavPoseLocal2_;
     srv.request.twist = uavTwistLocal2_;
+    srv.request.acc = uavAccLocal2_;
     // srv.request.
     if(isUpdateTargetPoint_)
     {
@@ -202,22 +217,6 @@ bool OffboardCtl::getTargetPointRawLocal2()
     // 获取平滑过渡点
     uavTargetPointRaw2_ = srv.response.setPointRaw;
     return true;
-}
-// 小无人机原始姿态控制
-mavros_msgs::AttitudeTarget OffboardCtl::smallUavTargetAttRaw(geometry_msgs::Quaternion orientation)
-{
-    mavros_msgs::AttitudeTarget smallUavTargetAttRaw;
-    smallUavTargetAttRaw.header.stamp = ros::Time::now();
-    smallUavTargetAttRaw.orientation = orientation;
-    smallUavTargetAttRaw.body_rate.x = 0;
-    smallUavTargetAttRaw.body_rate.y = 0;
-    smallUavTargetAttRaw.body_rate.z = 0;
-    smallUavTargetAttRaw.thrust = 0.5;
-    smallUavTargetAttRaw.type_mask = mavros_msgs::AttitudeTarget::IGNORE_ROLL_RATE |
-                                    mavros_msgs::AttitudeTarget::IGNORE_PITCH_RATE |
-                                    mavros_msgs::AttitudeTarget::IGNORE_YAW_RATE |
-                                    mavros_msgs::AttitudeTarget::IGNORE_THRUST;
-    return smallUavTargetAttRaw;
 }
 // 设置控制模式服务函数
 bool OffboardCtl::setOffboardCtlType(offboard_control::SetOffboardCtlType::Request& req, offboard_control::SetOffboardCtlType::Response& res)
@@ -335,23 +334,11 @@ void OffboardCtl::uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceS
     // 打印无人机本地加速度
     // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
 }
-// 根据无人机位置->速度
-geometry_msgs::TwistStamped OffboardCtl::uavPoseToTwist(const geometry_msgs::PoseStamped& uavTargetPoint, geometry_msgs::PoseStamped& uavPoseLocal, double vz_min, double vz_max)
+void OffboardCtl::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
-    // 无人机速度信息
-    geometry_msgs::TwistStamped uavTwistLocal;
-    // 计算位置误差
-    double error_x = uavTargetPoint.pose.position.x - uavPoseLocal.pose.position.x;
-    double error_y = uavTargetPoint.pose.position.y - uavPoseLocal.pose.position.y;
-    double error_z = uavTargetPoint.pose.position.z - uavPoseLocal.pose.position.z;
-    // 计算速度
-    uavTwistLocal.twist.linear.x = error_x / controlPeriod;
-    uavTwistLocal.twist.linear.y = error_y / controlPeriod;
-    uavTwistLocal.twist.linear.z = error_z / controlPeriod;
-    // 速度限幅
-    uavTwistLocal.twist.linear.z = uavTwistLocal.twist.linear.z > vz_max ? vz_max : uavTwistLocal.twist.linear.z;
-    uavTwistLocal.twist.linear.z = uavTwistLocal.twist.linear.z < vz_min ? vz_min : uavTwistLocal.twist.linear.z;
-    return uavTwistLocal;
+    uavImu_ = *msg;
+    // 打印imu数据
+    // ROS_INFO_STREAM("imuDataCallback: " << uavImu_);
 }
 // 小无人机在大无人机坐标系下的目标位置->小无人机在自己local坐标系下的目标位置
 geometry_msgs::PoseStamped OffboardCtl::uav1PoseInUav2FrameToUav1Frame(const geometry_msgs::PoseStamped& smallUavPoseInBigUavFrame)
@@ -362,6 +349,99 @@ geometry_msgs::PoseStamped OffboardCtl::uav1PoseInUav2FrameToUav1Frame(const geo
     smallUavPoseInSmallUavFrame.pose.position.x -= smallUavPoseInBigUavFrameInit_.pose.position.x;
     smallUavPoseInSmallUavFrame.pose.position.y -= smallUavPoseInBigUavFrameInit_.pose.position.y;
     return smallUavPoseInSmallUavFrame;
+}
+// 轨迹跟踪控制器
+bool OffboardCtl::trajTrackControler(const geometry_msgs::PoseStamped &uavLocalPos,
+                   const geometry_msgs::TwistStamped &uavLocalVel,
+                   const mavros_msgs::PositionTarget &refPositionTarg){
+    Eigen::Vector3d posRef;
+    Eigen::Vector3d posLocal;
+    Eigen::Vector3d velRef;
+    Eigen::Vector3d vecLocal;
+    Eigen::Vector3d accRef;
+    Eigen::Vector3d accRefTemp;
+    geometry_msgs::Vector3 accDes;
+
+    tf::pointMsgToEigen(refPositionTarg.position, posRef);
+    tf::pointMsgToEigen(uavLocalPos.pose.position, posLocal);
+    tf::vectorMsgToEigen(refPositionTarg.velocity, velRef);
+    tf::vectorMsgToEigen(uavLocalVel.twist.linear, vecLocal);
+    tf::vectorMsgToEigen(refPositionTarg.acceleration_or_force, accRef);
+    accRefTemp = accFFCoeff_.asDiagonal() * accRef +
+                trajTrackControlerKp_.asDiagonal() * (posRef - posLocal) +
+                trajTrackControlerKv_.asDiagonal() * (velRef - vecLocal);
+    tf::vectorEigenToMsg(accRefTemp, accDes);
+    // desAccPub_.publish(accDes);
+    calDesAttAndThr(accDes, uavTargetAttRaw2_);
+    return true;
+}
+void OffboardCtl::calDesAttAndThr(const geometry_msgs::Vector3 &accDes,
+                                  mavros_msgs::AttitudeTarget &spAtt) {
+    // cal des quation
+    Eigen::Vector3d acc;
+    double yaw = 0.0;
+    tf::vectorMsgToEigen(accDes, acc);
+    acc(2) = acc(2) + CONST_G;
+    // ROS_INFO_STREAM("acc:" << acc);
+    Eigen::Matrix3d rotmatFromDesAcc = accDes2Rotmat(acc, yaw);
+    Eigen::Quaterniond quatDes(rotmatFromDesAcc);
+
+    double r, p ,y;
+    geometry_msgs::Quaternion q;
+    tf::quaternionEigenToMsg(quatDes, q);
+    quat2RPY(q,r,p,y);
+    spAtt.orientation = tf::createQuaternionMsgFromRollPitchYaw(r, p, yaw);
+
+    // cal des thrust
+    Eigen::Quaterniond quatCurr;
+    tf::quaternionMsgToEigen(uavImu_.orientation, quatCurr);
+    Eigen::Matrix3d rotmatFromMavAtt = quatCurr.toRotationMatrix();
+    const Eigen::Vector3d zb = rotmatFromMavAtt.col(2);
+    spAtt.thrust =
+        std::max(0.0, std::min(1.0, HOVER_THRUST / CONST_G * (acc.dot(zb))));
+
+
+  /*******************************************************************************************/
+  // cal des quation
+  // Eigen::Vector3d acc;
+  // double roll, pitch, yaw = 0.0;
+  // tf::vectorMsgToEigen(accDes, acc);
+  // acc(2) = acc(2) + CONST_G;
+  // double yaw_imu = fromQuaternion2yaw(uavImu_.orientation);
+  // double sin = std::sin(yaw_imu);
+  // double cos = std::cos(yaw_imu);
+  // roll = (acc(0) * sin - acc(1) * cos) / CONST_G;
+  // pitch = (acc(0) * cos + acc(1) * sin) / CONST_G;
+  // Eigen::Quaterniond q = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()) *
+  //                        Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
+  //                        Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitX());
+  // geometry_msgs::Quaternion des_q;
+  // tf::quaternionEigenToMsg(q, des_q);
+  // spAtt.orientation = des_q;
+
+  // // cal des thrust
+  // Eigen::Quaterniond quatCurr;
+  // tf::quaternionMsgToEigen(uavImu_.orientation, quatCurr);
+  // Eigen::Matrix3d rotmatFromMavAtt = quatCurr.toRotationMatrix();
+  // const Eigen::Vector3d zb = rotmatFromMavAtt.col(2);
+  // spAtt.thrust =
+  //     std::max(0.0, std::min(1.0, HOVER_THRUST / CONST_G * (acc.dot(zb))));
+}
+Eigen::Matrix3d OffboardCtl::accDes2Rotmat(const Eigen::Vector3d &accDes,
+                                           const double &yaw) {
+    Eigen::Vector3d xbDes, ybDes, zbDes;
+    Eigen::Vector3d xbDesProj;
+    Eigen::Matrix3d rotmat;
+
+    xbDesProj << std::cos(yaw), std::sin(yaw), 0.0;
+
+    zbDes = accDes / accDes.norm();
+    ybDes = zbDes.cross(xbDesProj) / (zbDes.cross(xbDesProj)).norm();
+    xbDes = ybDes.cross(zbDes) / (ybDes.cross(zbDes)).norm();
+
+    rotmat << xbDes(0), ybDes(0), zbDes(0), xbDes(1), ybDes(1), zbDes(1),
+        xbDes(2), ybDes(2), zbDes(2);
+    return rotmat;
 }
 // 运动模式切换
 void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
@@ -436,7 +516,14 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
             uavTargetPointRaw2_.type_mask =
             mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
-            setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
+            setpointRawLocalPub2_.publish(uavTargetPointRaw2_);
+            // trajTrackControler(uavPoseLocal2_, uavTwistLocal2_, uavTargetPointRaw2_);
+            // uavTargetAttRaw2_.header.stamp = ros::Time::now(); //设置时间戳
+            // uavTargetAttRaw2_.type_mask =
+            //             mavros_msgs::AttitudeTarget::IGNORE_ROLL_RATE |
+            //             mavros_msgs::AttitudeTarget::IGNORE_PITCH_RATE |
+            //             mavros_msgs::AttitudeTarget::IGNORE_YAW_RATE ;
+            // setpointRawAttPub2_.publish(uavTargetAttRaw2_);
 
             uavTargetPoint1_ = uavTargetPoint2_;
             uavTargetPoint1_.pose.position.z -= 1.0;
@@ -467,7 +554,7 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             setpointRawLocalPub2_.publish(uavTargetPointRaw2_); //发布平滑过渡点
 
             // 小无人机姿态控制
-            setpointRawAttPub1_.publish(smallUavTargetAttRaw(uavTargetPoint2_.pose.orientation)); //发布小无人机姿态控制量
+            // setpointRawAttPub1_.publish(smallUavTargetAttRaw(uavTargetPoint2_.pose.orientation)); //发布小无人机姿态控制量
             //打印信息
             ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_ACTUAL");
             break;

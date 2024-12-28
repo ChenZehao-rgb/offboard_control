@@ -121,7 +121,6 @@ private:
     // 客户端服务函数
     bool isUavArrived(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID, double precision); // 判断是否到达目标点服务函数
     void setTargetPoint(const geometry_msgs::PoseStamped& targetPoint, uint8_t uavID); // 设置目标点服务函数
-    void setTargetPointRaw(const mavros_msgs::PositionTarget& targetPointRaw, uint8_t uavID); // 设置目标点原始值服务函数
     bool setUavTakeoffReady(uint8_t uavID); // 设置offboard和解锁函数
     void setOffboardCtlType(uint8_t ctlType); // 设置控制模式服务函数
     // 根据线结构传感器的测量结果，判断姿态调整是否到位

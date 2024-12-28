@@ -40,7 +40,7 @@ template<>
 struct MD5Sum< ::offboard_control::SetTargetPoint > {
   static const char* value()
   {
-    return "fcd605373e89b0a0850fa783080be9b9";
+    return "9a658aee9c9634e4e1d337a3edbe9137";
   }
 
   static const char* value(const ::offboard_control::SetTargetPoint&) { return value(); }

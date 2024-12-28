@@ -7,15 +7,13 @@ import genpy
 import struct
 
 import geometry_msgs.msg
-import mavros_msgs.msg
 import std_msgs.msg
 
 class SetTargetPointRequest(genpy.Message):
-  _md5sum = "72cfe09baead49e371d1147e57883723"
+  _md5sum = "fe78b9b615816ee275f9bae3c27a36c6"
   _type = "offboard_control/SetTargetPointRequest"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """geometry_msgs/PoseStamped targetPoint
-mavros_msgs/PositionTarget targetPointRaw
 uint8 uavID
 
 ================================================================================
@@ -61,56 +59,9 @@ float64 x
 float64 y
 float64 z
 float64 w
-
-================================================================================
-MSG: mavros_msgs/PositionTarget
-# Message for SET_POSITION_TARGET_LOCAL_NED
-#
-# Some complex system requires all feautures that mavlink
-# message provide. See issue #402.
-
-std_msgs/Header header
-
-uint8 coordinate_frame
-uint8 FRAME_LOCAL_NED = 1
-uint8 FRAME_LOCAL_OFFSET_NED = 7
-uint8 FRAME_BODY_NED = 8
-uint8 FRAME_BODY_OFFSET_NED = 9
-
-uint16 type_mask
-uint16 IGNORE_PX = 1	# Position ignore flags
-uint16 IGNORE_PY = 2
-uint16 IGNORE_PZ = 4
-uint16 IGNORE_VX = 8	# Velocity vector ignore flags
-uint16 IGNORE_VY = 16
-uint16 IGNORE_VZ = 32
-uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
-uint16 IGNORE_AFY = 128
-uint16 IGNORE_AFZ = 256
-uint16 FORCE = 512	# Force in af vector flag
-uint16 IGNORE_YAW = 1024
-uint16 IGNORE_YAW_RATE = 2048
-
-geometry_msgs/Point position
-geometry_msgs/Vector3 velocity
-geometry_msgs/Vector3 acceleration_or_force
-float32 yaw
-float32 yaw_rate
-
-================================================================================
-MSG: geometry_msgs/Vector3
-# This represents a vector in free space. 
-# It is only meant to represent a direction. Therefore, it does not
-# make sense to apply a translation to it (e.g., when applying a 
-# generic rigid transformation to a Vector3, tf2 will only apply the
-# rotation). If you want your data to be translatable too, use the
-# geometry_msgs/Point message instead.
-
-float64 x
-float64 y
-float64 z"""
-  __slots__ = ['targetPoint','targetPointRaw','uavID']
-  _slot_types = ['geometry_msgs/PoseStamped','mavros_msgs/PositionTarget','uint8']
+"""
+  __slots__ = ['targetPoint','uavID']
+  _slot_types = ['geometry_msgs/PoseStamped','uint8']
 
   def __init__(self, *args, **kwds):
     """
@@ -120,7 +71,7 @@ float64 z"""
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       targetPoint,targetPointRaw,uavID
+       targetPoint,uavID
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -131,13 +82,10 @@ float64 z"""
       # message fields cannot be None, assign default values for those that are
       if self.targetPoint is None:
         self.targetPoint = geometry_msgs.msg.PoseStamped()
-      if self.targetPointRaw is None:
-        self.targetPointRaw = mavros_msgs.msg.PositionTarget()
       if self.uavID is None:
         self.uavID = 0
     else:
       self.targetPoint = geometry_msgs.msg.PoseStamped()
-      self.targetPointRaw = mavros_msgs.msg.PositionTarget()
       self.uavID = 0
 
   def _get_types(self):
@@ -161,15 +109,7 @@ float64 z"""
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7d3I().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.targetPointRaw.header.seq, _x.targetPointRaw.header.stamp.secs, _x.targetPointRaw.header.stamp.nsecs))
-      _x = self.targetPointRaw.header.frame_id
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
-      _x = self
-      buff.write(_get_struct_BH9d2fB().pack(_x.targetPointRaw.coordinate_frame, _x.targetPointRaw.type_mask, _x.targetPointRaw.position.x, _x.targetPointRaw.position.y, _x.targetPointRaw.position.z, _x.targetPointRaw.velocity.x, _x.targetPointRaw.velocity.y, _x.targetPointRaw.velocity.z, _x.targetPointRaw.acceleration_or_force.x, _x.targetPointRaw.acceleration_or_force.y, _x.targetPointRaw.acceleration_or_force.z, _x.targetPointRaw.yaw, _x.targetPointRaw.yaw_rate, _x.uavID))
+      buff.write(_get_struct_7dB().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -183,8 +123,6 @@ float64 z"""
     try:
       if self.targetPoint is None:
         self.targetPoint = geometry_msgs.msg.PoseStamped()
-      if self.targetPointRaw is None:
-        self.targetPointRaw = mavros_msgs.msg.PositionTarget()
       end = 0
       _x = self
       start = end
@@ -201,21 +139,8 @@ float64 z"""
         self.targetPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 68
-      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.targetPointRaw.header.seq, _x.targetPointRaw.header.stamp.secs, _x.targetPointRaw.header.stamp.nsecs,) = _get_struct_7d3I().unpack(str[start:end])
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.targetPointRaw.header.frame_id = str[start:end].decode('utf-8', 'rosmsg')
-      else:
-        self.targetPointRaw.header.frame_id = str[start:end]
-      _x = self
-      start = end
-      end += 84
-      (_x.targetPointRaw.coordinate_frame, _x.targetPointRaw.type_mask, _x.targetPointRaw.position.x, _x.targetPointRaw.position.y, _x.targetPointRaw.position.z, _x.targetPointRaw.velocity.x, _x.targetPointRaw.velocity.y, _x.targetPointRaw.velocity.z, _x.targetPointRaw.acceleration_or_force.x, _x.targetPointRaw.acceleration_or_force.y, _x.targetPointRaw.acceleration_or_force.z, _x.targetPointRaw.yaw, _x.targetPointRaw.yaw_rate, _x.uavID,) = _get_struct_BH9d2fB().unpack(str[start:end])
+      end += 57
+      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID,) = _get_struct_7dB().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -237,15 +162,7 @@ float64 z"""
         length = len(_x)
       buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
       _x = self
-      buff.write(_get_struct_7d3I().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.targetPointRaw.header.seq, _x.targetPointRaw.header.stamp.secs, _x.targetPointRaw.header.stamp.nsecs))
-      _x = self.targetPointRaw.header.frame_id
-      length = len(_x)
-      if python3 or type(_x) == unicode:
-        _x = _x.encode('utf-8')
-        length = len(_x)
-      buff.write(struct.Struct('<I%ss'%length).pack(length, _x))
-      _x = self
-      buff.write(_get_struct_BH9d2fB().pack(_x.targetPointRaw.coordinate_frame, _x.targetPointRaw.type_mask, _x.targetPointRaw.position.x, _x.targetPointRaw.position.y, _x.targetPointRaw.position.z, _x.targetPointRaw.velocity.x, _x.targetPointRaw.velocity.y, _x.targetPointRaw.velocity.z, _x.targetPointRaw.acceleration_or_force.x, _x.targetPointRaw.acceleration_or_force.y, _x.targetPointRaw.acceleration_or_force.z, _x.targetPointRaw.yaw, _x.targetPointRaw.yaw_rate, _x.uavID))
+      buff.write(_get_struct_7dB().pack(_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -260,8 +177,6 @@ float64 z"""
     try:
       if self.targetPoint is None:
         self.targetPoint = geometry_msgs.msg.PoseStamped()
-      if self.targetPointRaw is None:
-        self.targetPointRaw = mavros_msgs.msg.PositionTarget()
       end = 0
       _x = self
       start = end
@@ -278,21 +193,8 @@ float64 z"""
         self.targetPoint.header.frame_id = str[start:end]
       _x = self
       start = end
-      end += 68
-      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.targetPointRaw.header.seq, _x.targetPointRaw.header.stamp.secs, _x.targetPointRaw.header.stamp.nsecs,) = _get_struct_7d3I().unpack(str[start:end])
-      start = end
-      end += 4
-      (length,) = _struct_I.unpack(str[start:end])
-      start = end
-      end += length
-      if python3:
-        self.targetPointRaw.header.frame_id = str[start:end].decode('utf-8', 'rosmsg')
-      else:
-        self.targetPointRaw.header.frame_id = str[start:end]
-      _x = self
-      start = end
-      end += 84
-      (_x.targetPointRaw.coordinate_frame, _x.targetPointRaw.type_mask, _x.targetPointRaw.position.x, _x.targetPointRaw.position.y, _x.targetPointRaw.position.z, _x.targetPointRaw.velocity.x, _x.targetPointRaw.velocity.y, _x.targetPointRaw.velocity.z, _x.targetPointRaw.acceleration_or_force.x, _x.targetPointRaw.acceleration_or_force.y, _x.targetPointRaw.acceleration_or_force.z, _x.targetPointRaw.yaw, _x.targetPointRaw.yaw_rate, _x.uavID,) = _get_struct_BH9d2fB().unpack(str[start:end])
+      end += 57
+      (_x.targetPoint.pose.position.x, _x.targetPoint.pose.position.y, _x.targetPoint.pose.position.z, _x.targetPoint.pose.orientation.x, _x.targetPoint.pose.orientation.y, _x.targetPoint.pose.orientation.z, _x.targetPoint.pose.orientation.w, _x.uavID,) = _get_struct_7dB().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -307,18 +209,12 @@ def _get_struct_3I():
     if _struct_3I is None:
         _struct_3I = struct.Struct("<3I")
     return _struct_3I
-_struct_7d3I = None
-def _get_struct_7d3I():
-    global _struct_7d3I
-    if _struct_7d3I is None:
-        _struct_7d3I = struct.Struct("<7d3I")
-    return _struct_7d3I
-_struct_BH9d2fB = None
-def _get_struct_BH9d2fB():
-    global _struct_BH9d2fB
-    if _struct_BH9d2fB is None:
-        _struct_BH9d2fB = struct.Struct("<BH9d2fB")
-    return _struct_BH9d2fB
+_struct_7dB = None
+def _get_struct_7dB():
+    global _struct_7dB
+    if _struct_7dB is None:
+        _struct_7dB = struct.Struct("<7dB")
+    return _struct_7dB
 # This Python file uses the following encoding: utf-8
 """autogenerated by genpy from offboard_control/SetTargetPointResponse.msg. Do not edit."""
 import codecs
@@ -436,6 +332,6 @@ def _get_struct_B():
     return _struct_B
 class SetTargetPoint(object):
   _type          = 'offboard_control/SetTargetPoint'
-  _md5sum = 'fcd605373e89b0a0850fa783080be9b9'
+  _md5sum = '9a658aee9c9634e4e1d337a3edbe9137'
   _request_class  = SetTargetPointRequest
   _response_class = SetTargetPointResponse

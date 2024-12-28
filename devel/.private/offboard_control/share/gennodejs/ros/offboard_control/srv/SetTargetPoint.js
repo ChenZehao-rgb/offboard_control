@@ -11,7 +11,6 @@ const _deserializer = _ros_msg_utils.Deserialize;
 const _arrayDeserializer = _deserializer.Array;
 const _finder = _ros_msg_utils.Find;
 const _getByteLength = _ros_msg_utils.getByteLength;
-let mavros_msgs = _finder('mavros_msgs');
 let geometry_msgs = _finder('geometry_msgs');
 
 //-----------------------------------------------------------
@@ -24,7 +23,6 @@ class SetTargetPointRequest {
     if (initObj === null) {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.targetPoint = null;
-      this.targetPointRaw = null;
       this.uavID = null;
     }
     else {
@@ -33,12 +31,6 @@ class SetTargetPointRequest {
       }
       else {
         this.targetPoint = new geometry_msgs.msg.PoseStamped();
-      }
-      if (initObj.hasOwnProperty('targetPointRaw')) {
-        this.targetPointRaw = initObj.targetPointRaw
-      }
-      else {
-        this.targetPointRaw = new mavros_msgs.msg.PositionTarget();
       }
       if (initObj.hasOwnProperty('uavID')) {
         this.uavID = initObj.uavID
@@ -53,8 +45,6 @@ class SetTargetPointRequest {
     // Serializes a message object of type SetTargetPointRequest
     // Serialize message field [targetPoint]
     bufferOffset = geometry_msgs.msg.PoseStamped.serialize(obj.targetPoint, buffer, bufferOffset);
-    // Serialize message field [targetPointRaw]
-    bufferOffset = mavros_msgs.msg.PositionTarget.serialize(obj.targetPointRaw, buffer, bufferOffset);
     // Serialize message field [uavID]
     bufferOffset = _serializer.uint8(obj.uavID, buffer, bufferOffset);
     return bufferOffset;
@@ -66,8 +56,6 @@ class SetTargetPointRequest {
     let data = new SetTargetPointRequest(null);
     // Deserialize message field [targetPoint]
     data.targetPoint = geometry_msgs.msg.PoseStamped.deserialize(buffer, bufferOffset);
-    // Deserialize message field [targetPointRaw]
-    data.targetPointRaw = mavros_msgs.msg.PositionTarget.deserialize(buffer, bufferOffset);
     // Deserialize message field [uavID]
     data.uavID = _deserializer.uint8(buffer, bufferOffset);
     return data;
@@ -76,7 +64,6 @@ class SetTargetPointRequest {
   static getMessageSize(object) {
     let length = 0;
     length += geometry_msgs.msg.PoseStamped.getMessageSize(object.targetPoint);
-    length += mavros_msgs.msg.PositionTarget.getMessageSize(object.targetPointRaw);
     return length + 1;
   }
 
@@ -87,14 +74,13 @@ class SetTargetPointRequest {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '72cfe09baead49e371d1147e57883723';
+    return 'fe78b9b615816ee275f9bae3c27a36c6';
   }
 
   static messageDefinition() {
     // Returns full string definition for message
     return `
     geometry_msgs/PoseStamped targetPoint
-    mavros_msgs/PositionTarget targetPointRaw
     uint8 uavID
     
     ================================================================================
@@ -141,53 +127,6 @@ class SetTargetPointRequest {
     float64 z
     float64 w
     
-    ================================================================================
-    MSG: mavros_msgs/PositionTarget
-    # Message for SET_POSITION_TARGET_LOCAL_NED
-    #
-    # Some complex system requires all feautures that mavlink
-    # message provide. See issue #402.
-    
-    std_msgs/Header header
-    
-    uint8 coordinate_frame
-    uint8 FRAME_LOCAL_NED = 1
-    uint8 FRAME_LOCAL_OFFSET_NED = 7
-    uint8 FRAME_BODY_NED = 8
-    uint8 FRAME_BODY_OFFSET_NED = 9
-    
-    uint16 type_mask
-    uint16 IGNORE_PX = 1	# Position ignore flags
-    uint16 IGNORE_PY = 2
-    uint16 IGNORE_PZ = 4
-    uint16 IGNORE_VX = 8	# Velocity vector ignore flags
-    uint16 IGNORE_VY = 16
-    uint16 IGNORE_VZ = 32
-    uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags
-    uint16 IGNORE_AFY = 128
-    uint16 IGNORE_AFZ = 256
-    uint16 FORCE = 512	# Force in af vector flag
-    uint16 IGNORE_YAW = 1024
-    uint16 IGNORE_YAW_RATE = 2048
-    
-    geometry_msgs/Point position
-    geometry_msgs/Vector3 velocity
-    geometry_msgs/Vector3 acceleration_or_force
-    float32 yaw
-    float32 yaw_rate
-    
-    ================================================================================
-    MSG: geometry_msgs/Vector3
-    # This represents a vector in free space. 
-    # It is only meant to represent a direction. Therefore, it does not
-    # make sense to apply a translation to it (e.g., when applying a 
-    # generic rigid transformation to a Vector3, tf2 will only apply the
-    # rotation). If you want your data to be translatable too, use the
-    # geometry_msgs/Point message instead.
-    
-    float64 x
-    float64 y
-    float64 z
     `;
   }
 
@@ -202,13 +141,6 @@ class SetTargetPointRequest {
     }
     else {
       resolved.targetPoint = new geometry_msgs.msg.PoseStamped()
-    }
-
-    if (msg.targetPointRaw !== undefined) {
-      resolved.targetPointRaw = mavros_msgs.msg.PositionTarget.Resolve(msg.targetPointRaw)
-    }
-    else {
-      resolved.targetPointRaw = new mavros_msgs.msg.PositionTarget()
     }
 
     if (msg.uavID !== undefined) {
@@ -296,6 +228,6 @@ class SetTargetPointResponse {
 module.exports = {
   Request: SetTargetPointRequest,
   Response: SetTargetPointResponse,
-  md5sum() { return 'fcd605373e89b0a0850fa783080be9b9'; },
+  md5sum() { return '9a658aee9c9634e4e1d337a3edbe9137'; },
   datatype() { return 'offboard_control/SetTargetPoint'; }
 };

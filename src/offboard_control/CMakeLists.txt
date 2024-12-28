@@ -15,10 +15,12 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   control_toolbox
   tf
+  eigen_conversions
+
 )
 # find_package(Boost REQUIRED COMPONENTS system)
 find_package(ruckig REQUIRED)
-
+find_package(Eigen3 REQUIRED)
 # find_package(motion_primitive_library REQUIRED)
 # include_directories(${MOTION_PRIMITIVE_LIBRARY_INCLUDE_DIRS})
 
@@ -69,6 +71,7 @@ add_service_files(
   isUavArrived.srv
   SetUavTakeoffReady.srv
   GenTrajOnline.srv
+  UpdateBoundOnline.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -132,6 +135,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Declare a C++ library
@@ -170,6 +174,10 @@ add_executable(camera_commander_node src/cameraCommand.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(online_traj_generator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(observer_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(camera_commander_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(offboard_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(follow_cable_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(keyboard_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}

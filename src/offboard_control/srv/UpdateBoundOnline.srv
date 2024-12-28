@@ -1,0 +1,5 @@
+geometry_msgs/Vector3 velBound
+geometry_msgs/Vector3 accBound
+---
+bool success
+bool isBoundUpdate

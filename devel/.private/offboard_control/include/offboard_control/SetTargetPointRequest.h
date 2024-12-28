@@ -16,7 +16,6 @@
 #include <ros/message_operations.h>
 
 #include <geometry_msgs/PoseStamped.h>
-#include <mavros_msgs/PositionTarget.h>
 
 namespace offboard_control
 {
@@ -27,12 +26,10 @@ struct SetTargetPointRequest_
 
   SetTargetPointRequest_()
     : targetPoint()
-    , targetPointRaw()
     , uavID(0)  {
     }
   SetTargetPointRequest_(const ContainerAllocator& _alloc)
     : targetPoint(_alloc)
-    , targetPointRaw(_alloc)
     , uavID(0)  {
   (void)_alloc;
     }
@@ -41,9 +38,6 @@ struct SetTargetPointRequest_
 
    typedef  ::geometry_msgs::PoseStamped_<ContainerAllocator>  _targetPoint_type;
   _targetPoint_type targetPoint;
-
-   typedef  ::mavros_msgs::PositionTarget_<ContainerAllocator>  _targetPointRaw_type;
-  _targetPointRaw_type targetPointRaw;
 
    typedef uint8_t _uavID_type;
   _uavID_type uavID;
@@ -78,7 +72,6 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::offboard_control::SetTargetPointRequest_<ContainerAllocator1> & lhs, const ::offboard_control::SetTargetPointRequest_<ContainerAllocator2> & rhs)
 {
   return lhs.targetPoint == rhs.targetPoint &&
-    lhs.targetPointRaw == rhs.targetPointRaw &&
     lhs.uavID == rhs.uavID;
 }
 
@@ -136,12 +129,12 @@ struct MD5Sum< ::offboard_control::SetTargetPointRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "72cfe09baead49e371d1147e57883723";
+    return "fe78b9b615816ee275f9bae3c27a36c6";
   }
 
   static const char* value(const ::offboard_control::SetTargetPointRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x72cfe09baead49e3ULL;
-  static const uint64_t static_value2 = 0x71d1147e57883723ULL;
+  static const uint64_t static_value1 = 0xfe78b9b615816ee2ULL;
+  static const uint64_t static_value2 = 0x75f9bae3c27a36c6ULL;
 };
 
 template<class ContainerAllocator>
@@ -161,7 +154,6 @@ struct Definition< ::offboard_control::SetTargetPointRequest_<ContainerAllocator
   static const char* value()
   {
     return "geometry_msgs/PoseStamped targetPoint\n"
-"mavros_msgs/PositionTarget targetPointRaw\n"
 "uint8 uavID\n"
 "\n"
 "================================================================================\n"
@@ -207,54 +199,6 @@ struct Definition< ::offboard_control::SetTargetPointRequest_<ContainerAllocator
 "float64 y\n"
 "float64 z\n"
 "float64 w\n"
-"\n"
-"================================================================================\n"
-"MSG: mavros_msgs/PositionTarget\n"
-"# Message for SET_POSITION_TARGET_LOCAL_NED\n"
-"#\n"
-"# Some complex system requires all feautures that mavlink\n"
-"# message provide. See issue #402.\n"
-"\n"
-"std_msgs/Header header\n"
-"\n"
-"uint8 coordinate_frame\n"
-"uint8 FRAME_LOCAL_NED = 1\n"
-"uint8 FRAME_LOCAL_OFFSET_NED = 7\n"
-"uint8 FRAME_BODY_NED = 8\n"
-"uint8 FRAME_BODY_OFFSET_NED = 9\n"
-"\n"
-"uint16 type_mask\n"
-"uint16 IGNORE_PX = 1	# Position ignore flags\n"
-"uint16 IGNORE_PY = 2\n"
-"uint16 IGNORE_PZ = 4\n"
-"uint16 IGNORE_VX = 8	# Velocity vector ignore flags\n"
-"uint16 IGNORE_VY = 16\n"
-"uint16 IGNORE_VZ = 32\n"
-"uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags\n"
-"uint16 IGNORE_AFY = 128\n"
-"uint16 IGNORE_AFZ = 256\n"
-"uint16 FORCE = 512	# Force in af vector flag\n"
-"uint16 IGNORE_YAW = 1024\n"
-"uint16 IGNORE_YAW_RATE = 2048\n"
-"\n"
-"geometry_msgs/Point position\n"
-"geometry_msgs/Vector3 velocity\n"
-"geometry_msgs/Vector3 acceleration_or_force\n"
-"float32 yaw\n"
-"float32 yaw_rate\n"
-"\n"
-"================================================================================\n"
-"MSG: geometry_msgs/Vector3\n"
-"# This represents a vector in free space. \n"
-"# It is only meant to represent a direction. Therefore, it does not\n"
-"# make sense to apply a translation to it (e.g., when applying a \n"
-"# generic rigid transformation to a Vector3, tf2 will only apply the\n"
-"# rotation). If you want your data to be translatable too, use the\n"
-"# geometry_msgs/Point message instead.\n"
-"\n"
-"float64 x\n"
-"float64 y\n"
-"float64 z\n"
 ;
   }
 
@@ -274,7 +218,6 @@ namespace serialization
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
       stream.next(m.targetPoint);
-      stream.next(m.targetPointRaw);
       stream.next(m.uavID);
     }
 
@@ -297,9 +240,6 @@ struct Printer< ::offboard_control::SetTargetPointRequest_<ContainerAllocator> >
     s << indent << "targetPoint: ";
     s << std::endl;
     Printer< ::geometry_msgs::PoseStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.targetPoint);
-    s << indent << "targetPointRaw: ";
-    s << std::endl;
-    Printer< ::mavros_msgs::PositionTarget_<ContainerAllocator> >::stream(s, indent + "  ", v.targetPointRaw);
     s << indent << "uavID: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.uavID);
   }

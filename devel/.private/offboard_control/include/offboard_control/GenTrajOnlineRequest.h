@@ -15,9 +15,10 @@
 #include <ros/builtin_message_traits.h>
 #include <ros/message_operations.h>
 
-#include <geometry_msgs/PoseStamped.h>
+#include <mavros_msgs/PositionTarget.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/AccelWithCovarianceStamped.h>
 
 namespace offboard_control
 {
@@ -30,19 +31,21 @@ struct GenTrajOnlineRequest_
     : targPoint()
     , pose()
     , twist()
+    , acc()
     , isUpdateState(false)  {
     }
   GenTrajOnlineRequest_(const ContainerAllocator& _alloc)
     : targPoint(_alloc)
     , pose(_alloc)
     , twist(_alloc)
+    , acc(_alloc)
     , isUpdateState(false)  {
   (void)_alloc;
     }
 
 
 
-   typedef  ::geometry_msgs::PoseStamped_<ContainerAllocator>  _targPoint_type;
+   typedef  ::mavros_msgs::PositionTarget_<ContainerAllocator>  _targPoint_type;
   _targPoint_type targPoint;
 
    typedef  ::geometry_msgs::PoseStamped_<ContainerAllocator>  _pose_type;
@@ -50,6 +53,9 @@ struct GenTrajOnlineRequest_
 
    typedef  ::geometry_msgs::TwistStamped_<ContainerAllocator>  _twist_type;
   _twist_type twist;
+
+   typedef  ::geometry_msgs::AccelWithCovarianceStamped_<ContainerAllocator>  _acc_type;
+  _acc_type acc;
 
    typedef uint8_t _isUpdateState_type;
   _isUpdateState_type isUpdateState;
@@ -86,6 +92,7 @@ bool operator==(const ::offboard_control::GenTrajOnlineRequest_<ContainerAllocat
   return lhs.targPoint == rhs.targPoint &&
     lhs.pose == rhs.pose &&
     lhs.twist == rhs.twist &&
+    lhs.acc == rhs.acc &&
     lhs.isUpdateState == rhs.isUpdateState;
 }
 
@@ -143,12 +150,12 @@ struct MD5Sum< ::offboard_control::GenTrajOnlineRequest_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "c7be0038aa37973ee7d8786bd8a24adf";
+    return "69caf5ed1b7124486d92a1d48a43b7ae";
   }
 
   static const char* value(const ::offboard_control::GenTrajOnlineRequest_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xc7be0038aa37973eULL;
-  static const uint64_t static_value2 = 0xe7d8786bd8a24adfULL;
+  static const uint64_t static_value1 = 0x69caf5ed1b712448ULL;
+  static const uint64_t static_value2 = 0x6d92a1d48a43b7aeULL;
 };
 
 template<class ContainerAllocator>
@@ -167,16 +174,46 @@ struct Definition< ::offboard_control::GenTrajOnlineRequest_<ContainerAllocator>
 {
   static const char* value()
   {
-    return "geometry_msgs/PoseStamped targPoint\n"
+    return "mavros_msgs/PositionTarget targPoint\n"
 "geometry_msgs/PoseStamped pose\n"
 "geometry_msgs/TwistStamped twist\n"
+"geometry_msgs/AccelWithCovarianceStamped acc\n"
 "bool isUpdateState\n"
 "\n"
 "================================================================================\n"
-"MSG: geometry_msgs/PoseStamped\n"
-"# A Pose with reference coordinate frame and timestamp\n"
-"Header header\n"
-"Pose pose\n"
+"MSG: mavros_msgs/PositionTarget\n"
+"# Message for SET_POSITION_TARGET_LOCAL_NED\n"
+"#\n"
+"# Some complex system requires all feautures that mavlink\n"
+"# message provide. See issue #402.\n"
+"\n"
+"std_msgs/Header header\n"
+"\n"
+"uint8 coordinate_frame\n"
+"uint8 FRAME_LOCAL_NED = 1\n"
+"uint8 FRAME_LOCAL_OFFSET_NED = 7\n"
+"uint8 FRAME_BODY_NED = 8\n"
+"uint8 FRAME_BODY_OFFSET_NED = 9\n"
+"\n"
+"uint16 type_mask\n"
+"uint16 IGNORE_PX = 1	# Position ignore flags\n"
+"uint16 IGNORE_PY = 2\n"
+"uint16 IGNORE_PZ = 4\n"
+"uint16 IGNORE_VX = 8	# Velocity vector ignore flags\n"
+"uint16 IGNORE_VY = 16\n"
+"uint16 IGNORE_VZ = 32\n"
+"uint16 IGNORE_AFX = 64	# Acceleration/Force vector ignore flags\n"
+"uint16 IGNORE_AFY = 128\n"
+"uint16 IGNORE_AFZ = 256\n"
+"uint16 FORCE = 512	# Force in af vector flag\n"
+"uint16 IGNORE_YAW = 1024\n"
+"uint16 IGNORE_YAW_RATE = 2048\n"
+"\n"
+"geometry_msgs/Point position\n"
+"geometry_msgs/Vector3 velocity\n"
+"geometry_msgs/Vector3 acceleration_or_force\n"
+"float32 yaw\n"
+"float32 yaw_rate\n"
 "\n"
 "================================================================================\n"
 "MSG: std_msgs/Header\n"
@@ -195,17 +232,35 @@ struct Definition< ::offboard_control::GenTrajOnlineRequest_<ContainerAllocator>
 "string frame_id\n"
 "\n"
 "================================================================================\n"
-"MSG: geometry_msgs/Pose\n"
-"# A representation of pose in free space, composed of position and orientation. \n"
-"Point position\n"
-"Quaternion orientation\n"
-"\n"
-"================================================================================\n"
 "MSG: geometry_msgs/Point\n"
 "# This contains the position of a point in free space\n"
 "float64 x\n"
 "float64 y\n"
 "float64 z\n"
+"\n"
+"================================================================================\n"
+"MSG: geometry_msgs/Vector3\n"
+"# This represents a vector in free space. \n"
+"# It is only meant to represent a direction. Therefore, it does not\n"
+"# make sense to apply a translation to it (e.g., when applying a \n"
+"# generic rigid transformation to a Vector3, tf2 will only apply the\n"
+"# rotation). If you want your data to be translatable too, use the\n"
+"# geometry_msgs/Point message instead.\n"
+"\n"
+"float64 x\n"
+"float64 y\n"
+"float64 z\n"
+"================================================================================\n"
+"MSG: geometry_msgs/PoseStamped\n"
+"# A Pose with reference coordinate frame and timestamp\n"
+"Header header\n"
+"Pose pose\n"
+"\n"
+"================================================================================\n"
+"MSG: geometry_msgs/Pose\n"
+"# A representation of pose in free space, composed of position and orientation. \n"
+"Point position\n"
+"Quaternion orientation\n"
 "\n"
 "================================================================================\n"
 "MSG: geometry_msgs/Quaternion\n"
@@ -229,17 +284,28 @@ struct Definition< ::offboard_control::GenTrajOnlineRequest_<ContainerAllocator>
 "Vector3  angular\n"
 "\n"
 "================================================================================\n"
-"MSG: geometry_msgs/Vector3\n"
-"# This represents a vector in free space. \n"
-"# It is only meant to represent a direction. Therefore, it does not\n"
-"# make sense to apply a translation to it (e.g., when applying a \n"
-"# generic rigid transformation to a Vector3, tf2 will only apply the\n"
-"# rotation). If you want your data to be translatable too, use the\n"
-"# geometry_msgs/Point message instead.\n"
+"MSG: geometry_msgs/AccelWithCovarianceStamped\n"
+"# This represents an estimated accel with reference coordinate frame and timestamp.\n"
+"Header header\n"
+"AccelWithCovariance accel\n"
 "\n"
-"float64 x\n"
-"float64 y\n"
-"float64 z\n"
+"================================================================================\n"
+"MSG: geometry_msgs/AccelWithCovariance\n"
+"# This expresses acceleration in free space with uncertainty.\n"
+"\n"
+"Accel accel\n"
+"\n"
+"# Row-major representation of the 6x6 covariance matrix\n"
+"# The orientation parameters use a fixed-axis representation.\n"
+"# In order, the parameters are:\n"
+"# (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)\n"
+"float64[36] covariance\n"
+"\n"
+"================================================================================\n"
+"MSG: geometry_msgs/Accel\n"
+"# This expresses acceleration in free space broken into its linear and angular parts.\n"
+"Vector3  linear\n"
+"Vector3  angular\n"
 ;
   }
 
@@ -261,6 +327,7 @@ namespace serialization
       stream.next(m.targPoint);
       stream.next(m.pose);
       stream.next(m.twist);
+      stream.next(m.acc);
       stream.next(m.isUpdateState);
     }
 
@@ -282,13 +349,16 @@ struct Printer< ::offboard_control::GenTrajOnlineRequest_<ContainerAllocator> >
   {
     s << indent << "targPoint: ";
     s << std::endl;
-    Printer< ::geometry_msgs::PoseStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.targPoint);
+    Printer< ::mavros_msgs::PositionTarget_<ContainerAllocator> >::stream(s, indent + "  ", v.targPoint);
     s << indent << "pose: ";
     s << std::endl;
     Printer< ::geometry_msgs::PoseStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.pose);
     s << indent << "twist: ";
     s << std::endl;
     Printer< ::geometry_msgs::TwistStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.twist);
+    s << indent << "acc: ";
+    s << std::endl;
+    Printer< ::geometry_msgs::AccelWithCovarianceStamped_<ContainerAllocator> >::stream(s, indent + "  ", v.acc);
     s << indent << "isUpdateState: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.isUpdateState);
   }

@@ -11,7 +11,9 @@
 #include <mavros_msgs/AttitudeTarget.h>
 #include <control_toolbox/pid.h>
 #include <tf/tf.h>
-
+#include <Eigen/Dense>
+#include <eigen_conversions/eigen_msg.h>
+#include <sensor_msgs/Imu.h>
 //自定义的服务类型
 #include <offboard_control/SetTargetPoint.h>
 #include <offboard_control/OffboardCtlType.h>
@@ -82,7 +84,7 @@ private:
     geometry_msgs::TwistStamped uavTwistLocal1_,uavTwistLocal2_; //订阅得到的无人机本地速度
     geometry_msgs::AccelWithCovarianceStamped uavAccLocal1_,uavAccLocal2_; //订阅得到的无人机本地加速度
     mavros_msgs::PositionTarget uavTargetPointRaw1_, uavTargetPointRaw2_; //平滑过渡设置的目标位置
-    mavros_msgs::AttitudeTarget uavTargetAttRaw1_; // 小无人机单独控制
+    mavros_msgs::AttitudeTarget uavTargetAttRaw1_, uavTargetAttRaw2_; //设置的目标姿态
     //定义是否获得无人机目标位置
     bool isGetTargetPoint_;
     bool isUpdateTargetPoint_;
@@ -115,7 +117,23 @@ private:
 
     // 位置环pid控制
     mavros_msgs::PositionTarget positionCtl(geometry_msgs::PoseStamped targetPoint, geometry_msgs::PoseStamped uavPoseLocal, double vz_min, double vz_max);
-    geometry_msgs::TwistStamped uavPoseToTwist(const geometry_msgs::PoseStamped& uavTargetPoint, geometry_msgs::PoseStamped& uavPoseLocal, double vz_min, double vz_max);
+
+    Eigen::Vector3d trajTrackControlerKp_;
+    Eigen::Vector3d trajTrackControlerKv_;
+    Eigen::Vector3d accFFCoeff_;  //加速度前馈系数
+    bool trajTrackControler(const geometry_msgs::PoseStamped &uavLocalPos,
+                   const geometry_msgs::TwistStamped &uavLocalVel,
+                   const mavros_msgs::PositionTarget &refPositionTarg);
+    void calDesAttAndThr(const geometry_msgs::Vector3 &accDes,
+                        mavros_msgs::AttitudeTarget &spAtt);
+    Eigen::Matrix3d accDes2Rotmat(const Eigen::Vector3d &accDes,
+                                const double &yaw);
+    #define HOVER_THRUST 0.71
+    #define CONST_G 9.81
+
+    sensor_msgs::Imu uavImu_;
+    ros::Subscriber imuSub_;
+    void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
 };
 
 #endif // OFFBOARD_CTL_H

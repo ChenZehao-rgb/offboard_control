@@ -209,21 +209,6 @@ void FollowCable::setTargetPoint(const geometry_msgs::PoseStamped& targetPoint,u
         ROS_ERROR_STREAM("Set uav "<<uavID<<" target point failed");
     }
 }
-// 设置目标点原始值
-void FollowCable::setTargetPointRaw(const mavros_msgs::PositionTarget& targetPointRaw, uint8_t uavID)
-{
-    offboard_control::SetTargetPoint setTargetPoint;
-    setTargetPoint.request.targetPointRaw = targetPointRaw;
-    setTargetPoint.request.uavID = uavID;
-    if(setRawPointClient_.call(setTargetPoint) && setTargetPoint.response.success)
-    {
-        ROS_INFO_STREAM("Set uav "<<uavID<<" target point success");
-    }
-    else
-    {
-        ROS_ERROR_STREAM("Set uav "<<uavID<<" target point failed");
-    }
-}
 // 设置无人机offboard和解锁
 bool FollowCable::setUavTakeoffReady(uint8_t uavID)
 {
@@ -635,6 +620,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             {
                 // 重置标志位
                 isGetCommand_ = false;
+                isSendStateChange_ = false;
                 preStateControlStr_ = "Follow cable";
                 stateControl_.state_ctrl_type = offboard_control::StateControl::CROSS_NODE;
                 // 释放索道
