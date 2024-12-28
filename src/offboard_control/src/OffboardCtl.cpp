@@ -73,9 +73,9 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
     // 初始化控制模式
-    offbCtlType_= GOTO_SETPOINT_STEP;
+    // offbCtlType_= GOTO_SETPOINT_STEP;
     // offbCtlType_= GOTO_SETPOINT_CLOSED_LOOP;
-    // offbCtlType_= GOTO_SETPOINT_SMOOTH;
+    offbCtlType_= GOTO_SETPOINT_SMOOTH;
 
     // 初始化pid控制器
     pidX_.initPid(1.5, 0.0, 0.1, 0.0, 0.0, 0);
@@ -184,6 +184,7 @@ bool OffboardCtl::getTargetPointRawLocal2()
     srv.request.targPoint = uavTargetPoint2_;
     srv.request.pose = uavPoseLocal2_;
     srv.request.twist = uavTwistLocal2_;
+    // srv.request.
     if(isUpdateTargetPoint_)
     {
         srv.request.isUpdateState = true;
