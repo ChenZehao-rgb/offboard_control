@@ -74,7 +74,7 @@
   <exec_depend>control_toolbox</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>geodesy</exec_depend>
-
+  <exec_depend>rospy</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

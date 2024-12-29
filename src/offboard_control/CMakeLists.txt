@@ -121,7 +121,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ros_pkg
-  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf
+  CATKIN_DEPENDS roscpp geometry_msgs mavros_msgs std_msgs message_runtime control_toolbox tf rospy
 #  DEPENDS system_lib
 )
 
@@ -218,10 +218,10 @@ target_link_libraries(camera_commander_node
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+  scripts/sensor_node.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html

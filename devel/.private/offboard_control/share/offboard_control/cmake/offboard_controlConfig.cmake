@@ -185,7 +185,7 @@ foreach(t ${offboard_control_EXPORTED_TARGETS})
   endif()
 endforeach()
 
-set(depends "roscpp;geometry_msgs;mavros_msgs;std_msgs;message_runtime;control_toolbox;tf")
+set(depends "roscpp;geometry_msgs;mavros_msgs;std_msgs;message_runtime;control_toolbox;tf;rospy")
 foreach(depend ${depends})
   string(REPLACE " " ";" depend_list ${depend})
   # the package name of the dependency must be kept in a unique variable so that it is not overwritten in recursive calls
