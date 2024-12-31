@@ -1,6 +1,7 @@
 #include "cameraCommand.h"
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
+#include <std_msgs/String.h>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include "offboard_control/Measure.h"
@@ -19,6 +20,7 @@ public:
             target_endpoint = udp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8888);
 
             pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
+            getControlSensorSub = nh.subscribe("/transform/sensor_switch", 10, &CameraCommandNode::getControlSensorCallback, this);
         } catch (boost::system::system_error& e) {
             ROS_ERROR("Failed to initialize UDP socket: %s", e.what());
             ros::shutdown();
@@ -47,6 +49,7 @@ private:
     udp::socket socket;
     udp::endpoint target_endpoint;
     ros::Publisher pointPub;
+    ros::Subscriber getControlSensorSub;
 
     void sendStartMeasureCommand()
     {
@@ -68,6 +71,18 @@ private:
         ROS_INFO_STREAM("Sent end measure command");
     }
 
+    void getControlSensorCallback(const std_msgs::String::ConstPtr& msg)
+    {
+        ROS_INFO_STREAM("Received control sensor switch command: " << msg->data);
+        if (msg->data == "start") {
+            sendStartMeasureCommand();
+        } else if (msg->data == "end") {
+            sendEndMeasureCommand();
+        } else {
+            ROS_WARN("Received unexpected control sensor switch command: %s", msg->data.c_str());
+        }
+    }
+
     void receiveResponse()
     {
         // 接收传感器返回的数据
@@ -81,12 +96,16 @@ private:
         if (len >= 16 && recv_buffer[0] == 0x55 && recv_buffer[1] == 0xAA && recv_buffer[2] == 5 && recv_buffer[3] == 0 && recv_buffer[4] == 8) {
             float x = *reinterpret_cast<float*>(recv_buffer + 8);
             float z = *reinterpret_cast<float*>(recv_buffer + 12);
-            ROS_INFO("Measurement success: x = %f, z = %f", x, z);
-
-            // 发布x, z信息
-            measure.is_valid = true;
-            measure.x = x;
-            measure.z = z;
+            // if measure x,z is nan, then it is invalid
+            if (std::isnan(x) || std::isnan(z)) {
+                measure.is_valid = false;
+                ROS_WARN("Measurement failed: x = %f, z = %f", x, z);
+            } else {
+                measure.is_valid = true;
+                measure.x = x;
+                measure.z = z;
+                ROS_INFO("Measurement success: x = %f, z = %f", x, z);
+            }
         } else {
             measure.is_valid = false;
             ROS_WARN("Received unexpected response from sensor");

@@ -63,6 +63,8 @@ private:
     // 发布无人机转换坐标后的本地位置
     ros::Publisher uavPoseGlobalPub1_;
     ros::Publisher uavPoseGlobalPub2_;
+    // publish the topic of control sensor switch
+    ros::Publisher controlSensorSwitchPub_;
     // 发布状态机控制状态
     ros::Publisher status_pub_;
     // 控制状态机
@@ -177,9 +179,11 @@ private:
 
     State onLinestate = DESCEND_TO_HALF_Z;
     bool adjustTargetPoint();
-    double judgeSensorZ(double sensor_z, double target_z);
+    double judgeSensorZ(double sensor_z, double local_z);
     // 根据当前小飞机线速度判断是否稳定
     bool isUav1Stable(double VelError);
+    void sendStartMeasureCommand();
+    void sendEndMeasureCommand();
 };
 
 #endif // FOLLOWCABLE_H
