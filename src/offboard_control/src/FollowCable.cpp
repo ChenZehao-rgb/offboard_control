@@ -28,6 +28,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 无人机本地位置订阅
     uavPoseSub1_ = nh_.subscribe("uav1/mavros/local_position/pose", 10, &FollowCable::uavPoseLocalCallback1, this);
     uavPoseSub2_ = nh_.subscribe("uav2/mavros/local_position/pose", 10, &FollowCable::uavPoseLocalCallback2, this);
+    // 无人机本地速度订阅
+    uavVelSub1_ = nh_.subscribe("uav1/mavros/local_position/velocity", 10, &FollowCable::uavVelLocalCallback1, this);
     // 无人机home位置订阅
     uavHomeSub1_ = nh_.subscribe("uav1/mavros/home_position/home", 10, &FollowCable::uavHomePoseCallback1, this);
     uavHomeSub2_ = nh_.subscribe("uav2/mavros/home_position/home", 10, &FollowCable::uavHomePoseCallback2, this);
@@ -143,6 +145,16 @@ bool FollowCable::isUavArrived(const geometry_msgs::PoseStamped& targetPoint, ui
         ROS_ERROR_STREAM("Failed to call isUavArrived service.");
         return false;
     }
+}
+// 根据小飞机线速度判断是否稳定
+bool FollowCable::isUav1Stable(double VelError)
+{
+    // 如果X,Y轴速度小于0.05m/s，认为稳定
+    if (fabs(uavVelLocalSub1_.twist.linear.x) < satbleVelError1 && fabs(uavVelLocalSub1_.twist.linear.y) < satbleVelError1)
+    {
+        return true;
+    }
+    return false;
 }
 // 控制爪子抓住索道
 bool FollowCable::graspCable()
@@ -342,7 +354,6 @@ double FollowCable::judgeSensorZ(double sensor_z, double target_z)
 bool FollowCable::adjustTargetPoint()
 {
     double sensor_z, target_z, actual_z; // 传感器测量的z值，小无人机高于索道的目标z值, 根据传感器和目标z值判断的实际z值
-    sensorDate_.is_valid = true; // 传感器数据有效
     switch (onLinestate)
     {
         case DESCEND_TO_HALF_Z:
@@ -356,8 +367,12 @@ bool FollowCable::adjustTargetPoint()
                 if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
                 {
                     // 等待小无人机静止，即判断速度是否小于一个阈值
-                    onLinestate = CHECK_SENSOR;
-                    ROS_INFO_STREAM("Arrived 0.5Z, check sensor...");
+                    if (isUav1Stable(satbleVelError1))
+                    {
+                        onLinestate = CHECK_SENSOR;
+                        ROS_INFO_STREAM("Arrived 0.5Z, check sensor...");
+                    }
+                    ROS_INFO_STREAM("Arrived 0.5Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
                 }
                 break;
             }
@@ -366,7 +381,7 @@ bool FollowCable::adjustTargetPoint()
             {
                 if (sensorDate_.is_valid)
                 {
-                    // 传感器数据有效，调整y坐标
+                    // 
                     sensor_z = sensorDate_.z;
                     ROS_INFO_STREAM("Sensor data is valid, y: " << sensorDate_.x << ", z: " << sensorDate_.z);
                     ROS_INFO_STREAM("Now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
@@ -745,6 +760,12 @@ void FollowCable::uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstP
     uavPoseLocalSub2_ = *msg;
     // uavPoseGlobalPub2_.publish(uavPoseGlobal2_);
 }
+// 订阅小无人机本地速度
+void FollowCable::uavVelLocalCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg)
+{
+    // 更新无人机本地速度
+    uavVelLocalSub1_ = *msg;
+}
 // 无人机home位置回调函数
 void FollowCable::uavHomePoseCallback1(const mavros_msgs::HomePosition::ConstPtr& msg)
 {
@@ -797,6 +818,11 @@ void FollowCable::readParameters(ros::NodeHandle& nh) {
     nh.getParam("size/rope/length", rope_length);
     // 读取小飞机携带爪子尺寸
     nh.getParam("size/claw/diameter", claw_diameter);
+    // 读取小飞机目标上线点在索道上方的高度
+    nh.getParam("position/onLinePoint_Z", onLinePoint_Z);
+    // 读取几种位置精度
+    nh.getParam("position/targetPointError1", targetPointError1);
+    nh.getParam("position/targetPointError2", targetPointError2);
     // 读取waypoints_set_1
     XmlRpc::XmlRpcValue waypoints;
     std::vector<geometry_msgs::PoseStamped> waypoints_set_1_;

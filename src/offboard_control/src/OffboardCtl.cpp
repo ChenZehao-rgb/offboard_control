@@ -499,8 +499,6 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             uavTargetPoint1_ = uavTargetPoint2_;
             uavTargetPoint1_.pose.position.z -= 1.0;
             uavTargetPoint1_ = uav1PoseInUav2FrameToUav1Frame(uavTargetPoint1_);
-            // uavTargetPointRaw1_ = uavTargetPointRaw2_;
-            // setpointRawLocalPub1_.publish(uavTargetPointRaw1_); //发布目标位置
             setpointLocalPub1_.publish(uavTargetPoint1_); //发布目标位置
             //打印信息
             // ROS_INFO_STREAM("offboard_control::OffboardCtlType::GOTO_SETPOINT_CLOSED_LOOP: " << targetPoint_);

@@ -49,6 +49,8 @@ private:
     // 订阅无人机本地位置
     ros::Subscriber uavPoseSub1_;
     ros::Subscriber uavPoseSub2_;
+    // 订阅小无人机本地速度
+    ros::Subscriber uavVelSub1_;
     // 订阅无人机home位置
     ros::Subscriber uavHomeSub1_;
     ros::Subscriber uavHomeSub2_;
@@ -75,6 +77,8 @@ private:
     // mavros订阅本地位置
     geometry_msgs::PoseStamped uavPoseLocalSub1_;
     geometry_msgs::PoseStamped uavPoseLocalSub2_;
+    // mavros订阅本地速度
+    geometry_msgs::TwistStamped uavVelLocalSub1_;
     // mavros订阅home位置
     mavros_msgs::HomePosition uavHomePoseSub1_;
     mavros_msgs::HomePosition uavHomePoseSub2_;
@@ -87,10 +91,10 @@ private:
     geometry_msgs::PoseStamped crossPoint_; // 越过节点的目标点，主要是大无人机高度
     std::vector<geometry_msgs::PoseStamped> cablePoints_; // 索道上的上线点
     double claw_diameter, rope_length; // 爪子直径，大小无人机连接绳长度
-    double onLinePoint_Z = 1.0; // 小飞机相对索道上线点的高度
+    double onLinePoint_Z; // 小飞机相对索道上线点的高度
     int onLineFailCnt = 0; // 上线失败计数
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavTargetPose_; // 小无人机在大无人机坐标系下的local坐标，大无人机目标位置
-    double targetPointError1 = 0.1, targetPointError2 = 0.3; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
+    double targetPointError1, targetPointError2, satbleVelError1; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
     offboard_control::Measure sensorDate_; // 传感器测量的索道位置
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
@@ -111,6 +115,8 @@ private:
     // 本地位置回调函数
     void uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    // 本地速度回调函数
+    void uavVelLocalCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg);
     // home位置回调函数
     void uavHomePoseCallback1(const mavros_msgs::HomePosition::ConstPtr& msg);
     void uavHomePoseCallback2(const mavros_msgs::HomePosition::ConstPtr& msg);
@@ -172,6 +178,8 @@ private:
     State onLinestate = DESCEND_TO_HALF_Z;
     bool adjustTargetPoint();
     double judgeSensorZ(double sensor_z, double target_z);
+    // 根据当前小飞机线速度判断是否稳定
+    bool isUav1Stable(double VelError);
 };
 
 #endif // FOLLOWCABLE_H
