@@ -72,6 +72,7 @@ add_service_files(
   SetUavTakeoffReady.srv
   GenTrajOnline.srv
   UpdateBoundOnline.srv
+  cameraControl.srv
 )
 
 ## Generate actions in the 'action' folder

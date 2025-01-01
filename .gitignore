@@ -8,3 +8,5 @@ logs/
 
 # 忽略VSCode生成的文件
 .vscode/
+
+*.bag

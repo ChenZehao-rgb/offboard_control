@@ -24,6 +24,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     // 无人机返航点服务
     setUavReturnClient1_ = nh_.serviceClient<mavros_msgs::SetMode>("/uav1/mavros/set_mode");
     setUavReturnClient2_ = nh_.serviceClient<mavros_msgs::SetMode>("/uav2/mavros/set_mode");
+    // 设置相机控制客户端
+    setCameraControlClient_ = nh_.serviceClient<offboard_control::cameraControl>("/offboard/camera_control");
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
@@ -149,6 +151,20 @@ bool FollowCable::isUavArrived(const geometry_msgs::PoseStamped& targetPoint, ui
         return false;
     }
 }
+// send the control command of the camera
+void FollowCable::sendCameraControlCommand(int command)
+{
+    offboard_control::cameraControl cameraControl;
+    cameraControl.request.command = command;
+    if(setCameraControlClient_.call(cameraControl) && cameraControl.response.success)
+    {
+        ROS_INFO_STREAM("Send camera control command success");
+    }
+    else
+    {
+        ROS_ERROR_STREAM("Send camera control command failed");
+    }
+}
 // 根据小飞机线速度判断是否稳定
 bool FollowCable::isUav1Stable(double VelError)
 {
@@ -272,12 +288,14 @@ void FollowCable::sendStartMeasureCommand()
     std_msgs::String msg;
     msg.data = "start";
     controlSensorSwitchPub_.publish(msg);
+    ROS_INFO_STREAM("Sent start measure command");
 }
 void FollowCable::sendEndMeasureCommand()
 {
     std_msgs::String msg;
     msg.data = "end";
     controlSensorSwitchPub_.publish(msg);
+    ROS_INFO_STREAM("Sent end measure command");
 }
 // 指定无人机到达一系列目标点
 void FollowCable::followCablePoints(std::vector<geometry_msgs::PoseStamped> &waypoints)
@@ -396,7 +414,7 @@ bool FollowCable::adjustTargetPoint()
                     if(descendHeight.empty())
                     {
                         ROS_INFO("Descend to lowest ...");
-                        sendEndMeasureCommand();
+                        sendCameraControlCommand(0);
                         loadDescendHeight(nh_);
                         return true;
                     }
@@ -409,7 +427,7 @@ bool FollowCable::adjustTargetPoint()
 
         case CHECK_SENSOR:
         {
-            sendStartMeasureCommand();
+            sendCameraControlCommand(1);
             bool sensor_valid = false;
             const int num_readings = 100;
             std::vector<float> sensor_z_readings, sensor_y_readings;
@@ -815,9 +833,7 @@ void FollowCable::readParameters(ros::NodeHandle& nh) {
     nh.getParam("position/targetPointError1", targetPointError1);
     nh.getParam("position/targetPointError2", targetPointError2);
     nh.getParam("position/satbleVelError1", stableVelError1);
-    nh.getParam("decend//height/first", descendHeight[1]);
-    nh.getParam("decend//height/second", descendHeight[2]);
-    nh.getParam("decend//height/third", descendHeight[3]);
+    loadDescendHeight(nh);
     // 读取waypoints_set_1
     XmlRpc::XmlRpcValue waypoints;
     std::vector<geometry_msgs::PoseStamped> waypoints_set_1_;
@@ -863,9 +879,18 @@ void FollowCable::readParameters(ros::NodeHandle& nh) {
 }
 void FollowCable::loadDescendHeight(ros::NodeHandle& nh)
 {
-    nh.getParam("decend//height/first", descendHeight[1]);
-    nh.getParam("decend//height/second", descendHeight[2]);
-    nh.getParam("decend//height/third", descendHeight[3]);
+    descendHeight.clear();
+    float first, second, third;
+    if (nh.getParam("descend/height/first", first) &&
+        nh.getParam("descend/height/second", second) &&
+        nh.getParam("descend/height/third", third)) {
+        descendHeight.push_back(first);
+        descendHeight.push_back(second);
+        descendHeight.push_back(third);
+        ROS_INFO("Reloaded descend heights: %f, %f, %f", first, second, third);
+    } else {
+        ROS_WARN("Failed to reload descend heights from parameter server");
+    }
 }
 
 int main(int argc, char** argv)

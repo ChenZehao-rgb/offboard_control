@@ -19,6 +19,10 @@
            /online_traj_generator/ruckig_command
            /online_traj_generator/ruckig_targ
 
+           /transform/sensor_data
+           /transform/small_uav_pose_in_big_uav_frame
+           /transform/sensor_switch
+
          -o $(find offboard_control)/bag">
   </node>
 </launch>

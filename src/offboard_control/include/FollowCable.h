@@ -27,6 +27,7 @@
 #include "offboard_control/SetUavTakeoffReady.h"
 #include <offboard_control/Status.h>
 #include <offboard_control/Measure.h>
+#include <offboard_control/cameraControl.h>
 
 class FollowCable{
 public:
@@ -44,6 +45,7 @@ private:
     ros::ServiceClient setUavTakeoffReadyClient_; //设置offboard和解锁客户端
     ros::ServiceClient setUavReturnClient1_;
     ros::ServiceClient setUavReturnClient2_;
+    ros::ServiceClient setCameraControlClient_;
     // 键盘输入
     ros::Subscriber keyboardSub_;
     // 订阅无人机本地位置
@@ -180,6 +182,7 @@ private:
     double smallUav_y, smallUav_z;
     std::vector<float> descendHeight;
     void loadDescendHeight(ros::NodeHandle& nh);
+    void sendCameraControlCommand(int command);
 };
 
 #endif // FOLLOWCABLE_H
