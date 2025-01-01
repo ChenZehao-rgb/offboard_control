@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <numeric>
 #include "FollowCable.h"
 //几种控制模式定义
 #define GOTO_SETPOINT_STEP 0
@@ -152,7 +153,7 @@ bool FollowCable::isUavArrived(const geometry_msgs::PoseStamped& targetPoint, ui
 bool FollowCable::isUav1Stable(double VelError)
 {
     // 如果X,Y轴速度小于0.05m/s，认为稳定
-    if (fabs(uavVelLocalSub1_.twist.linear.x) < satbleVelError1 && fabs(uavVelLocalSub1_.twist.linear.y) < satbleVelError1)
+    if (fabs(uavVelLocalSub1_.twist.linear.x) < stableVelError1 && fabs(uavVelLocalSub1_.twist.linear.y) < stableVelError1)
     {
         return true;
     }
@@ -368,25 +369,40 @@ double FollowCable::judgeSensorZ(double sensor_z, double local_z)
 bool FollowCable::adjustTargetPoint()
 {
     double sensor_z, actual_z; // 传感器测量的z值，小无人机高于索道的目标z值, 根据传感器和目标z值判断的实际z值
-    double local_z = uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z; // 小无人机高于索道的实际z值
+    double sensor_y; // 传感器测量的y值
     switch (onLinestate)
     {
-        case DESCEND_TO_HALF_Z:
+        case DESCEND:
         {
             setPidGains(0.2); // 设置速度限幅
-            onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.5 * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
+            onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, descendHeight.front() * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
             setTargetPoint(targetPointInOnLineState_, 2);
-            ROS_INFO_STREAM("Descend to 0.5Z..., high is: "<< local_z);
+            ROS_INFO_STREAM("Descend to 0.5Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
 
             if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
             {
                 // 等待小无人机静止，即判断速度是否小于一个阈值
-                if (isUav1Stable(satbleVelError1))
+                if (isUav1Stable(stableVelError1))
                 {
+                    // 等待10s
+                    for(int i = 0; i < 10; i++)
+                    {
+                        ros::spinOnce();
+                        ros::Rate(1).sleep();
+                        ROS_INFO_STREAM("Descend to " << descendHeight.front() << "Z, , wait for 10s: " << i << "s ...");
+                    }
+                    ROS_INFO_STREAM("Arrived " << descendHeight.front() << "Z, check sensor...");
+                    descendHeight.erase(descendHeight.begin());
+                    if(descendHeight.empty())
+                    {
+                        ROS_INFO("Descend to lowest ...");
+                        sendEndMeasureCommand();
+                        loadDescendHeight(nh_);
+                        return true;
+                    }
                     onLinestate = CHECK_SENSOR;
-                    ROS_INFO_STREAM("Arrived 0.5Z, check sensor...");
                 }
-                ROS_INFO_STREAM("Arrived 0.5Z, now high is: "<< local_z);
+                ROS_INFO_STREAM("Arrived " << descendHeight.front() << "Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
             }
             break;
         }
@@ -395,18 +411,35 @@ bool FollowCable::adjustTargetPoint()
         {
             sendStartMeasureCommand();
             bool sensor_valid = false;
+            const int num_readings = 100;
+            std::vector<float> sensor_z_readings, sensor_y_readings;
+            std::vector<float> smallUav_z_readings, smallUav_y_readings;
             for (int attempt = 0; attempt < 3; ++attempt) {
-                // waiting for 3s
-                for (int i = 0; i < 3; i++) {
+                sensor_z_readings.clear();
+
+                // Collect sensor data for 5 second (100 readings at 20Hz)
+                for (int i = 0; i < num_readings; ++i) {
                     ros::spinOnce();
-                    ros::Rate(1).sleep();
-                    ROS_INFO_STREAM("Checking sensor: " << i << "s ...");
+                    ros::Rate(20).sleep();
+                    if (sensorDate_.is_valid) {
+                        sensor_z_readings.push_back(sensorDate_.z);
+                        sensor_y_readings.push_back(sensorDate_.x);
+                    }
+                    smallUav_z_readings.push_back(smallUavPoseInBigUavFrame_.pose.position.z);
+                    smallUav_y_readings.push_back(smallUavPoseInBigUavFrame_.pose.position.y);
                 }
-                if (sensorDate_.is_valid) {
-                    sensor_z = sensorDate_.z;
-                    ROS_INFO_STREAM("Sensor data is valid, y: " << sensorDate_.x << ", z: " << sensorDate_.z);
-                    ROS_INFO_STREAM("Now high is: " << local_z);
-                    actual_z = judgeSensorZ(sensor_z, local_z);
+                if (!sensor_z_readings.empty()) {
+                    float sum_z = std::accumulate(sensor_z_readings.begin(), sensor_z_readings.end(), 0.0f);
+                    float sum_y = std::accumulate(sensor_y_readings.begin(), sensor_y_readings.end(), 0.0f);
+                    sensor_z = sum_z / sensor_z_readings.size();
+                    sensor_y = sum_y / sensor_y_readings.size();
+                    float sum_smallUav_z = std::accumulate(smallUav_z_readings.begin(), smallUav_z_readings.end(), 0.0f);
+                    float sum_smallUav_y = std::accumulate(smallUav_y_readings.begin(), smallUav_y_readings.end(), 0.0f);
+                    smallUav_y = sum_smallUav_y / smallUav_y_readings.size();
+                    smallUav_z = sum_smallUav_z / smallUav_z_readings.size();
+                    ROS_INFO_STREAM("Sensor data is valid, average z: " << sensor_z << ", average y: " << sensor_y);
+                    ROS_INFO_STREAM("Now high is: " << smallUav_z);
+                    actual_z = judgeSensorZ(sensor_z, smallUav_z);
                     onLinestate = ADJUST_Y_POSITION;
                     sensor_valid = true;
                     break;
@@ -416,98 +449,29 @@ bool FollowCable::adjustTargetPoint()
             }
 
             if (!sensor_valid) {
+                // ROS_INFO("Sensor data is invalid after 3 attempts");
+                // onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.3 * onLinePoint_Z);
+                // setTargetPoint(targetPointInOnLineState_, 2);
+                // ROS_INFO_STREAM("Sensor data is invalid, descend to 0.3Z..., high is: " << uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
+                // onLinestate = DESCEND_TO_0_3_Z;
                 ROS_INFO("Sensor data is invalid after 3 attempts");
-                onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.3 * onLinePoint_Z);
-                setTargetPoint(targetPointInOnLineState_, 2);
-                ROS_INFO_STREAM("Sensor data is invalid, descend to 0.3Z..., high is: " << local_z);
-                onLinestate = DESCEND_TO_0_3_Z;
+                return false;
             }
             break;
         }
         case ADJUST_Y_POSITION:
         {
             // 根据传感器数据调整y坐标, make sure how to get believe y,
-            gettargetpointfromsensor
+            targetPointInOnLineState_.pose.position.y = sensor_y + smallUav_y;
             setTargetPoint(targetPointInOnLineState_, 2);
-            ROS_INFO_STREAM("Adjust y position..., adjust y: " << targetPointInOnLineState_.pose.position.y - uavPoseLocalSub2_.pose.position.y);
+            ROS_INFO_STREAM("Adjust y position..., adjust y: " << sensor_y + smallUav_y - uavPoseLocalSub2_.pose.position.y);
             if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
             {
                 ROS_INFO_STREAM("Adjust y position success...");
-                onLinestate = DESCEND_TO_0_2_Z;
+                onLinestate = DESCEND;
             }
             break;
         }
-
-        case DESCEND_TO_0_2_Z:
-            {
-                // setPidGains(0.1);
-                onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.2 * onLinePoint_Z);
-                setTargetPoint(targetPointInOnLineState_, 2);
-                ROS_INFO_STREAM("Descend to 0.2Z..., high is: "<< local_z);
-                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
-                {
-                    // 等待10s
-                    for(int i = 0; i < 10; i++)
-                    {
-                        ros::spinOnce();
-                        ros::Rate(1).sleep();
-                        ROS_INFO_STREAM("Descend to 0.2Z, wait for 10s: " << i << "s ...");
-                    }
-                    ROS_INFO_STREAM("Arrived 0.2Z, now high is: "<< local_z);
-                    onLinestate = FINAL_ADJUSTMENT;
-                }
-                break;
-            }
-
-        case FINAL_ADJUSTMENT:
-            {
-                targetPointInOnLineState_.pose.position.y += 0;
-                setTargetPoint(targetPointInOnLineState_, 2);
-                ROS_INFO_STREAM("Adjust y position..., adjust y: " << targetPointInOnLineState_.pose.position.y - uavPoseLocalSub2_.pose.position.y);
-                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
-                {
-                    ROS_INFO_STREAM("Adjust y position success...");
-                    onLinestate = DESCEND_TO_0_1_Z;
-                }
-                break;
-            }
-
-        case DESCEND_TO_0_1_Z:
-            {
-                // setPidGains(0.05);
-                onLineCableHight2UavHight(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, 0.1 * onLinePoint_Z);
-                setTargetPoint(targetPointInOnLineState_, 2);
-                ROS_INFO_STREAM("Descend to 0.1Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
-                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
-                {
-                    // 等待10s
-                    for(int i = 0; i < 10; i++)
-                    {
-                        ros::spinOnce();
-                        ros::Rate(1).sleep();
-                        ROS_INFO_STREAM("Descend to 0.1Z, wait for 10s: " << i << "s ...");
-                    }
-                    ROS_INFO_STREAM("Arrived 0.1Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
-                    return true;
-                }
-                break;
-            }
-
-        case DESCEND_TO_0_3_Z:
-            {
-                if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
-                {
-                    if (sensorDate_.is_valid)
-                    {
-                        onLinestate = ADJUST_Y_POSITION;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                break;
-            }
     }
     return false;
 }
@@ -568,7 +532,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
                 isArrivedOnlinePoint_ = false;
                 isGetCommand_ = false;
                 // 初始化上线操作状态机状态
-                onLinestate = DESCEND_TO_HALF_Z;
+                onLinestate = DESCEND;
             }
             break;
         }
@@ -850,6 +814,10 @@ void FollowCable::readParameters(ros::NodeHandle& nh) {
     // 读取几种位置精度
     nh.getParam("position/targetPointError1", targetPointError1);
     nh.getParam("position/targetPointError2", targetPointError2);
+    nh.getParam("position/satbleVelError1", stableVelError1);
+    nh.getParam("decend//height/first", descendHeight[1]);
+    nh.getParam("decend//height/second", descendHeight[2]);
+    nh.getParam("decend//height/third", descendHeight[3]);
     // 读取waypoints_set_1
     XmlRpc::XmlRpcValue waypoints;
     std::vector<geometry_msgs::PoseStamped> waypoints_set_1_;
@@ -893,6 +861,13 @@ void FollowCable::readParameters(ros::NodeHandle& nh) {
     ROS_INFO_STREAM("Waypoints set 2: " << waypoints_set_2_.size() << " points");
     ROS_INFO_STREAM("Cable points: " << cablePoints_.size() << " points");
 }
+void FollowCable::loadDescendHeight(ros::NodeHandle& nh)
+{
+    nh.getParam("decend//height/first", descendHeight[1]);
+    nh.getParam("decend//height/second", descendHeight[2]);
+    nh.getParam("decend//height/third", descendHeight[3]);
+}
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "follow_cable");

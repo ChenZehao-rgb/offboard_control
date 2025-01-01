@@ -96,7 +96,7 @@ private:
     double onLinePoint_Z; // 小飞机相对索道上线点的高度
     int onLineFailCnt = 0; // 上线失败计数
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavTargetPose_; // 小无人机在大无人机坐标系下的local坐标，大无人机目标位置
-    double targetPointError1, targetPointError2, satbleVelError1; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
+    double targetPointError1, targetPointError2, stableVelError1; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
     offboard_control::Measure sensorDate_; // 传感器测量的索道位置
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
@@ -166,24 +166,20 @@ private:
     // 上线过程状态机定义
     enum State
     {
-        DESCEND_TO_HALF_Z,
+        DESCEND,
         CHECK_SENSOR,
-        ADJUST_Y_POSITION,
-        DESCEND_TO_0_2_Z,
-        FINAL_ADJUSTMENT,
-        DESCEND_TO_0_1_Z,
-        GRASP_CABLE,
-        DESCEND_TO_0_3_Z,
-        RETURN
+        ADJUST_Y_POSITION
     };
-
-    State onLinestate = DESCEND_TO_HALF_Z;
+    State onLinestate = DESCEND;
     bool adjustTargetPoint();
     double judgeSensorZ(double sensor_z, double local_z);
     // 根据当前小飞机线速度判断是否稳定
     bool isUav1Stable(double VelError);
     void sendStartMeasureCommand();
     void sendEndMeasureCommand();
+    double smallUav_y, smallUav_z;
+    std::vector<float> descendHeight;
+    void loadDescendHeight(ros::NodeHandle& nh);
 };
 
 #endif // FOLLOWCABLE_H

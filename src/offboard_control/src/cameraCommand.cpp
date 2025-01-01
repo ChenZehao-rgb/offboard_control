@@ -29,7 +29,7 @@ public:
 
     void spin()
     {
-        ros::Rate rate(30); // 30 Hz
+        ros::Rate rate(20); // 30 Hz
         // sendStartMeasureCommand();
         sendEndMeasureCommand();
         while (ros::ok())

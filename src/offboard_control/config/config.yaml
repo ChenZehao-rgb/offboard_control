@@ -26,3 +26,6 @@ position:
   onLinePoint_Z: 1.0
   targetPointError1: 0.1
   targetPointError2: 0.3
+  satbleVelError1: 0.05
+descend:
+  height: {first: 0.5, second: 0.2, third: 0.1}
