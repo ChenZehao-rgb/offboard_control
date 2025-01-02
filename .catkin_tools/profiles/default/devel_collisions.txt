@@ -1,2 +1,8 @@
+<<<<<<< HEAD
 /home/chen/offboard_control/devel/./cmake.lock 210
 /home/sia268/offboard_control/devel/./cmake.lock 8
+=======
+/home/chen/offboard_control/devel/./cmake.lock 215
+/home/sia268/offboard_control/devel/./cmake.lock 1
+/home/sia269/offboard_control/devel/./cmake.lock 18
+>>>>>>> ef28ca76741a4cf6ff8027e9ec5f61e83841b579

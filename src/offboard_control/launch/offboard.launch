@@ -1,12 +1,12 @@
 <launch>
-    <!-- 启动offboard_control节点 -->
-    <node pkg="offboard_control" type="offboard_control_node" name="OffboardCtl" output="screen"/>
-    <!-- 启动online_traj_generator节点 -->
-    <node pkg="offboard_control" type="online_traj_generator_node" name="OnlineTrajGen" output="screen"/>
+    <!-- 启动 cameraCommand 节点 -->
+    <node pkg="offboard_control" type="camera_commander_node" name="cameraCommand" output="screen"/>
     <!-- 启动 uav_coordinate_trans 节点 -->
     <node pkg="offboard_control" type="uav_coordinate_trans_node" name="uav_coordinate_trans" output="screen"/>
-    <!-- 启动 cameraCommand 节点 -->
-    <!-- <node pkg="offboard_control" type="camera_commander_node" name="cameraCommand" output="screen"/> -->
+    <!-- 启动online_traj_generator节点 -->
+    <node pkg="offboard_control" type="online_traj_generator_node" name="OnlineTrajGen" output="screen"/>
+    <!-- 启动offboard_control节点 -->
+    <node pkg="offboard_control" type="offboard_control_node" name="OffboardCtl" output="screen"/>
     <!-- 加载参数文件 -->
     <rosparam file="$(find offboard_control)/config/waypoints.yaml" command="load"/>
     <rosparam file="$(find offboard_control)/config/config.yaml" command="load"/>

@@ -1,10 +1,11 @@
 #include "cameraCommand.h"
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
+#include <std_msgs/String.h>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include "offboard_control/Measure.h"
-
+#include "offboard_control/cameraControl.h"
 using namespace boost::asio;
 using boost::asio::ip::udp;
 
@@ -17,12 +18,12 @@ public:
         try {
             // Define target endpoint
             target_endpoint = udp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8888);
-
-            pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
         } catch (boost::system::system_error& e) {
             ROS_ERROR("Failed to initialize UDP socket: %s", e.what());
             ros::shutdown();
         }
+        pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
+        cameraControlService = nh.advertiseService("offboard/camera_control", &CameraCommandNode::cameraControlCallback, this);
     }
 
     void spin()
@@ -37,7 +38,6 @@ public:
             } catch (boost::system::system_error& e) {
                 ROS_ERROR("Error receiving data: %s", e.what());
             }
-            ros::spinOnce();
             rate.sleep();
         }
     }
@@ -47,7 +47,8 @@ private:
     udp::socket socket;
     udp::endpoint target_endpoint;
     ros::Publisher pointPub;
-
+    ros::Subscriber getControlSensorSub;
+    ros::ServiceServer cameraControlService;
     void sendStartMeasureCommand()
     {
         ooCommandStruct cmd;
@@ -68,6 +69,24 @@ private:
         ROS_INFO_STREAM("Sent end measure command");
     }
 
+    bool cameraControlCallback(offboard_control::cameraControl::Request &req,
+                               offboard_control::cameraControl::Response &res)
+    {
+        if (req.command == 1) {
+            sendStartMeasureCommand();
+            res.success = true;
+            ROS_INFO("Started measurement");
+        } else if (req.command == 0) {
+            sendEndMeasureCommand();
+            res.success = true;
+            ROS_INFO("Ended measurement");
+        } else {
+            res.success = false;
+            ROS_WARN("Received invalid command: %d", req.command);
+        }
+        return true;
+    }
+
     void receiveResponse()
     {
         // 接收传感器返回的数据
@@ -81,12 +100,16 @@ private:
         if (len >= 16 && recv_buffer[0] == 0x55 && recv_buffer[1] == 0xAA && recv_buffer[2] == 5 && recv_buffer[3] == 0 && recv_buffer[4] == 8) {
             float x = *reinterpret_cast<float*>(recv_buffer + 8);
             float z = *reinterpret_cast<float*>(recv_buffer + 12);
-            ROS_INFO("Measurement success: x = %f, z = %f", x, z);
-
-            // 发布x, z信息
-            measure.is_valid = true;
-            measure.x = x;
-            measure.z = z;
+            // if measure x,z is nan, then it is invalid
+            if (std::isnan(x) || std::isnan(z)) {
+                measure.is_valid = false;
+                ROS_WARN("Measurement failed: x = %f, z = %f", x, z);
+            } else {
+                measure.is_valid = true;
+                measure.x = x;
+                measure.z = z;
+                ROS_INFO("Measurement success: x = %f, z = %f", x, z);
+            }
         } else {
             measure.is_valid = false;
             ROS_WARN("Received unexpected response from sensor");
@@ -100,6 +123,8 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "camera_command_node");
     ros::NodeHandle nh;
     CameraCommandNode cameraCommandNode(nh);
+    ros::AsyncSpinner spinner(2);
+    spinner.start();
     cameraCommandNode.spin();
     return 0;
 }

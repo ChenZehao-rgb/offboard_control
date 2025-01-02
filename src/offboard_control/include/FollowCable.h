@@ -27,6 +27,7 @@
 #include "offboard_control/SetUavTakeoffReady.h"
 #include <offboard_control/Status.h>
 #include <offboard_control/Measure.h>
+#include <offboard_control/cameraControl.h>
 
 class FollowCable{
 public:
@@ -44,11 +45,14 @@ private:
     ros::ServiceClient setUavTakeoffReadyClient_; //设置offboard和解锁客户端
     ros::ServiceClient setUavReturnClient1_;
     ros::ServiceClient setUavReturnClient2_;
+    ros::ServiceClient setCameraControlClient_;
     // 键盘输入
     ros::Subscriber keyboardSub_;
     // 订阅无人机本地位置
     ros::Subscriber uavPoseSub1_;
     ros::Subscriber uavPoseSub2_;
+    // 订阅小无人机本地速度
+    ros::Subscriber uavVelSub1_;
     // 订阅无人机home位置
     ros::Subscriber uavHomeSub1_;
     ros::Subscriber uavHomeSub2_;
@@ -61,6 +65,8 @@ private:
     // 发布无人机转换坐标后的本地位置
     ros::Publisher uavPoseGlobalPub1_;
     ros::Publisher uavPoseGlobalPub2_;
+    // publish the topic of control sensor switch
+    ros::Publisher controlSensorSwitchPub_;
     // 发布状态机控制状态
     ros::Publisher status_pub_;
     // 控制状态机
@@ -75,6 +81,8 @@ private:
     // mavros订阅本地位置
     geometry_msgs::PoseStamped uavPoseLocalSub1_;
     geometry_msgs::PoseStamped uavPoseLocalSub2_;
+    // mavros订阅本地速度
+    geometry_msgs::TwistStamped uavVelLocalSub1_;
     // mavros订阅home位置
     mavros_msgs::HomePosition uavHomePoseSub1_;
     mavros_msgs::HomePosition uavHomePoseSub2_;
@@ -87,10 +95,10 @@ private:
     geometry_msgs::PoseStamped crossPoint_; // 越过节点的目标点，主要是大无人机高度
     std::vector<geometry_msgs::PoseStamped> cablePoints_; // 索道上的上线点
     double claw_diameter, rope_length; // 爪子直径，大小无人机连接绳长度
-    double onLinePoint_Z = 1.0; // 小飞机相对索道上线点的高度
+    double onLinePoint_Z; // 小飞机相对索道上线点的高度
     int onLineFailCnt = 0; // 上线失败计数
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavTargetPose_; // 小无人机在大无人机坐标系下的local坐标，大无人机目标位置
-    double targetPointError1 = 0.1, targetPointError2 = 0.3; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
+    double targetPointError1, targetPointError2, stableVelError1; // 目标点误差,设置两种精度的，只有达到这个精度，才认为到达目标点
     offboard_control::Measure sensorDate_; // 传感器测量的索道位置
     // 沿索道运动目标点
     std::vector<std::vector<geometry_msgs::PoseStamped>> all_waypoints_;
@@ -111,6 +119,8 @@ private:
     // 本地位置回调函数
     void uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg);
+    // 本地速度回调函数
+    void uavVelLocalCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg);
     // home位置回调函数
     void uavHomePoseCallback1(const mavros_msgs::HomePosition::ConstPtr& msg);
     void uavHomePoseCallback2(const mavros_msgs::HomePosition::ConstPtr& msg);
@@ -158,20 +168,21 @@ private:
     // 上线过程状态机定义
     enum State
     {
-        DESCEND_TO_HALF_Z,
+        DESCEND,
         CHECK_SENSOR,
-        ADJUST_Y_POSITION,
-        DESCEND_TO_0_2_Z,
-        FINAL_ADJUSTMENT,
-        DESCEND_TO_0_1_Z,
-        GRASP_CABLE,
-        DESCEND_TO_0_3_Z,
-        RETURN
+        ADJUST_Y_POSITION
     };
-
-    State onLinestate = DESCEND_TO_HALF_Z;
+    State onLinestate = DESCEND;
     bool adjustTargetPoint();
-    double judgeSensorZ(double sensor_z, double target_z);
+    double judgeSensorZ(double sensor_z, double local_z);
+    // 根据当前小飞机线速度判断是否稳定
+    bool isUav1Stable(double VelError);
+    void sendStartMeasureCommand();
+    void sendEndMeasureCommand();
+    double smallUav_y, smallUav_z;
+    std::vector<float> descendHeight;
+    void loadDescendHeight(ros::NodeHandle& nh);
+    void sendCameraControlCommand(int command);
 };
 
 #endif // FOLLOWCABLE_H
