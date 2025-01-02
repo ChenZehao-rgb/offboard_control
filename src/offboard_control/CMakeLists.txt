@@ -163,6 +163,7 @@ add_executable(online_traj_generator_node src/traj_generator/online_traj_generat
 add_executable(uav_coordinate_trans_node src/uav_coordinate_trans.cpp)
 add_executable(observer_node src/observer_node.cpp)
 add_executable(camera_commander_node src/cameraCommand.cpp)
+add_executable(setActuatorCommand_node src/setActuatorCommand.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -179,6 +180,7 @@ add_dependencies(camera_commander_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${cat
 add_dependencies(offboard_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(follow_cable_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(keyboard_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(setActuatorCommand_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
@@ -209,6 +211,9 @@ target_link_libraries(observer_node
 target_link_libraries(camera_commander_node
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
+)
+target_link_libraries(setActuatorCommand_node
+  ${catkin_LIBRARIES}
 )
 
 #############
