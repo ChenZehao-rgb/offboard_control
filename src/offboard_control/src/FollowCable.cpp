@@ -26,6 +26,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     setUavReturnClient2_ = nh_.serviceClient<mavros_msgs::SetMode>("/uav2/mavros/set_mode");
     // 设置相机控制客户端
     setCameraControlClient_ = nh_.serviceClient<offboard_control::cameraControl>("/offboard/camera_control");
+    // send the control command of the actuator
+    setActuatorControlClient_ = nh_.serviceClient<mavros_msgs::CommandLong>("/uav1/mavros/cmd/command");
     // 键盘输入订阅
     keyboardSub_ = nh_.subscribe("/keyboard_input", 10, &FollowCable::keyboardCallback, this);
     // 无人机本地位置订阅
@@ -165,6 +167,23 @@ void FollowCable::sendCameraControlCommand(int command)
         ROS_ERROR_STREAM("Send camera control command failed");
     }
 }
+bool FollowCable::setActuatorCommand(bool grasp)
+{
+    mavros_msgs::CommandLong srv;
+    srv.request.broadcast = false;
+    srv.request.command = 187; // MAV_CMD_DO_SET_ACTUATOR
+    srv.request.param2 = grasp ? 0.5 : 0.0;  // AUX2
+    if (setActuatorControlClient_.call(srv) && srv.response.success)
+    {
+        ROS_INFO("Command sent successfully");
+        return true;
+    }
+    else
+    {
+        ROS_ERROR("Failed to send command");
+        return false;
+    }
+}
 // 根据小飞机线速度判断是否稳定
 bool FollowCable::isUav1Stable(double VelError)
 {
@@ -178,36 +197,44 @@ bool FollowCable::isUav1Stable(double VelError)
 // 控制爪子抓住索道
 bool FollowCable::graspCable()
 {
-    // 控制指令
-
-    //等待10s
-    ROS_INFO_STREAM("Grasp cable...");
-    // 循环10次
-    for(int i = 0; i < 10; i++)
+    if(setActuatorCommand(true))
     {
-        ros::spinOnce();
-        ros::Rate(1).sleep();
-        ROS_INFO_STREAM("Grasping : " << i << "s ...");
+        ROS_INFO_STREAM("Send grasp success");
+        // 循环10次
+        for(int i = 0; i < 10; i++)
+        {
+            ros::spinOnce();
+            ros::Rate(1).sleep();
+            ROS_INFO_STREAM("Grasping : " << i << "s ...");
+        }
+        return true;
     }
-    // 判断是否抓住索道
-    return (1>0); // 某个值大于阈值
+    else
+    {
+        ROS_ERROR_STREAM("Send grasp failed");
+        return false;
+    }
 }
 // 松开爪子
 bool FollowCable::releaseCable()
 {
-    // 控制指令
-
-    //等待10s
-    ROS_INFO_STREAM("Release cable...");
-    // 循环10次
-    for(int i = 0; i < 10; i++)
+    if(setActuatorCommand(false))
     {
-        ros::spinOnce();
-        ros::Rate(1).sleep();
-        ROS_INFO_STREAM("Releasing : " << i << "s ...");
+        ROS_INFO_STREAM("Send release success");
+        // 循环10次
+        for(int i = 0; i < 10; i++)
+        {
+            ros::spinOnce();
+            ros::Rate(1).sleep();
+            ROS_INFO_STREAM("Grasping : " << i << "s ...");
+        }
+        return true;
     }
-    // 判断是否松开索道
-    return (1<0); // 某个值小于阈值
+    else
+    {
+        ROS_ERROR_STREAM("Send release failed");
+        return false;
+    }
 }
 // 判断是否获取索道采集信息
 bool FollowCable::storeCableInfo()
@@ -282,20 +309,6 @@ void FollowCable::setPidGains(double vz_max)
     {
         ROS_ERROR_STREAM("Set pid gains failed");
     }
-}
-void FollowCable::sendStartMeasureCommand()
-{
-    std_msgs::String msg;
-    msg.data = "start";
-    controlSensorSwitchPub_.publish(msg);
-    ROS_INFO_STREAM("Sent start measure command");
-}
-void FollowCable::sendEndMeasureCommand()
-{
-    std_msgs::String msg;
-    msg.data = "end";
-    controlSensorSwitchPub_.publish(msg);
-    ROS_INFO_STREAM("Sent end measure command");
 }
 // 指定无人机到达一系列目标点
 void FollowCable::followCablePoints(std::vector<geometry_msgs::PoseStamped> &waypoints)
@@ -379,7 +392,6 @@ double FollowCable::judgeSensorZ(double sensor_z, double local_z)
     else {
         // 肯定有一个有问题，返回较小的那个
         return sensor_z < local_z ? sensor_z : local_z;
-
     }
 }
 // 下降过程中根据传感器数据动态调整目标点 目标是循环这个函数，直到测量到的z到一个阈值，其中y不超过一个阈值, 
@@ -395,7 +407,7 @@ bool FollowCable::adjustTargetPoint()
             setPidGains(0.2); // 设置速度限幅
             onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, descendHeight.front() * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
             setTargetPoint(targetPointInOnLineState_, 2);
-            ROS_INFO_STREAM("Descend to 0.5Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
+            ROS_INFO_STREAM("Descend to " << descendHeight.front() << "Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
 
             if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
             {

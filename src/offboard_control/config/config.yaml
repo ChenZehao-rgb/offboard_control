@@ -29,3 +29,7 @@ position:
   satbleVelError1: 0.05
 descend:
   height: {first: 0.5, second: 0.2, third: 0.1}
+sensor_install:
+  error_x: 0.0
+  error_y: 0.0
+  error_z: 0.0

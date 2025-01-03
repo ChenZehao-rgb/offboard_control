@@ -5,6 +5,7 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/PositionTarget.h>
+#include <mavros_msgs/CommandLong.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geographic_msgs/GeoPoint.h>
 #include <geographic_msgs/GeoPoseStamped.h>
@@ -46,6 +47,7 @@ private:
     ros::ServiceClient setUavReturnClient1_;
     ros::ServiceClient setUavReturnClient2_;
     ros::ServiceClient setCameraControlClient_;
+    ros::ServiceClient setActuatorControlClient_;
     // 键盘输入
     ros::Subscriber keyboardSub_;
     // 订阅无人机本地位置
@@ -177,12 +179,11 @@ private:
     double judgeSensorZ(double sensor_z, double local_z);
     // 根据当前小飞机线速度判断是否稳定
     bool isUav1Stable(double VelError);
-    void sendStartMeasureCommand();
-    void sendEndMeasureCommand();
     double smallUav_y, smallUav_z;
     std::vector<float> descendHeight;
     void loadDescendHeight(ros::NodeHandle& nh);
     void sendCameraControlCommand(int command);
+    bool setActuatorCommand(bool grasp);
 };
 
 #endif // FOLLOWCABLE_H

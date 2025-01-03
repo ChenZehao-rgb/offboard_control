@@ -24,6 +24,7 @@ public:
         }
         pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
         cameraControlService = nh.advertiseService("offboard/camera_control", &CameraCommandNode::cameraControlCallback, this);
+        getCameraInstallParam(nh);
     }
 
     void spin()
@@ -49,6 +50,7 @@ private:
     ros::Publisher pointPub;
     ros::Subscriber getControlSensorSub;
     ros::ServiceServer cameraControlService;
+    double error_x, error_y, error_z;
     void sendStartMeasureCommand()
     {
         ooCommandStruct cmd;
@@ -86,7 +88,6 @@ private:
         }
         return true;
     }
-
     void receiveResponse()
     {
         // 接收传感器返回的数据
@@ -106,8 +107,8 @@ private:
                 ROS_WARN("Measurement failed: x = %f, z = %f", x, z);
             } else {
                 measure.is_valid = true;
-                measure.x = x;
-                measure.z = z;
+                measure.x = x-error_x;
+                measure.z = z-error_z;
                 ROS_INFO("Measurement success: x = %f, z = %f", x, z);
             }
         } else {
@@ -115,6 +116,16 @@ private:
             ROS_WARN("Received unexpected response from sensor");
         }
         pointPub.publish(measure);
+    }
+    //   sensor_install:
+    //   error_x: 0.1
+    //   error_y: 0.1
+    void getCameraInstallParam(ros::NodeHandle& nh)
+    {
+        // 读取相机安装参数
+        nh.param("sensor_install/error_x", error_x, 0.1);
+        nh.param("sensor_install/error_y", error_y, 0.1);
+        nh.param("sensor_install/error_z", error_z, 0.1);
     }
 };
 
