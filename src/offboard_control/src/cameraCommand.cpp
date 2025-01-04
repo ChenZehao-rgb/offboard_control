@@ -125,10 +125,10 @@ private:
     void getCameraInstallParam(ros::NodeHandle& nh)
     {
         // 读取相机安装参数
-        nh.param("sensor_install/error_x", error_x);
-        nh.param("sensor_install/error_y", error_y);
-        nh.param("sensor_install/error_z", error_z);
-        nh.param("sensor_range/range_z", range_z);
+        nh.getParam("sensor_install/error_x", error_x);
+        nh.getParam("sensor_install/error_y", error_y);
+        nh.getParam("sensor_install/error_z", error_z);
+        nh.getParam("sensor_range/range_z", range_z);
     }
     void cameraDataConvert(float &x, float &z)
     {

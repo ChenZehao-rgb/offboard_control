@@ -16,31 +16,25 @@ public:
         setCameraControlClient_ = nh.serviceClient<offboard_control::cameraControl>("/offboard/camera_control");
         sensor_data_sub_ = nh.subscribe("/transform/sensor_data", 10, &ActuatorCommandManager::getSensorData, this);
         smallUavPoseInBigUavFrameSub_ = nh.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &ActuatorCommandManager::smallUavPoseInBigUavFrameCallback, this);
+        bigUavPoseSub_ = nh.subscribe("/uav2/mavros/local_position/pose", 10, &ActuatorCommandManager::bigUavPoseCallback, this);
     }
 
-    bool setActuatorCommand(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+    bool setActuatorCommand(bool grasp)
     {
         mavros_msgs::CommandLong srv;
         srv.request.broadcast = false;
         srv.request.command = 187; // MAV_CMD_DO_SET_ACTUATOR
-        srv.request.param1 = req.data ? 1 : 0; // Set param1 based on request
-        srv.request.param2 = req.data ? 0.5 : 0.0; // Set param2 based on request
-        srv.request.param3 = req.data ? 0.8 : 0.0; // Set param3 based on request
-
-        if (command_client_.call(srv))
+        srv.request.param2 = grasp ? 0.5 : 0.0;  // AUX2
+        if (command_client_.call(srv) && srv.response.success)
         {
-            res.success = true;
-            res.message = "Command sent successfully";
             ROS_INFO("Command sent successfully");
+            return true;
         }
         else
         {
-            res.success = false;
-            res.message = "Failed to send command";
             ROS_ERROR("Failed to send command");
+            return false;
         }
-
-        return true;
     }
 
     void test_camera()
@@ -59,10 +53,11 @@ public:
             // Collect sensor data for 5 seconds (100 readings at 20Hz)
             for (int i = 0; i < num_readings; ++i) {
                 ros::spinOnce();
-                ros::Rate(20).sleep();
+                ros::Rate(30).sleep();
                 if (sensorDate_.is_valid) {
                     sensor_z_readings.push_back(sensorDate_.z);
                     sensor_y_readings.push_back(sensorDate_.x);
+                    ROS_INFO_STREAM("Sensor data is valid, z: " << sensorDate_.z << ", x: " << sensorDate_.x);
                 }
                 smallUav_z_readings.push_back(smallUavPoseInBigUavFrame_.pose.position.z);
                 smallUav_y_readings.push_back(smallUavPoseInBigUavFrame_.pose.position.y);
@@ -85,18 +80,32 @@ public:
                 ROS_INFO_STREAM("Sensor data is invalid on attempt " << (attempt + 1));
             }
         }
-
-        if (!sensor_valid) {
-            ROS_INFO("Sensor data is invalid after 3 attempts");
+        while(ros::ok())
+        {
+            ros::spinOnce();
+            ros::Rate(30).sleep();
+            ROS_INFO_STREAM("Big uav need to adjust y position..., adjust to: " << sensor_y + smallUav_y);
+            ROS_INFO_STREAM("Now small uav y: " << smallUavPoseInBigUavFrame_.pose.position.y << ", now big uav y: " << bigUavPose_.pose.position.y);
         }
+        // if (sensor_valid) {
+        //     // 根据传感器数据调整y坐标, make sure how to get believe y,
+        //     targetPointInOnLineState_.pose.position.y = sensor_y + smallUav_y;
+        //     setTargetPoint(targetPointInOnLineState_, 2);
+        //     ROS_INFO_STREAM("Adjust y position..., adjust y: " << sensor_y + smallUav_y - uavPoseLocalSub2_.pose.position.y);
+        //     if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
+        //     {
+        //         ROS_INFO_STREAM("Adjust y position success...");
+        //         onLinestate = DESCEND;
+        //     }
+        // }
     }
 
 private:
     ros::ServiceClient command_client_;
     ros::ServiceClient setCameraControlClient_;
     ros::Subscriber sensor_data_sub_;
-    ros::Subscriber smallUavPoseInBigUavFrameSub_;
-    geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_;
+    ros::Subscriber smallUavPoseInBigUavFrameSub_, bigUavPoseSub_;
+    geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavPose_;
     offboard_control::Measure sensorDate_;
     double sensor_z, sensor_y, smallUav_z, smallUav_y, actual_z;
 
@@ -108,6 +117,10 @@ private:
     void smallUavPoseInBigUavFrameCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
     {
         smallUavPoseInBigUavFrame_ = *msg;
+    }
+    void bigUavPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
+    {
+        bigUavPose_ = *msg;
     }
 
     void sendCameraControlCommand(int command)
@@ -143,10 +156,11 @@ int main(int argc, char **argv)
 
     ActuatorCommandManager manager(nh);
 
-    ros::ServiceServer service = nh.advertiseService("set_actuator_command", &ActuatorCommandManager::setActuatorCommand, &manager);
     ROS_INFO("Ready to set actuator command.");
     
-    ros::spin();
+    ros::AsyncSpinner spinner(2);
+    spinner.start();
+    manager.test_camera();
 
     return 0;
 }
