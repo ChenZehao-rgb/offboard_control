@@ -33,3 +33,5 @@ sensor_install:
   error_x: 0.0
   error_y: 0.0
   error_z: 0.0
+sensor_range:
+  range_z: 700.0 # mm

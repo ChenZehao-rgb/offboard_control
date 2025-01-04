@@ -50,7 +50,8 @@ private:
     ros::Publisher pointPub;
     ros::Subscriber getControlSensorSub;
     ros::ServiceServer cameraControlService;
-    double error_x, error_y, error_z;
+    double error_x, error_y, error_z; // mm
+    double range_z; // mm
     void sendStartMeasureCommand()
     {
         ooCommandStruct cmd;
@@ -107,8 +108,9 @@ private:
                 ROS_WARN("Measurement failed: x = %f, z = %f", x, z);
             } else {
                 measure.is_valid = true;
-                measure.x = x-error_x;
-                measure.z = z-error_z;
+                cameraDataConvert(x, z);
+                measure.x = x;
+                measure.z = z;
                 ROS_INFO("Measurement success: x = %f, z = %f", x, z);
             }
         } else {
@@ -123,9 +125,19 @@ private:
     void getCameraInstallParam(ros::NodeHandle& nh)
     {
         // 读取相机安装参数
-        nh.param("sensor_install/error_x", error_x, 0.1);
-        nh.param("sensor_install/error_y", error_y, 0.1);
-        nh.param("sensor_install/error_z", error_z, 0.1);
+        nh.param("sensor_install/error_x", error_x);
+        nh.param("sensor_install/error_y", error_y);
+        nh.param("sensor_install/error_z", error_z);
+        nh.param("sensor_range/range_z", range_z);
+    }
+    void cameraDataConvert(float &x, float &z)
+    {
+        // 传感器数据转换
+        z = range_z + z; // 传感器数据为负值，转换为正值
+        z = z - error_z; // 减去安装误差
+        z = z / 1000; // convert mm to m
+        x = x - error_x; // 减去安装误差
+        x = x / 1000;
     }
 };
 
