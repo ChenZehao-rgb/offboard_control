@@ -172,7 +172,7 @@ bool FollowCable::setActuatorCommand(bool grasp)
     mavros_msgs::CommandLong srv;
     srv.request.broadcast = false;
     srv.request.command = 187; // MAV_CMD_DO_SET_ACTUATOR
-    srv.request.param2 = grasp ? 0.5 : 0.0;  // AUX2
+    srv.request.param1 = grasp ? 1.0 : -1.0;  // AUX1
     if (setActuatorControlClient_.call(srv) && srv.response.success)
     {
         ROS_INFO("Command sent successfully");

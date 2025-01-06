@@ -1,7 +1,9 @@
 #include "cameraCommand.h"
 #include <ros/ros.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/String.h>
+#include <sensor_msgs/Range.h>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include "offboard_control/Measure.h"
@@ -24,6 +26,7 @@ public:
         }
         pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
         cameraControlService = nh.advertiseService("offboard/camera_control", &CameraCommandNode::cameraControlCallback, this);
+        dist_pub = nh.advertise<sensor_msgs::Range>("/uav1/mavros/distance_sensor/laser_1_sub", 10);
         getCameraInstallParam(nh);
     }
 
@@ -50,6 +53,7 @@ private:
     ros::Publisher pointPub;
     ros::Subscriber getControlSensorSub;
     ros::ServiceServer cameraControlService;
+    ros::Publisher dist_pub;
     double error_x, error_y, error_z; // mm
     double range_z; // mm
     void sendStartMeasureCommand()
@@ -109,6 +113,7 @@ private:
             } else {
                 measure.is_valid = true;
                 cameraDataConvert(x, z);
+                publishEncodedData(encodeTwoDoubles(x, z));
                 measure.x = x;
                 measure.z = z;
                 ROS_INFO("Measurement success: x = %f, z = %f", x, z);
@@ -138,7 +143,33 @@ private:
         z = z / 1000; // convert mm to m
         x = x - error_x; // 减去安装误差
         x = x / 1000;
+        // keep down to 2 decimal places
+        x = std::round(x * 100) / 100;
+        z = std::round(z * 100) / 100;
     }
+    float encodeTwoDoubles(double val1, double val2) {
+        // Scale and pack two doubles into 16 bits each
+        int16_t x = static_cast<int16_t>(std::round(val1 * 100.0));
+        int16_t y = static_cast<int16_t>(std::round(val2 * 100.0));
+        uint32_t packed = (static_cast<uint32_t>(x) << 16) | (static_cast<uint16_t>(y));
+
+        float result;
+        std::memcpy(&result, &packed, sizeof(result));
+        return result;
+    }
+    void publishEncodedData(float encoded)
+    {
+        sensor_msgs::Range range_msg;
+        range_msg.header.stamp = ros::Time::now();
+        range_msg.header.frame_id = "lidarlite_laser";
+        range_msg.radiation_type = sensor_msgs::Range::INFRARED;
+        range_msg.field_of_view = 0.5;
+        range_msg.min_range = 0;
+        range_msg.max_range = 10;
+        range_msg.range = encoded;
+        dist_pub.publish(range_msg);
+    }
+
 };
 
 int main(int argc, char** argv)

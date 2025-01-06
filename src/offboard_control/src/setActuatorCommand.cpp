@@ -6,6 +6,7 @@
 #include <numeric>
 #include <vector>
 #include <geometry_msgs/PoseStamped.h>
+#include <sensor_msgs/Range.h>
 
 class ActuatorCommandManager
 {
@@ -17,14 +18,52 @@ public:
         sensor_data_sub_ = nh.subscribe("/transform/sensor_data", 10, &ActuatorCommandManager::getSensorData, this);
         smallUavPoseInBigUavFrameSub_ = nh.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &ActuatorCommandManager::smallUavPoseInBigUavFrameCallback, this);
         bigUavPoseSub_ = nh.subscribe("/uav2/mavros/local_position/pose", 10, &ActuatorCommandManager::bigUavPoseCallback, this);
+        dist_pub = nh.advertise<sensor_msgs::Range>("/uav1/mavros/distance_sensor/laser_1_sub", 10);
+        dist_pub2 = nh.advertise<sensor_msgs::Range>("/uav2/mavros/distance_sensor/laser_1_sub", 10);
+        pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/mavros/landing_target/pose", 10);
+        pose_pub2 = nh.advertise<geometry_msgs::PoseStamped>("/uav2/mavros/landing_target/pose", 10);
+        while (ros::ok())
+        {
+            sendPoseData();
+            sendLidarData();
+            ros::spinOnce();
+            ros::Rate(30).sleep();
+        }
     }
-
+    void sendLidarData()
+    {
+        sensor_msgs::Range range_msg;
+        range_msg.header.stamp = ros::Time::now();
+        range_msg.header.frame_id = "lidarlite_laser";
+        range_msg.radiation_type = sensor_msgs::Range::INFRARED;
+        range_msg.field_of_view = 0.5;
+        range_msg.min_range = 0.2;
+        range_msg.max_range = 10;
+        range_msg.range = 0.5;  
+        dist_pub.publish(range_msg);
+        dist_pub2.publish(range_msg);
+    }
+    void sendPoseData()
+    {
+        geometry_msgs::PoseStamped pose_data;
+        pose_data.header.stamp = ros::Time::now();
+        pose_data.header.frame_id = "landing_target";
+        pose_data.pose.position.x = 8;
+        pose_data.pose.position.y = 10;
+        pose_data.pose.position.z = 10.0;
+        pose_data.pose.orientation.x = 0.0;
+        pose_data.pose.orientation.y = 0.0;
+        pose_data.pose.orientation.z = 0.0;
+        pose_data.pose.orientation.w = 1.0;
+        pose_pub.publish(pose_data);
+        pose_pub2.publish(pose_data);
+    }
     bool setActuatorCommand(bool grasp)
     {
         mavros_msgs::CommandLong srv;
         srv.request.broadcast = false;
         srv.request.command = 187; // MAV_CMD_DO_SET_ACTUATOR
-        srv.request.param2 = grasp ? 0.5 : 0.0;  // AUX2
+        srv.request.param2 = grasp ? 1 : -1;  // AUX2
         if (command_client_.call(srv) && srv.response.success)
         {
             ROS_INFO("Command sent successfully");
@@ -105,6 +144,8 @@ private:
     ros::ServiceClient setCameraControlClient_;
     ros::Subscriber sensor_data_sub_;
     ros::Subscriber smallUavPoseInBigUavFrameSub_, bigUavPoseSub_;
+    ros::Publisher dist_pub, dist_pub2;
+    ros::Publisher pose_pub, pose_pub2;
     geometry_msgs::PoseStamped smallUavPoseInBigUavFrame_, bigUavPose_;
     offboard_control::Measure sensorDate_;
     double sensor_z, sensor_y, smallUav_z, smallUav_y, actual_z;
@@ -154,13 +195,12 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "set_actuator_command");
     ros::NodeHandle nh;
 
-    ActuatorCommandManager manager(nh);
-
     ROS_INFO("Ready to set actuator command.");
     
     ros::AsyncSpinner spinner(2);
     spinner.start();
-    manager.test_camera();
+    // manager.test_camera();
+    ActuatorCommandManager manager(nh);
 
     return 0;
 }
