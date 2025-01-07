@@ -19,16 +19,36 @@ public:
         smallUavPoseInBigUavFrameSub_ = nh.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &ActuatorCommandManager::smallUavPoseInBigUavFrameCallback, this);
         bigUavPoseSub_ = nh.subscribe("/uav2/mavros/local_position/pose", 10, &ActuatorCommandManager::bigUavPoseCallback, this);
         dist_pub = nh.advertise<sensor_msgs::Range>("/uav1/mavros/distance_sensor/laser_1_sub", 10);
-        dist_pub2 = nh.advertise<sensor_msgs::Range>("/uav2/mavros/distance_sensor/laser_1_sub", 10);
-        pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/mavros/landing_target/pose", 10);
-        pose_pub2 = nh.advertise<geometry_msgs::PoseStamped>("/uav2/mavros/landing_target/pose", 10);
         while (ros::ok())
         {
-            sendPoseData();
-            sendLidarData();
+            // sendLidarData();
             ros::spinOnce();
-            ros::Rate(30).sleep();
+            ros::Rate(10).sleep();
+            if(sensorDate_.is_valid)
+            {
+                if(sensorDate_.z - 0.5 < 0.05 && sensorDate_.x < 0.05)
+                {
+                    setActuatorCommand(true);
+                    // delay 30s
+                    for(int i = 0; i < 30; i++)
+                    {
+                        ros::spinOnce();
+                        ros::Rate(1).sleep();
+                        ROS_INFO_STREAM("Grasping : " << i << "s ...");
+                    }
+                    ROS_INFO_STREAM("Grasp success...");
+                    break;
+                }
+            }
         }
+        // holding 10s
+        for(int i = 0; i < 10; i++)
+        {
+            ros::spinOnce();
+            ros::Rate(1).sleep();
+            ROS_INFO_STREAM("Holding : " << i << "s ...");
+        }
+        setActuatorCommand(false);
     }
     void sendLidarData()
     {
@@ -41,22 +61,6 @@ public:
         range_msg.max_range = 1000;
         range_msg.range = 328.66;  
         dist_pub.publish(range_msg);
-        dist_pub2.publish(range_msg);
-    }
-    void sendPoseData()
-    {
-        geometry_msgs::PoseStamped pose_data;
-        pose_data.header.stamp = ros::Time::now();
-        pose_data.header.frame_id = "landing_target";
-        pose_data.pose.position.x = 8;
-        pose_data.pose.position.y = 10;
-        pose_data.pose.position.z = 10.0;
-        pose_data.pose.orientation.x = 0.0;
-        pose_data.pose.orientation.y = 0.0;
-        pose_data.pose.orientation.z = 0.0;
-        pose_data.pose.orientation.w = 1.0;
-        pose_pub.publish(pose_data);
-        pose_pub2.publish(pose_data);
     }
     bool setActuatorCommand(bool grasp)
     {
@@ -75,7 +79,9 @@ public:
             return false;
         }
     }
-
+    void test_grasp()
+    {
+    }
     void test_camera()
     {
         sendCameraControlCommand(1);

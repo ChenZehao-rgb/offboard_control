@@ -3,6 +3,9 @@
 #include <iomanip>
 #include <string>
 
+// test encode and decode functions
+// g++ -o test_encode_decode test_encode_decode.cpp
+// ./test_encode_decode
 float encode(float num1, float num2) {
     // 获取符号
     int sign;

@@ -113,7 +113,6 @@ private:
             } else {
                 measure.is_valid = true;
                 cameraDataConvert(x, z);
-                publishEncodedData(encodeTwoDoubles(x, z));
                 measure.x = x;
                 measure.z = z;
                 ROS_INFO("Measurement success: x = %f, z = %f", x, z);
@@ -123,6 +122,7 @@ private:
             ROS_WARN("Received unexpected response from sensor");
         }
         pointPub.publish(measure);
+        publishEncodedData(encodeTwoDoubles(measure.x, measure.z, measure.is_valid));
     }
     //   sensor_install:
     //   error_x: 0.1
@@ -147,17 +147,22 @@ private:
         x = std::round(x * 100) / 100;
         z = std::round(z * 100) / 100;
     }
-    float encodeTwoDoubles(float num1, float num2) {
+    float encodeTwoDoubles(float num1, float num2, bool is_valid) {
         // 获取符号
         int sign;
-        if (num1 >= 0 && num2 >= 0) {
-            sign = 1;
-        } else if (num1 >= 0 && num2 < 0) {
-            sign = 2;
-        } else if (num1 < 0 && num2 >= 0) {
-            sign = 3;
-        } else {
-            sign = 4;
+        if(is_valid == false) {
+            sign = 5;
+        } else
+        {
+            if (num1 >= 0 && num2 >= 0) {
+                sign = 1;
+            } else if (num1 >= 0 && num2 < 0) {
+                sign = 2;
+            } else if (num1 < 0 && num2 >= 0) {
+                sign = 3;
+            } else {
+                sign = 4;
+            }
         }
 
         // 获取绝对值并去掉小数点
