@@ -1,51 +1,77 @@
 #include <iostream>
-#include <cassert>
-#include <cstring>
 #include <cmath>
+#include <iomanip>
+#include <string>
 
-float encodeTwoDoubles(double val1, double val2);
-void decodeTwoDoubles(float encoded, double& val1, double& val2);
+float encode(float num1, float num2) {
+    // 获取符号
+    int sign;
+    if (num1 >= 0 && num2 >= 0) {
+        sign = 1;
+    } else if (num1 >= 0 && num2 < 0) {
+        sign = 2;
+    } else if (num1 < 0 && num2 >= 0) {
+        sign = 3;
+    } else {
+        sign = 4;
+    }
+
+    // 获取绝对值并去掉小数点
+    int abs_num1 = static_cast<int>(std::round(std::abs(num1) * 100));
+    int abs_num2 = static_cast<int>(std::round(std::abs(num2) * 100));
+
+    // 组合结果
+    std::string combined = std::to_string(sign) + 
+                           std::to_string(abs_num1) + "." + 
+                           std::to_string(abs_num2);
+
+    return std::stof(combined);
+}
+
+void decode(float combined, float& num1, float& num2) {
+    // 将float转换为字符串
+    std::string combined_str = std::to_string(combined);
+
+    // 提取符号
+    int sign = combined_str[0] - '0';
+
+    // 提取数值部分
+    size_t dot_pos = combined_str.find('.');
+    int abs_num1 = std::stoi(combined_str.substr(1, dot_pos - 1));
+    int abs_num2 = std::stoi(combined_str.substr(dot_pos + 1, 2)); // 只取两位小数
+
+    // 计算浮点数
+    switch (sign) {
+        case 1:
+            num1 = abs_num1 / 100.0f;
+            num2 = abs_num2 / 100.0f;
+            break;
+        case 2:
+            num1 = abs_num1 / 100.0f;
+            num2 = -abs_num2 / 100.0f;
+            break;
+        case 3:
+            num1 = -abs_num1 / 100.0f;
+            num2 = abs_num2 / 100.0f;
+            break;
+        case 4:
+            num1 = -abs_num1 / 100.0f;
+            num2 = -abs_num2 / 100.0f;
+            break;
+    }
+}
 
 int main() {
-    double original_val1 = 0.23;
-    double original_val2 = -1.67;
+    float num1 = 0.23f;
+    float num2 = -0.88f;
 
-    // Encode
-    float encoded = encodeTwoDoubles(original_val1, original_val2);
-    std::cout << "Encoded value: " << encoded << std::endl;
+    float encoded = encode(num1, num2);
+    std::cout << "Encoded: " << encoded << std::endl;
 
-    // Decode
-    double decoded_val1, decoded_val2;
-    decodeTwoDoubles(encoded, decoded_val1, decoded_val2);
-
-    std::cout << "Decoded values: " << decoded_val1 << ", " << decoded_val2 << std::endl;
-
-    // Verify decoded values are close to original values
-    assert(std::abs(original_val1 - decoded_val1) < 0.01);
-    assert(std::abs(original_val2 - decoded_val2) < 0.01);
-
-    std::cout << "Test passed!" << std::endl;
+    float decoded_num1, decoded_num2;
+    decode(encoded, decoded_num1, decoded_num2);
+    std::cout << "Decoded num1: " << std::fixed << std::setprecision(2) << decoded_num1 << std::endl;
+    std::cout << "Decoded num2: " << std::fixed << std::setprecision(2) << decoded_num2 << std::endl;
 
     return 0;
-}
-
-float encodeTwoDoubles(double val1, double val2) {
-    // Scale and pack two doubles into 16 bits each
-    int16_t x = static_cast<int16_t>(std::round(val1 * 100.0));
-    int16_t y = static_cast<int16_t>(std::round(val2 * 100.0));
-    uint32_t packed = (static_cast<uint32_t>(x) << 16) | (static_cast<uint16_t>(y));
-
-    float result;
-    std::memcpy(&result, &packed, sizeof(result));
-    return result;
-}
-
-void decodeTwoDoubles(float encoded, double& val1, double& val2) {
-    uint32_t packed;
-    std::memcpy(&packed, &encoded, sizeof(packed));
-
-    int16_t x = packed >> 16;
-    int16_t y = packed & 0xFFFF;
-    val1 = static_cast<double>(x) / 100.0;
-    val2 = static_cast<double>(y) / 100.0;
 }

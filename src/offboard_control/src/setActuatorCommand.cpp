@@ -36,10 +36,10 @@ public:
         range_msg.header.stamp = ros::Time::now();
         range_msg.header.frame_id = "lidarlite_laser";
         range_msg.radiation_type = sensor_msgs::Range::INFRARED;
-        range_msg.field_of_view = 0.5;
-        range_msg.min_range = 0.2;
-        range_msg.max_range = 10;
-        range_msg.range = 0.5;  
+        range_msg.field_of_view = 0.001;
+        range_msg.min_range = 0;
+        range_msg.max_range = 1000;
+        range_msg.range = 328.66;  
         dist_pub.publish(range_msg);
         dist_pub2.publish(range_msg);
     }

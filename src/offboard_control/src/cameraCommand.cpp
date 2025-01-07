@@ -147,15 +147,29 @@ private:
         x = std::round(x * 100) / 100;
         z = std::round(z * 100) / 100;
     }
-    float encodeTwoDoubles(double val1, double val2) {
-        // Scale and pack two doubles into 16 bits each
-        int16_t x = static_cast<int16_t>(std::round(val1 * 100.0));
-        int16_t y = static_cast<int16_t>(std::round(val2 * 100.0));
-        uint32_t packed = (static_cast<uint32_t>(x) << 16) | (static_cast<uint16_t>(y));
+    float encodeTwoDoubles(float num1, float num2) {
+        // 获取符号
+        int sign;
+        if (num1 >= 0 && num2 >= 0) {
+            sign = 1;
+        } else if (num1 >= 0 && num2 < 0) {
+            sign = 2;
+        } else if (num1 < 0 && num2 >= 0) {
+            sign = 3;
+        } else {
+            sign = 4;
+        }
 
-        float result;
-        std::memcpy(&result, &packed, sizeof(result));
-        return result;
+        // 获取绝对值并去掉小数点
+        int abs_num1 = static_cast<int>(std::round(std::abs(num1) * 100));
+        int abs_num2 = static_cast<int>(std::round(std::abs(num2) * 100));
+
+        // 组合结果
+        std::string combined = std::to_string(sign) + 
+                            std::to_string(abs_num1) + "." + 
+                            std::to_string(abs_num2);
+
+        return std::stof(combined);
     }
     void publishEncodedData(float encoded)
     {
@@ -163,9 +177,9 @@ private:
         range_msg.header.stamp = ros::Time::now();
         range_msg.header.frame_id = "lidarlite_laser";
         range_msg.radiation_type = sensor_msgs::Range::INFRARED;
-        range_msg.field_of_view = 0.5;
+        range_msg.field_of_view = 0.001;
         range_msg.min_range = 0;
-        range_msg.max_range = 10;
+        range_msg.max_range = 1000;
         range_msg.range = encoded;
         dist_pub.publish(range_msg);
     }
