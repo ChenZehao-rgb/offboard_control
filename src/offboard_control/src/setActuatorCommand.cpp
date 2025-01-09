@@ -24,22 +24,23 @@ public:
             // sendLidarData();
             ros::spinOnce();
             ros::Rate(10).sleep();
-            if(sensorDate_.is_valid)
-            {
-                if(sensorDate_.z - 0.5 < 0.05 && sensorDate_.x < 0.05)
-                {
-                    setActuatorCommand(true);
-                    // delay 30s
-                    for(int i = 0; i < 30; i++)
-                    {
-                        ros::spinOnce();
-                        ros::Rate(1).sleep();
-                        ROS_INFO_STREAM("Grasping : " << i << "s ...");
-                    }
-                    ROS_INFO_STREAM("Grasp success...");
-                    break;
-                }
-            }
+            // if(sensorDate_.is_valid)
+            // {
+            //     if(sensorDate_.z - 0.5 < 0.05 && sensorDate_.x < 0.05)
+            //     {
+            //         setActuatorCommand(true);
+            //         // delay 30s
+            //         for(int i = 0; i < 30; i++)
+            //         {
+            //             ros::spinOnce();
+            //             ros::Rate(1).sleep();
+            //             ROS_INFO_STREAM("Grasping : " << i << "s ...");
+            //         }
+            //         ROS_INFO_STREAM("Grasp success...");
+            //         break;
+            //     }
+            // }
+            sendLidarData();
         }
         // holding 10s
         for(int i = 0; i < 10; i++)

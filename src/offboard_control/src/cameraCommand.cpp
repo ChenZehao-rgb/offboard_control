@@ -24,7 +24,7 @@ public:
             ROS_ERROR("Failed to initialize UDP socket: %s", e.what());
             ros::shutdown();
         }
-        pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
+        // pointPub = nh.advertise<offboard_control::Measure>("/transform/sensor_data", 10);
         cameraControlService = nh.advertiseService("offboard/camera_control", &CameraCommandNode::cameraControlCallback, this);
         dist_pub = nh.advertise<sensor_msgs::Range>("/uav1/mavros/distance_sensor/laser_1_sub", 10);
         getCameraInstallParam(nh);

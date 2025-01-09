@@ -10,7 +10,7 @@ takeoff_points:
   uav2:
     position_x: 0.0
     position_y: 0.0
-    position_z: 2.0
+    position_z: 1.0
     orientation_x: 0.0
     orientation_y: 0.0
     orientation_z: 0.0
@@ -34,4 +34,4 @@ sensor_install:
   error_y: 0.0
   error_z: 0.0
 sensor_range:
-  range_z: 700.0 # mm
+  range_z: 400.0 # mm
