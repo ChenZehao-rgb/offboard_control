@@ -75,7 +75,7 @@ private:
     ros::Timer controlLoop_, statusPubTimer_;
     /******************** 使用变量定义 **********************/
     // 状态机控制频率
-    #define controlRate 5.0
+    #define controlRate 20.0
     #define controlPeriod (1.0 / controlRate)
     // 状态机控制状态
     offboard_control::StateControl stateControl_, previousStateControl_, nextStateControl_;

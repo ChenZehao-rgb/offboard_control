@@ -69,6 +69,8 @@ FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_
     setUavTakeoffReady(1);
     // 延时5s,等待无人机起飞
     ros::Duration(5).sleep();
+
+    // testPoseTrans();
 }
 
 FollowCable::~FollowCable()
@@ -78,25 +80,28 @@ FollowCable::~FollowCable()
 // 测试函数
 void FollowCable::testPoseTrans()
 {
-    setOffboardCtlType(GOTO_SETPOINT_RELATIVE); // 设置相对位置控制模式
     // 延时10s,等待无人机起飞
     ros::Duration(10).sleep();
     // 测试全局坐标转换为本地坐标
     geometry_msgs::PoseStamped testPose1, testPose2;
-    testPose1.pose.position.x = 1.0;
-    testPose1.pose.position.y = 1.0;
-    testPose1.pose.position.z = 1.0;
+    testPose1.pose.position.x = 0.0;
+    testPose1.pose.position.y = 0.0;
+    testPose1.pose.position.z = 5.0;
     testPose1.pose.orientation.x = 0.0;
     testPose1.pose.orientation.y = 0.0;
     testPose1.pose.orientation.z = 0.0;
     testPose1.pose.orientation.w = 1.0;
     testPose2 = testPose1;
-    testPose2.pose.position.x += -2;
-    testPose2.pose.position.y += -2;
-    setTargetPoint(testPose1,1);
     setTargetPoint(testPose2,2);
-    ROS_INFO_STREAM("testPoseTrans: " << testPose1);
-    ROS_INFO_STREAM("testPoseTrans: " << testPose2);
+    ros::Duration(10).sleep();
+    testPose2.pose.position.z -= 0.5;
+    setTargetPoint(testPose2,2);
+    ros::Duration(10).sleep();
+    testPose2.pose.position.z -= 0.3;
+    setTargetPoint(testPose2,2);
+    ros::Duration(10).sleep();
+    testPose2.pose.position.z -= 0.1;
+    setTargetPoint(testPose2,2);
     while(1)
     {
         ros::spinOnce();
@@ -475,6 +480,8 @@ bool FollowCable::adjustTargetPoint()
                     break;
                 } else {
                     ROS_INFO_STREAM("Sensor data is invalid on attempt " << (attempt + 1));
+                    onLinestate = DESCEND;
+                    break;
                 }
             }
 
@@ -574,7 +581,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // 设置为速度控制状态，使用位置差得到期望速度
             if(!isSendStateChange_)
             {
-                setOffboardCtlType(GOTO_SETPOINT_CLOSED_LOOP);
+                // setOffboardCtlType(GOTO_SETPOINT_CLOSED_LOOP);
                 isSendStateChange_ = true;
             }
             ROS_INFO_STREAM("Onlineing, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
@@ -628,7 +635,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
             // while(1);
             if(!isSendStateChange_)
             {
-                setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
+                // setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
                 isSendStateChange_ = true;
             }
             ROS_INFO("Following cable...");
