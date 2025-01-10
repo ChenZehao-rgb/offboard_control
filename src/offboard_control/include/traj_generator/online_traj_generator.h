@@ -35,8 +35,7 @@ public:
     ros::Publisher ruckigCommandPub_;
     ros::Publisher ruckigTargPub_;
 
-    ros::ServiceServer genTarjSer1_;
-    ros::ServiceServer genTarjSer2_;
+    ros::ServiceServer genTarjSer_;
 };
 
 #endif

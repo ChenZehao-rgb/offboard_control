@@ -75,8 +75,9 @@ private:
     ros::Timer controlLoop_, statusPubTimer_;
     /******************** 使用变量定义 **********************/
     // 状态机控制频率
-    #define controlRate 20.0
+    #define controlRate 5.0
     #define controlPeriod (1.0 / controlRate)
+    int pointCount_ = controlRate;// 目标点计数
     // 状态机控制状态
     offboard_control::StateControl stateControl_, previousStateControl_, nextStateControl_;
     std::string preStateControlStr_;
@@ -184,6 +185,10 @@ private:
     void loadDescendHeight(ros::NodeHandle& nh);
     void sendCameraControlCommand(int command);
     bool setActuatorCommand(bool grasp);
+    void generateOnlinePoints(geometry_msgs::PoseStamped& startPoint, geometry_msgs::PoseStamped& endPoint, double step, double high);
+    geometry_msgs::PoseStamped startOnlinePoint;
+    bool isGetDescendHeight;
+    double high;
 };
 
 #endif // FOLLOWCABLE_H

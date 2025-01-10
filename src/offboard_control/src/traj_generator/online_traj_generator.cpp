@@ -10,6 +10,8 @@ void quat2RPY(const geometry_msgs::Quaternion &quat, double &roll,
 
 OnlineTrajGenerator::OnlineTrajGenerator(const ros::NodeHandle &nh)
   : TrajGenerator(), nh_{nh} {
+    genTarjSer_ = nh_.advertiseService("online_traj_generator/gen_traj_online",
+                                        &OnlineTrajGenerator::genTrajOnline, this);
     ruckigStatePub_ = nh_.advertise<sensor_msgs::JointState>(
                       "/online_traj_generator/ruckig_state", 10);
     ruckigCommandPub_ = nh_.advertise<sensor_msgs::JointState>(
@@ -108,11 +110,7 @@ int main(int argc, char *argv[]) {
   ros::AsyncSpinner spinner(2);
   spinner.start();
   // 使用类分别创建两个独立的对象
-  OnlineTrajGenerator onlineTrajGen1(nh), onlineTrajGen2(nh);
-  onlineTrajGen1.genTarjSer1_ = nh.advertiseService("uav1/online_traj_generator/gen_traj_online",
-                                        &OnlineTrajGenerator::genTrajOnline, &onlineTrajGen1);
-  onlineTrajGen2.genTarjSer2_ = nh.advertiseService("uav2/online_traj_generator/gen_traj_online",
-                                        &OnlineTrajGenerator::genTrajOnline, &onlineTrajGen2);
+  OnlineTrajGenerator onlineTrajGen(nh);
   while (ros::ok()) {
     ros::Duration(1.0).sleep();
   }

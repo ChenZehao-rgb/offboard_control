@@ -20,8 +20,8 @@ const double Ts = 0.05;
 const double POS_ERROR_TOLERATE = 0.05;
 const double YAW_ERROR_TOLERATE = 0.05;
 
-const std::vector<double> VEL_LIMIT = {10.0, 10.0, 0.3, YAW_VEL_LIMIT};
-const std::vector<double> ACC_LIMIT = {1.0, 1.0, 0.2, YAW_ACC_LIMIT};
+const std::vector<double> VEL_LIMIT = {10.0, 10.0, 0.5, YAW_VEL_LIMIT};
+const std::vector<double> ACC_LIMIT = {1.0, 1.0, 0.3, YAW_ACC_LIMIT};
 const std::vector<double> JERK_LIMIT = {0.7, 0.7, 0.1, YAW_JERK_LIMIT};
 
 class TrajGenerator {

@@ -68,7 +68,7 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     
     // 轨迹生成器客户端
     trajGeneratorClient1_ = nh_.serviceClient<offboard_control::GenTrajOnline>("uav1/online_traj_generator/gen_traj_online");
-    trajGeneratorClient2_ = nh_.serviceClient<offboard_control::GenTrajOnline>("uav2/online_traj_generator/gen_traj_online");
+    trajGeneratorClient2_ = nh_.serviceClient<offboard_control::GenTrajOnline>("online_traj_generator/gen_traj_online");
     // 状态切换定时器
     stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
 
@@ -414,7 +414,7 @@ void OffboardCtl::stateSwitchTimerCallback(const ros::TimerEvent& event)
             // uavTargetPoint1_.pose.position.z -= 1.0;
             // setpointRawLocalPub1_.publish(positionCtl(uav1PoseInUav2FrameToUav1Frame(uavTargetPoint1_), uavPoseLocal1_)); //位置环pid控制
             // uavTargetPoint1_ = uav1PoseInUav2FrameToUav1Frame(uavTargetPoint1_);
-            getTargetPointRawLocal1(); //获取平滑过渡点
+            // getTargetPointRawLocal1(); //获取平滑过渡点
             uavTargetPointRaw1_.header.stamp = ros::Time::now(); //设置时间戳
             uavTargetPointRaw1_.coordinate_frame =
             mavros_msgs::PositionTarget::FRAME_LOCAL_NED;

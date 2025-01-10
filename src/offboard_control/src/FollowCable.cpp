@@ -7,7 +7,7 @@
 #define GOTO_SETPOINT_CLOSED_LOOP 1
 #define GOTO_SETPOINT_SMOOTH 2
 #define GOTO_SETPOINT_RELATIVE 3
-FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_(false), isSendOnlinePoint_(false), isGetCommand_(false), isGetCrossPoint_(false)
+FollowCable::FollowCable(const ros::NodeHandle& nh) : nh_(nh), isGetOnlinePoint_(false), isSendOnlinePoint_(false), isGetCommand_(false), isGetCrossPoint_(false), isGetDescendHeight(false)
 {
     // 设置目标点客户端
     setPointClient_ = nh_.serviceClient<offboard_control::SetTargetPoint>("/offboard_control/set_target_point");
@@ -94,14 +94,12 @@ void FollowCable::testPoseTrans()
     testPose2 = testPose1;
     setTargetPoint(testPose2,2);
     ros::Duration(10).sleep();
-    testPose2.pose.position.z -= 0.5;
-    setTargetPoint(testPose2,2);
-    ros::Duration(10).sleep();
-    testPose2.pose.position.z -= 0.3;
-    setTargetPoint(testPose2,2);
-    ros::Duration(10).sleep();
-    testPose2.pose.position.z -= 0.1;
-    setTargetPoint(testPose2,2);
+    for(int i=0;i<10;i++)
+    {
+        testPose2.pose.position.z -= 0.1*i;
+        setTargetPoint(testPose2,2);
+        ros::Duration(1).sleep();
+    }
     while(1)
     {
         ros::spinOnce();
@@ -399,6 +397,14 @@ double FollowCable::judgeSensorZ(double sensor_z, double local_z)
         return sensor_z < local_z ? sensor_z : local_z;
     }
 }
+// generate the onlinepoints
+void FollowCable::generateOnlinePoints(geometry_msgs::PoseStamped& startPoint, geometry_msgs::PoseStamped& endPoint, double step, double high)
+{
+    startPoint.pose.position.z -= high * step;
+    setTargetPoint(startPoint, 2);
+    pointCount_--;
+}
+
 // 下降过程中根据传感器数据动态调整目标点 目标是循环这个函数，直到测量到的z到一个阈值，其中y不超过一个阈值, 
 // y = bigUavTargetPose_.pose.position.y - uavPoseLocalSub2_.pose.position.y
 bool FollowCable::adjustTargetPoint()
@@ -411,9 +417,17 @@ bool FollowCable::adjustTargetPoint()
         {
             setPidGains(0.2); // 设置速度限幅
             onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, targetPointInOnLineState_, descendHeight.front() * onLinePoint_Z); // 设置targetPoint的x和z，先让下降到索道上方0.5Z处
-            setTargetPoint(targetPointInOnLineState_, 2);
-            ROS_INFO_STREAM("Descend to " << descendHeight.front() << "Z..., high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
-
+            if(pointCount_ > 0)
+            {
+                if(!isGetDescendHeight)
+                {
+                    high = startOnlinePoint.pose.position.z - targetPointInOnLineState_.pose.position.z;
+                    isGetDescendHeight = true;
+                }
+                generateOnlinePoints(startOnlinePoint, targetPointInOnLineState_, controlPeriod, high);
+            }
+            // while(1);
+            ROS_INFO_STREAM("Descend to " << descendHeight.front() << "Z..., high is: "<< startOnlinePoint.pose.position.z);
             if (isUavArrived(targetPointInOnLineState_, 2, targetPointError1))
             {
                 // 等待小无人机静止，即判断速度是否小于一个阈值
@@ -435,6 +449,9 @@ bool FollowCable::adjustTargetPoint()
                         loadDescendHeight(nh_);
                         return true;
                     }
+                    startOnlinePoint = targetPointInOnLineState_;
+                    pointCount_ = controlRate;
+                    isGetDescendHeight = false;
                     onLinestate = CHECK_SENSOR;
                 }
                 ROS_INFO_STREAM("Arrived " << descendHeight.front() << "Z, now high is: "<< uavPoseLocalSub1_.pose.position.z - cablePoints_.front().pose.position.z);
@@ -533,7 +550,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
     if(previousStateControl_.state_ctrl_type != stateControl_.state_ctrl_type)
     {
         ROS_INFO_STREAM( preStateControlStr_ << " is down, waiting for command...");
-        waitForCommand();
+        // waitForCommand();
         previousStateControl_.state_ctrl_type = stateControl_.state_ctrl_type; // 保存上一个状态
     }
     // 运动控制状态机逻辑
@@ -543,12 +560,12 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         case offboard_control::StateControl::ARRIVE_ONLINE_POINT:
         {
             ROS_INFO("Go to online point...");
-            // testPoseTrans(); // 测试坐标转换
             // 获取上线坐标
             if(!isGetOnlinePoint_)
             {
                 // 越过节点或者初始的上线点
                 onLineCablePoint2UavPoint(cablePoints_.front(), onLinePoint1_, onLinePoint2_, onLinePoint_Z);
+                startOnlinePoint = onLinePoint2_;
                 isGetOnlinePoint_ = true;
             }
             // 发送大飞机上线点
@@ -632,7 +649,7 @@ void FollowCable::controlLoop(const ros::TimerEvent&)
         }
         case offboard_control::StateControl::FOLLOW_CABLE:
         {
-            // while(1);
+            while(1);
             if(!isSendStateChange_)
             {
                 // setOffboardCtlType(GOTO_SETPOINT_SMOOTH);
