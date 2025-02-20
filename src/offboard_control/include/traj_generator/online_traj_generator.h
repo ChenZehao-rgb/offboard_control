@@ -5,6 +5,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <mavros_msgs/PositionTarget.h>
+#include <sensor_msgs/Imu.h>
 #include <ros/ros.h>
 #include <tf/tf.h>
 
@@ -21,6 +22,7 @@ public:
     void updateTrajGeneratorState();
     void updateTrajGeneratorTarg();
     void updateSetPointRaw();
+    double computeYawAngularAcceleration(double current_yaw_rate);
 
     bool genTrajOnline(offboard_control::GenTrajOnline::Request &req,
                        offboard_control::GenTrajOnline::Response &res);
@@ -30,6 +32,7 @@ public:
     geometry_msgs::PoseStamped targPointLocal_;
     geometry_msgs::PoseStamped uavPoseLocal_;
     geometry_msgs::TwistStamped uavTwistLocal_;
+    sensor_msgs::Imu uavImuData_;
 
     ros::Publisher ruckigStatePub_;
     ros::Publisher ruckigCommandPub_;

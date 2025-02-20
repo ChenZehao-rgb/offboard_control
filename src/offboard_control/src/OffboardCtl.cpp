@@ -30,10 +30,8 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     // 订阅无人机本地速度
     uavTwistLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback1, this);
     uavTwistLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback2, this);
-    // 订阅无人机本地加速度
-    uavAccLocalSub1_ = nh_.subscribe("uav1/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback1, this);
-    uavAccLocalSub2_ = nh_.subscribe("uav2/mavros/Local_position/accel", 10, &OffboardCtl::uavAccLocalCallback2, this);
-
+    // sub uav2 imu data
+    imuSub_ = nh_.subscribe("uav2/mavros/imu/data", 10, &OffboardCtl::imuDataCallback, this);
     // 发布无人机本地位置
     setpointLocalPub1_ = nh_.advertise<geometry_msgs::PoseStamped>("uav1/mavros/setpoint_position/local", 10);
     setpointLocalPub2_ = nh_.advertise<geometry_msgs::PoseStamped>("uav2/mavros/setpoint_position/local", 10);
@@ -67,7 +65,6 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     setModeClient2_ = nh_.serviceClient<mavros_msgs::SetMode>("uav2/mavros/set_mode");
     
     // 轨迹生成器客户端
-    trajGeneratorClient1_ = nh_.serviceClient<offboard_control::GenTrajOnline>("uav1/online_traj_generator/gen_traj_online");
     trajGeneratorClient2_ = nh_.serviceClient<offboard_control::GenTrajOnline>("online_traj_generator/gen_traj_online");
     // 状态切换定时器
     stateSwitchTimer_ = nh_.createTimer(ros::Duration(controlPeriod), &OffboardCtl::stateSwitchTimerCallback, this);
@@ -154,45 +151,21 @@ bool OffboardCtl::setTargetPoint(offboard_control::SetTargetPoint::Request& req,
     return true;
 }
 // 获取平滑过渡点
-bool OffboardCtl::getTargetPointRawLocal1()
-{
-    offboard_control::GenTrajOnline srv;
-    srv.request.targPoint = uavTargetPoint1_;
-    srv.request.pose = uavPoseLocal1_;
-    srv.request.twist = uavTwistLocal1_;
-    if(isUpdateTargetPoint_)
-    {
-        srv.request.isUpdateState = true;
-        isUpdateTargetPoint_ = false;
-    }
-    else
-    {
-        srv.request.isUpdateState = false;
-    }
-    if(!trajGeneratorClient1_.call(srv))
-    {
-        ROS_ERROR_STREAM("getTargetPointRawLocal: trajGeneratorClient_ failed");
-        return false;
-    }
-    // 获取平滑过渡点
-    uavTargetPointRaw1_ = srv.response.setPointRaw;
-    return true;
-}
 bool OffboardCtl::getTargetPointRawLocal2()
 {
     offboard_control::GenTrajOnline srv;
     srv.request.targPoint = uavTargetPoint2_;
     srv.request.pose = uavPoseLocal2_;
     srv.request.twist = uavTwistLocal2_;
-    // srv.request.
+    srv.request.imuData = uavImuData_;
     if(isUpdateTargetPoint_)
     {
-        srv.request.isUpdateState = true;
+        srv.request.isUpdateTarget = true;
         isUpdateTargetPoint_ = false;
     }
     else
     {
-        srv.request.isUpdateState = false;
+        srv.request.isUpdateTarget = false;
     }
     if(!trajGeneratorClient2_.call(srv))
     {
@@ -307,17 +280,11 @@ void OffboardCtl::uavTwistLocalCallback2(const geometry_msgs::TwistStamped::Cons
     // 打印无人机本地速度
     // ROS_INFO_STREAM("uavTwistLocalCallback: " << uavTwistLocal_);
 }
-void OffboardCtl::uavAccLocalCallback1(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg)
+void OffboardCtl::imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
-    uavAccLocal1_ = *msg;
-    // 打印无人机本地加速度
-    // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
-}
-void OffboardCtl::uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg)
-{
-    uavAccLocal2_ = *msg;
-    // 打印无人机本地加速度
-    // ROS_INFO_STREAM("uavAccLocalCallback: " << uavAccLocal_);
+    uavImuData_ = *msg;
+    // 打印无人机姿态
+    // ROS_INFO_STREAM("imuDataCallback: " << imuData_);
 }
 // 小无人机在大无人机坐标系下的目标位置->小无人机在自己local坐标系下的目标位置
 geometry_msgs::PoseStamped OffboardCtl::uav1PoseInUav2FrameToUav1Frame(const geometry_msgs::PoseStamped& smallUavPoseInBigUavFrame)

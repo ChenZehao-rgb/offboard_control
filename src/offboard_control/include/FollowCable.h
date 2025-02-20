@@ -185,10 +185,13 @@ private:
     void loadDescendHeight(ros::NodeHandle& nh);
     void sendCameraControlCommand(int command);
     bool setActuatorCommand(bool grasp);
-    void generateOnlinePoints(geometry_msgs::PoseStamped& startPoint, geometry_msgs::PoseStamped& endPoint, double step, double high);
+    void generateOnlinePoints(geometry_msgs::PoseStamped& startPoint, geometry_msgs::PoseStamped& endPoint, double time);
     geometry_msgs::PoseStamped startOnlinePoint;
     bool isGetDescendHeight;
-    double high;
+    geometry_msgs::PoseStamped generateTargetDistance;
+    int uav1StableCnt = 0;
+    const int stableThreshold = 10;
+
 };
 
 #endif // FOLLOWCABLE_H

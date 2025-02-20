@@ -1,7 +1,8 @@
 geometry_msgs/PoseStamped targPoint
 geometry_msgs/PoseStamped pose
 geometry_msgs/TwistStamped twist
-bool isUpdateState
+sensor_msgs/Imu imuData
+bool isUpdateTarget
 ---
 mavros_msgs/PositionTarget setPointRaw
 bool success

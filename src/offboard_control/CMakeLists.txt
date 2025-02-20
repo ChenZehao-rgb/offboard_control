@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   control_toolbox
   tf
   eigen_conversions
+  sensor_msgs
 
 )
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -88,6 +89,7 @@ generate_messages(
   std_msgs
   geometry_msgs
   mavros_msgs
+  sensor_msgs
 )
 
 ################################################

@@ -20,39 +20,39 @@ OnlineTrajGenerator::OnlineTrajGenerator(const ros::NodeHandle &nh)
                         "/online_traj_generator/ruckig_targ", 10);
   };
 
-  OnlineTrajGenerator::~OnlineTrajGenerator(){};
+OnlineTrajGenerator::~OnlineTrajGenerator(){};
 
-  void OnlineTrajGenerator::updateTrajGeneratorState(){
-    state_.position[0] = uavPoseLocal_.pose.position.x;
-    state_.position[1] = uavPoseLocal_.pose.position.y;
-    state_.position[2] = uavPoseLocal_.pose.position.z;
-    double roll, pitch, yaw;
-    quat2RPY(uavPoseLocal_.pose.orientation, roll, pitch, yaw);
-    state_.position[3] = yaw;
-  }
+void OnlineTrajGenerator::updateTrajGeneratorState(){
+  state_.position[0] = uavPoseLocal_.pose.position.x;
+  state_.position[1] = uavPoseLocal_.pose.position.y;
+  state_.position[2] = uavPoseLocal_.pose.position.z;
+  double roll, pitch, yaw;
+  quat2RPY(uavPoseLocal_.pose.orientation, roll, pitch, yaw);
+  state_.position[3] = yaw;
+
+  state_.velocity[0] = uavTwistLocal_.twist.linear.x;
+  state_.velocity[1] = uavTwistLocal_.twist.linear.y;
+  state_.velocity[2] = uavTwistLocal_.twist.linear.z;
+  state_.velocity[3] = uavImuData_.angular_velocity.z;
+
+  state_.effort[0] = uavImuData_.linear_acceleration.x;
+  state_.effort[1] = uavImuData_.linear_acceleration.y;
+  state_.effort[2] = uavImuData_.linear_acceleration.z - 9.81;
+}
 
 void OnlineTrajGenerator::updateTrajGeneratorTarg(){
   targ_.position[0] = targPointLocal_.pose.position.x;
   targ_.position[1] = targPointLocal_.pose.position.y;
   targ_.position[2] = targPointLocal_.pose.position.z;
-  double roll, pitch, yaw;
-  quat2RPY(targPointLocal_.pose.orientation, roll, pitch, yaw);
-  targ_.position[3] = yaw;
+  targ_.position[3] = M_PI_2;
+  // velocity and acceleration are set to zero
 }
 
 void OnlineTrajGenerator::updateSetPointRaw(){
   setPointRawLocal_.position.x = command_.position[0];
   setPointRawLocal_.position.y = command_.position[1];
-
-  // if(fabs(targ_.position[2] - command_.position[2]) < 0.10) {
-  //   command_.position[2] = targ_.position[2];
-  //   command_.velocity[2] = 0.0;
-  //   command_.effort[2] = 0.0;
-  // }
   setPointRawLocal_.position.z = command_.position[2];
-
-  // setPointRawLocal_.yaw = command_.position[3];
-  setPointRawLocal_.yaw = targ_.position[3];
+  setPointRawLocal_.yaw = command_.position[3];
 
 
   setPointRawLocal_.velocity.x = command_.velocity[0];
@@ -73,19 +73,10 @@ bool OnlineTrajGenerator::genTrajOnline(
   targPointLocal_ = req.targPoint;
   uavPoseLocal_ = req.pose;
   uavTwistLocal_ = req.twist;
+  uavImuData_ = req.imuData;
 
-  if (req.isUpdateState) {
-    updateTrajGeneratorState();
-  } else {
-    // last command used as current state
-
-    for (std::size_t id = 0; id < STATE_NUM; id++) {
-      state_.position[id] = command_.position[id];
-      state_.velocity[id] = command_.velocity[id];
-      state_.effort[id] = command_.effort[id];
-    }
-  }
-
+  updateTrajGeneratorState();
+  
   updateTrajGeneratorTarg();
 
   if (!trajGenerate()) {
@@ -109,7 +100,6 @@ int main(int argc, char *argv[]) {
   ros::NodeHandle nh;
   ros::AsyncSpinner spinner(2);
   spinner.start();
-  // 使用类分别创建两个独立的对象
   OnlineTrajGenerator onlineTrajGen(nh);
   while (ros::ok()) {
     ros::Duration(1.0).sleep();

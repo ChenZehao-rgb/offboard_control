@@ -82,13 +82,16 @@ public:
         }
 
         ruckig::Result res = ruckigOtg_.update(ruckigInput_, ruckigOutput_);
-        if (res == ruckig::Result::Working || res == ruckig::Result::Finished ){
-            for (std::size_t id = 0; id < STATE_NUM; id++) {
-            command_.position[id] = ruckigOutput_.new_position[id];
-            command_.velocity[id] = ruckigOutput_.new_velocity[id];
-            command_.effort[id] = ruckigOutput_.new_acceleration[id];
-        }
-        return true;
+        if (res == ruckig::Result::Working)
+        {
+            for (std::size_t id = 0; id < STATE_NUM; id++) 
+            {
+                command_.position[id] = ruckigOutput_.new_position[id];
+                command_.velocity[id] = ruckigOutput_.new_velocity[id];
+                command_.effort[id] = ruckigOutput_.new_acceleration[id];
+            }
+            ruckigOutput_.pass_to_input(ruckigInput_);
+            return true;
         }else{
             switch (res) {
         case ruckig::Result::Error:  // Unclassified error

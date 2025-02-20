@@ -69,10 +69,8 @@ private:
     // 回调函数
     void uavPoseLocalCallback1(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void uavTwistLocalCallback1(const geometry_msgs::TwistStamped::ConstPtr& msg);
-    void uavAccLocalCallback1(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
     void uavPoseLocalCallback2(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void uavTwistLocalCallback2(const geometry_msgs::TwistStamped::ConstPtr& msg);
-    void uavAccLocalCallback2(const geometry_msgs::AccelWithCovarianceStamped::ConstPtr& msg);
     // 小无人机在大无人机坐标系下的local坐标回调函数
     void smallUavPoseInBigUavFrameCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     // 小无人机在大无人机坐标系下的目标位置->小无人机在自己local坐标系下的目标位置
@@ -82,7 +80,6 @@ private:
     //定义的消息类型
     geometry_msgs::PoseStamped uavPoseLocal1_,uavPoseLocal2_; //订阅得到的无人机本地位置
     geometry_msgs::TwistStamped uavTwistLocal1_,uavTwistLocal2_; //订阅得到的无人机本地速度
-    geometry_msgs::AccelWithCovarianceStamped uavAccLocal1_,uavAccLocal2_; //订阅得到的无人机本地加速度
     mavros_msgs::PositionTarget uavTargetPointRaw1_, uavTargetPointRaw2_; //平滑过渡设置的目标位置
     mavros_msgs::AttitudeTarget uavTargetAttRaw1_, uavTargetAttRaw2_; //设置的目标姿态
     //定义是否获得无人机目标位置
@@ -131,7 +128,7 @@ private:
     #define HOVER_THRUST 0.71
     #define CONST_G 9.81
 
-    sensor_msgs::Imu uavImu_;
+    sensor_msgs::Imu uavImuData_;
     ros::Subscriber imuSub_;
     void imuDataCallback(const sensor_msgs::Imu::ConstPtr& msg);
 };
