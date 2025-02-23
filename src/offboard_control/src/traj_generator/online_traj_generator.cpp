@@ -33,11 +33,11 @@ void OnlineTrajGenerator::updateTrajGeneratorState(){
   state_.velocity[0] = uavTwistLocal_.twist.linear.x;
   state_.velocity[1] = uavTwistLocal_.twist.linear.y;
   state_.velocity[2] = uavTwistLocal_.twist.linear.z;
-  state_.velocity[3] = uavImuData_.angular_velocity.z;
+  state_.velocity[3] =  - uavImuData_.angular_velocity.z;
 
-  state_.effort[0] = uavImuData_.linear_acceleration.x;
-  state_.effort[1] = uavImuData_.linear_acceleration.y;
-  state_.effort[2] = uavImuData_.linear_acceleration.z - 9.81;
+  state_.effort[0] = uavImuData_.linear_acceleration.y;
+  state_.effort[1] = uavImuData_.linear_acceleration.x;
+  state_.effort[2] = 9.81 - uavImuData_.linear_acceleration.z;
 }
 
 void OnlineTrajGenerator::updateTrajGeneratorTarg(){
@@ -53,7 +53,6 @@ void OnlineTrajGenerator::updateSetPointRaw(){
   setPointRawLocal_.position.y = command_.position[1];
   setPointRawLocal_.position.z = command_.position[2];
   setPointRawLocal_.yaw = command_.position[3];
-
 
   setPointRawLocal_.velocity.x = command_.velocity[0];
   setPointRawLocal_.velocity.y = command_.velocity[1];
@@ -76,9 +75,22 @@ bool OnlineTrajGenerator::genTrajOnline(
   uavImuData_ = req.imuData;
 
   updateTrajGeneratorState();
-  
-  updateTrajGeneratorTarg();
+  if(req.isUpdateTarget)
+  {
+    updateTrajGeneratorTarg();
+    for (std::size_t id = 0; id < STATE_NUM; id++){
+            ruckigInput_.current_position[id] = state_.position[id];
+            // ruckigInput_.current_velocity[id] = state_.velocity[id];
+            // ruckigInput_.current_acceleration[id] = state_.effort[id];
+        }
 
+    for (std::size_t id = 0; id < STATE_NUM; id++){
+      ruckigInput_.target_position[id] = targ_.position[id];
+      ruckigInput_.target_velocity[id] = 0.0;
+      ruckigInput_.target_acceleration[id] = 0.0;
+    }
+  }
+  
   if (!trajGenerate()) {
     res.success = false;
     ROS_ERROR_STREAM("trajGenerate: genTrajOnline failed");

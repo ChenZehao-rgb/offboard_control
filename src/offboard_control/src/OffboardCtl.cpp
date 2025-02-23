@@ -29,7 +29,7 @@ OffboardCtl::OffboardCtl(const ros::NodeHandle& nh) : nh_(nh), isGetTargetPoint_
     smallUavPoseInBigUavFrameSub_ = nh_.subscribe("/transform/small_uav_pose_in_big_uav_frame", 10, &OffboardCtl::smallUavPoseInBigUavFrameCallback, this);
     // 订阅无人机本地速度
     uavTwistLocalSub1_ = nh_.subscribe("uav1/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback1, this);
-    uavTwistLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/velocity", 10, &OffboardCtl::uavTwistLocalCallback2, this);
+    uavTwistLocalSub2_ = nh_.subscribe("uav2/mavros/local_position/velocity_local", 10, &OffboardCtl::uavTwistLocalCallback2, this);
     // sub uav2 imu data
     imuSub_ = nh_.subscribe("uav2/mavros/imu/data", 10, &OffboardCtl::imuDataCallback, this);
     // 发布无人机本地位置

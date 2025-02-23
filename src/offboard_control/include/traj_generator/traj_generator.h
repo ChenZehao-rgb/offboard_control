@@ -20,9 +20,9 @@ const double Ts = 0.05;
 const double POS_ERROR_TOLERATE = 0.05;
 const double YAW_ERROR_TOLERATE = 0.05;
 
-const std::vector<double> VEL_LIMIT = {10.0, 10.0, 0.5, YAW_VEL_LIMIT};
-const std::vector<double> ACC_LIMIT = {1.0, 1.0, 0.3, YAW_ACC_LIMIT};
-const std::vector<double> JERK_LIMIT = {0.7, 0.7, 0.1, YAW_JERK_LIMIT};
+const std::vector<double> VEL_LIMIT = {5.0, 5.0, 5.0, YAW_VEL_LIMIT};
+const std::vector<double> ACC_LIMIT = {3.0, 3.0, 2.0, YAW_ACC_LIMIT};
+const std::vector<double> JERK_LIMIT = {2.0, 2.0, 2.0, YAW_JERK_LIMIT};
 
 class TrajGenerator {
 public:
@@ -69,20 +69,8 @@ public:
     };
 
     bool trajGenerate(){
-        for (std::size_t id = 0; id < STATE_NUM; id++){
-            ruckigInput_.current_position[id] = state_.position[id];
-            ruckigInput_.current_velocity[id] = state_.velocity[id];
-            ruckigInput_.current_acceleration[id] = state_.effort[id];
-        }
-
-        for (std::size_t id = 0; id < STATE_NUM; id++){
-            ruckigInput_.target_position[id] = targ_.position[id];
-            ruckigInput_.target_velocity[id] = 0.0;
-            ruckigInput_.target_acceleration[id] = 0.0;
-        }
-
         ruckig::Result res = ruckigOtg_.update(ruckigInput_, ruckigOutput_);
-        if (res == ruckig::Result::Working)
+        if (res == ruckig::Result::Working || res == ruckig::Result::Finished)
         {
             for (std::size_t id = 0; id < STATE_NUM; id++) 
             {
@@ -91,6 +79,7 @@ public:
                 command_.effort[id] = ruckigOutput_.new_acceleration[id];
             }
             ruckigOutput_.pass_to_input(ruckigInput_);
+            std::cout << "Trajectory duration: " << ruckigOutput_.trajectory.get_duration() << " [s]." << std::endl;
             return true;
         }else{
             switch (res) {

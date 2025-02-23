@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   control_toolbox
   tf
+  tf2
   eigen_conversions
   sensor_msgs
 
@@ -167,6 +168,7 @@ add_executable(uav_coordinate_trans_node src/uav_coordinate_trans.cpp)
 add_executable(observer_node src/observer_node.cpp)
 add_executable(camera_commander_node src/cameraCommand.cpp)
 add_executable(setActuatorCommand_node src/setActuatorCommand.cpp)
+add_executable(test_ruckig_node src/test_ruckig.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -217,6 +219,10 @@ target_link_libraries(camera_commander_node
 )
 target_link_libraries(setActuatorCommand_node
   ${catkin_LIBRARIES}
+)
+target_link_libraries(test_ruckig_node
+  ${catkin_LIBRARIES}
+  ruckig::ruckig
 )
 
 #############
